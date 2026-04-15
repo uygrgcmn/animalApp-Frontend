@@ -1,0 +1,145 @@
+import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { colors } from "../../../core/theme/colors";
+import { radius, spacing, typography } from "../../../core/theme/tokens";
+import { AppButton } from "../../../shared/ui/AppButton";
+import { AppIcon, type AppIconName } from "../../../shared/ui/AppIcon";
+import { StatusPill, type StatusPillTone } from "../../../shared/ui/StatusPill";
+
+type ActionGateSheetProps = {
+  ctaLabel: string;
+  description: string;
+  icon: AppIconName;
+  missingItems: string[];
+  onClose: () => void;
+  onCtaPress: () => void;
+  reasonLabel: string;
+  reasonTone: StatusPillTone;
+  title: string;
+  visible: boolean;
+};
+
+export function ActionGateSheet({
+  ctaLabel,
+  description,
+  icon,
+  missingItems,
+  onClose,
+  onCtaPress,
+  reasonLabel,
+  reasonTone,
+  title,
+  visible
+}: ActionGateSheetProps) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Modal
+      animationType="slide"
+      onRequestClose={onClose}
+      transparent
+      visible={visible}
+    >
+      <View style={styles.overlay}>
+        <Pressable onPress={onClose} style={StyleSheet.absoluteFillObject} />
+        <View
+          style={[
+            styles.sheet,
+            {
+              paddingBottom: Math.max(insets.bottom, spacing.standard)
+            }
+          ]}
+        >
+          <View style={styles.handle} />
+          <View style={styles.header}>
+            <AppIcon name={icon} size={22} />
+            <StatusPill label={reasonLabel} tone={reasonTone} />
+          </View>
+          <View style={styles.texts}>
+            <Text style={styles.title}>{title}</Text>
+            <Text style={styles.description}>{description}</Text>
+          </View>
+          <View style={styles.list}>
+            {missingItems.map((item) => (
+              <View key={item} style={styles.listItem}>
+                <AppIcon name="progress-alert" size={16} tone="warning" />
+                <Text style={styles.listText}>{item}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={styles.actions}>
+            <AppButton
+              label={ctaLabel}
+              leftSlot={
+                <AppIcon
+                  backgrounded={false}
+                  color="#FFFFFF"
+                  name="arrow-right"
+                  size={18}
+                />
+              }
+              onPress={onCtaPress}
+            />
+            <AppButton label="Daha sonra" onPress={onClose} variant="secondary" />
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  actions: {
+    gap: spacing.compact
+  },
+  description: {
+    color: colors.textMuted,
+    ...typography.body
+  },
+  handle: {
+    alignSelf: "center",
+    backgroundColor: colors.borderStrong,
+    borderRadius: radius.pill,
+    height: 4,
+    width: 52
+  },
+  header: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  list: {
+    gap: spacing.tight
+  },
+  listItem: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.tight
+  },
+  listText: {
+    color: colors.textMuted,
+    flex: 1,
+    ...typography.body
+  },
+  overlay: {
+    backgroundColor: "#0F172A66",
+    flex: 1,
+    justifyContent: "flex-end"
+  },
+  sheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.xlarge,
+    borderTopRightRadius: radius.xlarge,
+    gap: spacing.standard,
+    paddingHorizontal: spacing.comfortable,
+    paddingTop: spacing.standard
+  },
+  texts: {
+    gap: spacing.tight
+  },
+  title: {
+    color: colors.text,
+    ...typography.h2
+  }
+});
