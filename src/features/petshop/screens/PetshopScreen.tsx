@@ -1,13 +1,11 @@
 import { Link, router } from "expo-router";
 import { useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { RefreshControl, StyleSheet, View } from "react-native";
 
 import { routeBuilders, routes } from "../../../core/navigation/routes";
+import { colors } from "../../../core/theme/colors";
 import { spacing } from "../../../core/theme/tokens";
-import { petshopCampaigns } from "../../../shared/mocks/marketplace";
-import { getStoreById, petshopPerformanceSummary } from "../../../shared/mocks/petshop";
 import { AppButton } from "../../../shared/ui/AppButton";
-import { AppHeader } from "../../../shared/ui/AppHeader";
 import { AppIcon } from "../../../shared/ui/AppIcon";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { FilterChip } from "../../../shared/ui/FilterChip";
@@ -22,6 +20,7 @@ import {
   getPetshopActionLabel,
   getPetshopModePresentation
 } from "../../profile/utils/modeStatus";
+import { usePetshopDiscovery } from "../hooks/usePetshopQueries";
 
 type DiscoveryFilter = "all" | "discount" | "verified" | "nearby";
 
@@ -30,29 +29,30 @@ const discoveryFilters: {
   label: string;
   value: DiscoveryFilter;
 }[] = [
-  { icon: "view-grid-outline", label: "Tum kampanyalar", value: "all" },
-  { icon: "sale-outline", label: "Indirimli", value: "discount" },
-  { icon: "shield-check-outline", label: "Dogrulananlar", value: "verified" },
-  { icon: "map-marker-outline", label: "Yakindakiler", value: "nearby" }
+  { icon: "view-grid-outline", label: "Tüm kampanyalar", value: "all" },
+  { icon: "sale-outline", label: "İndirimli", value: "discount" },
+  { icon: "shield-check-outline", label: "Doğrulananlar", value: "verified" },
+  { icon: "map-marker-outline", label: "Yakındakiler", value: "nearby" }
 ];
 
 export function PetshopScreen() {
   const petshopStatus = useSessionStore((state) => state.petshopStatus);
   const petshopPresentation = getPetshopModePresentation(petshopStatus);
+  const discoveryQuery = usePetshopDiscovery();
   const [searchValue, setSearchValue] = useState("");
   const [filter, setFilter] = useState<DiscoveryFilter>("all");
 
   const discoveryRows = useMemo(() => {
     const normalizedSearch = searchValue.trim().toLowerCase();
 
-    return petshopCampaigns.filter((campaign) => {
-      const store = getStoreById(campaign.storeId);
+    return (discoveryQuery.data ?? []).filter((campaign) => {
+      const isDiscounted = /\b(15|20)\b/.test(campaign.discount);
 
-      if (filter === "discount" && !campaign.discount.includes("20") && !campaign.discount.includes("15")) {
+      if (filter === "discount" && !isDiscounted) {
         return false;
       }
 
-      if (filter === "verified" && store?.verifiedState !== "verified") {
+      if (filter === "verified" && campaign.verificationState !== "verified") {
         return false;
       }
 
@@ -68,44 +68,47 @@ export function PetshopScreen() {
         campaign.title.toLowerCase().includes(normalizedSearch) ||
         campaign.storeName.toLowerCase().includes(normalizedSearch) ||
         campaign.city.toLowerCase().includes(normalizedSearch) ||
-        campaign.summary.toLowerCase().includes(normalizedSearch)
+        campaign.summary.toLowerCase().includes(normalizedSearch) ||
+        campaign.campaignLabel.toLowerCase().includes(normalizedSearch)
       );
     });
-  }, [filter, searchValue]);
+  }, [discoveryQuery.data, filter, searchValue]);
+  const refreshing = discoveryQuery.isFetching && !discoveryQuery.isLoading;
 
   return (
-    <ScreenContainer contentContainerStyle={styles.content}>
-      <AppHeader
-        description="Kurumsal, guven veren ve kampanya odakli petshop deneyimi; kesif ve magaza yonetimini ayni dilde toplar."
-        title="Petshop"
-      />
-
+    <ScreenContainer
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          onRefresh={() => void discoveryQuery.refetch()}
+          refreshing={refreshing}
+          tintColor={colors.primary}
+        />
+      }
+    >
       <InfoCard
-        description="Normal kullanici kampanyalari kesfeder; petshop hesabi ise dashboard ve kampanya yonetimine gecis alir."
-        title="Petshop merkezi"
+        description={petshopPresentation.description}
+        title="Mağaza yönetimi"
         variant="accent"
       >
         <View style={styles.metaRow}>
-          <MetaPill icon="storefront-outline" label="Kesfet + magaza profili" tone="primary" />
-          <MetaPill icon="chart-line" label="Performans ozeti" tone="success" />
-          <MetaPill icon="shield-check-outline" label={petshopPerformanceSummary.verificationLabel} tone="warning" />
+          <MetaPill icon="shield-check-outline" label={petshopPresentation.label} tone="primary" />
+          <MetaPill
+            icon="storefront-outline"
+            label={discoveryQuery.isLoading ? "Yüklüyor..." : `${discoveryQuery.data?.length ?? 0} mağaza`}
+            tone="neutral"
+          />
         </View>
-      </InfoCard>
-
-      <InfoCard
-        description={petshopPresentation.description}
-        title="Petshop hesabi tarafi"
-      >
         <View style={styles.managementGrid}>
           <Link href={routes.app.petshopDashboard} asChild>
             <AppButton
-              label="Magaza Dashboard'u"
-              leftSlot={<AppIcon backgrounded={false} color="#FFFFFF" name="view-dashboard-outline" size={18} />}
+              label="Mağaza Dashboard"
+              leftSlot={<AppIcon backgrounded={false} color={colors.textInverse} name="view-dashboard-outline" size={18} />}
             />
           </Link>
           <Link href={routes.app.petshopCampaignManagement} asChild>
             <AppButton
-              label="Kampanyalarim"
+              label="Kampanya Yönetimi"
               leftSlot={<AppIcon backgrounded={false} name="tag-multiple-outline" size={18} />}
               variant="secondary"
             />
@@ -121,7 +124,7 @@ export function PetshopScreen() {
           ) : (
             <Link href={routeBuilders.createWithType("petshop-campaign")} asChild>
               <AppButton
-                label="Yeni Kampanya Olustur"
+                label="Yeni Kampanya Oluştur"
                 leftSlot={<AppIcon backgrounded={false} name="plus" size={18} />}
                 variant="ghost"
               />
@@ -131,12 +134,13 @@ export function PetshopScreen() {
       </InfoCard>
 
       <SectionHeader
-        description="Normal kullanici tarafi icin kampanyalari ve magazalari sade ama premium bir kart duzeniyle listeliyoruz."
-        title="Petshop kesfet listesi"
+        eyebrow="Keşfet"
+        title="Petshop kampanyaları"
+        description="İndirimli ürünler, doğrulanan mağazalar ve yakındaki fırsatlar."
       />
 
       <SearchBar
-        placeholder="Magaza, kampanya veya sehir ara"
+        placeholder="Mağaza, kampanya veya şehir ara"
         showFilterButton
         value={searchValue}
         onChangeText={setSearchValue}
@@ -157,54 +161,70 @@ export function PetshopScreen() {
       </View>
 
       <View style={styles.metaRow}>
-        <MetaPill icon="view-agenda-outline" label={`${discoveryRows.length} kampanya`} tone="primary" />
-        <MetaPill icon="tune-variant" label={discoveryFilters.find((item) => item.value === filter)?.label ?? "Tum kampanyalar"} tone="neutral" />
+        <MetaPill icon="storefront-outline" label={`${discoveryRows.length} sonuç`} tone="primary" />
+        <MetaPill
+          icon="tune-variant"
+          label={discoveryFilters.find((item) => item.value === filter)?.label ?? "Tum kampanyalar"}
+          tone="neutral"
+        />
+        {searchValue.trim() ? (
+          <MetaPill icon="magnify" label={`"${searchValue.trim()}"`} tone="neutral" />
+        ) : null}
       </View>
 
-      {discoveryRows.length > 0 ? (
+      {discoveryQuery.isError ? (
+        <EmptyState
+          actionSlot={
+            <AppButton
+              label="Tekrar dene"
+              onPress={() => void discoveryQuery.refetch()}
+              variant="secondary"
+            />
+          }
+          description="Petshop kampanyaları şu an yüklenemedi. Bağlantıyı yenileyip tekrar deneyebilirsin."
+          icon="wifi-off"
+          title="Kampanyalar getirilemedi"
+        />
+      ) : discoveryRows.length > 0 ? (
         <View style={styles.list}>
-          {discoveryRows.map((campaign) => {
-            const store = getStoreById(campaign.storeId);
-
-            return (
-              <PetshopCampaignCard
-                key={campaign.id}
-                actionSlot={
-                  <View style={styles.actionRow}>
-                    {store ? (
-                      <AppButton
-                        label="Magaza"
-                        onPress={() => {
-                          router.push(routeBuilders.petshopStoreProfile(store.id));
-                        }}
-                        variant="secondary"
-                      />
-                    ) : null}
+          {discoveryRows.map((campaign) => (
+            <PetshopCampaignCard
+              key={campaign.id}
+              actionSlot={
+                <View style={styles.actionRow}>
+                  {campaign.storeId ? (
                     <AppButton
-                      label="Incele"
+                      label="Magaza"
                       onPress={() => {
-                        router.push(routeBuilders.petshopCampaignDetail(campaign.id));
+                        router.push(routeBuilders.petshopStoreProfile(campaign.storeId));
                       }}
+                      variant="secondary"
                     />
-                  </View>
-                }
-                campaignLabel={campaign.campaignLabel}
-                deadline={campaign.deadline}
-                description={campaign.summary}
-                priceLabel={`${campaign.discount} • ${campaign.priceLabel}`}
-                storeName={campaign.storeName}
-                title={campaign.title}
-                verificationState={store?.verifiedState}
-                visualLabel={campaign.visualLabel}
-              />
-            );
-          })}
+                  ) : null}
+                  <AppButton
+                    label="Incele"
+                    onPress={() => {
+                      router.push(routeBuilders.petshopCampaignDetail(campaign.id));
+                    }}
+                  />
+                </View>
+              }
+              campaignLabel={campaign.campaignLabel}
+              deadline={campaign.deadline}
+              description={campaign.summary}
+              priceLabel={`${campaign.discount} • ${campaign.priceLabel}`}
+              storeName={campaign.storeName}
+              title={campaign.title}
+              verificationState={campaign.verificationState}
+              visualLabel={campaign.visualLabel}
+            />
+          ))}
         </View>
       ) : (
         <EmptyState
-          description="Secili filtreler ve arama kelimesiyle eslesen petshop kampanyasi bulunamadi. Filtreyi sifirlayip yeniden kesfe cikabilirsin."
+          description="Seçili filtreler ve arama kelimesiyle eşleşen petshop kampanyası bulunamadı. Filtreyi sıfırlayıp yeniden keşfe çıkabilirsin."
           icon="store-search-outline"
-          title="Kampanya bulunamadi"
+          title="Kampanya bulunamadı"
         />
       )}
     </ScreenContainer>

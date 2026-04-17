@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors } from "../../core/theme/colors";
-import { radius, shadows, spacing } from "../../core/theme/tokens";
+import { radius, shadows, spacing, typography } from "../../core/theme/tokens";
 import { AppIcon, type AppIconName } from "./AppIcon";
 import { MetaPill } from "./MetaPill";
 
@@ -11,7 +11,9 @@ type MarketplaceCardProps = {
     label: string;
     tone?: "primary" | "success" | "warning" | "neutral";
   }[];
+  coverImageUri?: string;
   icon: AppIconName;
+  onPress?: () => void;
   summary: string;
   title: string;
   tone?: "primary" | "success" | "warning" | "neutral";
@@ -19,13 +21,23 @@ type MarketplaceCardProps = {
 
 export function MarketplaceCard({
   chips,
+  coverImageUri,
   icon,
+  onPress,
   summary,
   title,
   tone = "primary"
 }: MarketplaceCardProps) {
   return (
-    <View style={styles.card}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, pressed ? styles.pressed : null]}
+    >
+      {coverImageUri ? (
+        <View style={styles.visualArea}>
+          <Image source={{ uri: coverImageUri }} style={styles.visualImage} />
+        </View>
+      ) : null}
       <View style={styles.header}>
         <AppIcon name={icon} size={22} tone={tone} />
         <Text style={styles.title}>{title}</Text>
@@ -41,7 +53,7 @@ export function MarketplaceCard({
           />
         ))}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -65,15 +77,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: spacing.compact
   },
+  pressed: {
+    opacity: 0.92
+  },
   summary: {
     color: colors.textMuted,
-    fontSize: 14,
-    lineHeight: 21
+    ...typography.body
   },
   title: {
     color: colors.text,
     flex: 1,
-    fontSize: 16,
-    fontWeight: "800"
+    ...typography.subheading
+  },
+  visualArea: {
+    borderRadius: radius.medium,
+    height: 180,
+    overflow: "hidden"
+  },
+  visualImage: {
+    height: "100%",
+    width: "100%"
   }
 });

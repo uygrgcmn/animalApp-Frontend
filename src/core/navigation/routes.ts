@@ -19,10 +19,11 @@ export const routes = {
     home: "/(app)/(tabs)/home" as Href,
     explore: "/(app)/(tabs)/explore" as Href,
     community: "/(app)/(tabs)/community" as Href,
+    create: "/(app)/(tabs)/create" as Href,
     messages: "/(app)/(tabs)/messages" as Href,
     profile: "/(app)/(tabs)/profile" as Href,
     petshop: "/(app)/(tabs)/petshop" as Href,
-    create: "/(app)/create" as Href,
+    profileEdit: "/(app)/profile/edit" as Href,
     profileModes: "/(app)/profile/modes" as Href,
     profileApplications: "/(app)/profile/applications" as Href,
     profileListings: "/(app)/profile/listings" as Href,
@@ -42,17 +43,17 @@ export const mainTabs = {
     iconActive: "home-variant" as IconName,
     label: "Ana Sayfa"
   },
-  explore: {
-    href: routes.app.explore,
-    icon: "compass-outline" as IconName,
-    iconActive: "compass" as IconName,
-    label: "Kesfet"
-  },
   community: {
     href: routes.app.community,
     icon: "hand-heart-outline" as IconName,
     iconActive: "hand-heart" as IconName,
     label: "Topluluk"
+  },
+  create: {
+    href: routes.app.create,
+    icon: "plus-circle-outline" as IconName,
+    iconActive: "plus-circle" as IconName,
+    label: "İlan Oluştur"
   },
   messages: {
     href: routes.app.messages,
@@ -84,7 +85,7 @@ export const routeBuilders = {
       | "petshop-campaign"
   ) =>
     ({
-      pathname: "/(app)/create",
+      pathname: "/(app)/(tabs)/create",
       params: { listingType }
     }) as const,
   caregiverListingDetail: (listingId: string) =>

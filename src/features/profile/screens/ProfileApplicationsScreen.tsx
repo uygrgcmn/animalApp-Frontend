@@ -1,113 +1,162 @@
 import { Link } from "expo-router";
 import { useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
+import { routeBuilders } from "../../../core/navigation/routes";
 import { spacing } from "../../../core/theme/tokens";
-import { applicationItems } from "../../../shared/mocks/profile";
+import type { ApplicationRecord, ApplicationStatus, ListingType } from "../../../core/api/contracts";
 import { AppButton } from "../../../shared/ui/AppButton";
-import { AppHeader } from "../../../shared/ui/AppHeader";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { ManagementItemCard } from "../../../shared/ui/ManagementItemCard";
 import { MetaPill } from "../../../shared/ui/MetaPill";
 import { ModeBadge } from "../../../shared/ui/ModeBadge";
 import { ScreenContainer } from "../../../shared/ui/ScreenContainer";
 import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
-import { getMockItemHref } from "../../../shared/utils/mockNavigation";
+import { useMyApplications } from "../../listings/hooks/useListings";
+import { formatRelativeDate } from "../../../shared/utils/formatDate";
 
-type ApplicationStatus = "pending" | "accepted" | "rejected";
+type DisplayStatus = "pending" | "accepted" | "rejected";
 
-const options: { label: string; value: ApplicationStatus }[] = [
+const options: { label: string; value: DisplayStatus }[] = [
   { label: "Beklemede", value: "pending" },
   { label: "Kabul", value: "accepted" },
   { label: "Red", value: "rejected" }
 ];
 
+const listingTypeLabels: Record<string, string> = {
+  SITTING: "Bakıcı İlanı",
+  HELP_REQUEST: "Bakıcı Talebi",
+  FREE_ITEM: "Ücretsiz Eşya",
+  ACTIVITY: "Etkinlik",
+  COMMUNITY: "Topluluk",
+  ADOPTION: "Sahiplendirme"
+};
+
+function toDisplayStatus(status: ApplicationStatus): DisplayStatus {
+  if (status === "APPROVED" || status === "COMPLETED") return "accepted";
+  if (status === "REJECTED" || status === "CANCELLED") return "rejected";
+  return "pending";
+}
+
+function getDetailHref(app: ApplicationRecord) {
+  const type = app.listing?.type;
+  const id = app.listingId;
+  if (type === "SITTING") return routeBuilders.caregiverListingDetail(id);
+  if (type === "HELP_REQUEST") return routeBuilders.ownerRequestDetail(id);
+  return routeBuilders.communityPostDetail(id);
+}
+
 export function ProfileApplicationsScreen() {
-  const [status, setStatus] = useState<ApplicationStatus>("pending");
+  const [status, setStatus] = useState<DisplayStatus>("pending");
+  const { data: applications = [], isLoading } = useMyApplications();
+
+  const pendingCount = useMemo(
+    () => applications.filter((a) => toDisplayStatus(a.status) === "pending").length,
+    [applications]
+  );
+  const acceptedCount = useMemo(
+    () => applications.filter((a) => toDisplayStatus(a.status) === "accepted").length,
+    [applications]
+  );
+  const rejectedCount = useMemo(
+    () => applications.filter((a) => toDisplayStatus(a.status) === "rejected").length,
+    [applications]
+  );
 
   const items = useMemo(
-    () => applicationItems.filter((item) => item.status === status),
-    [status]
+    () => applications.filter((a) => toDisplayStatus(a.status) === status),
+    [applications, status]
   );
 
   return (
     <ScreenContainer contentContainerStyle={styles.content}>
-      <AppHeader
-        description="Basvurular bekleme, kabul ve red durumlarina gore takip edilir."
-        showBackButton
-        title="Basvurularim"
-      />
-
-      <View style={styles.summaryRow}>
-        <MetaPill
-          icon="clock-outline"
-          label={`${applicationItems.filter((item) => item.status === "pending").length} beklemede`}
-          tone="warning"
-        />
-        <MetaPill
-          icon="check-circle-outline"
-          label={`${applicationItems.filter((item) => item.status === "accepted").length} kabul`}
-          tone="success"
-        />
-        <MetaPill
-          icon="close-circle-outline"
-          label={`${applicationItems.filter((item) => item.status === "rejected").length} red`}
-          tone="neutral"
-        />
-      </View>
-
-      <SegmentedTabs onChange={setStatus} options={options} value={status} />
-
-      {items.length ? (
-        <View style={styles.list}>
-          {items.map((item) => (
-            <ManagementItemCard
-              key={item.id}
-              actions={
-                <>
-                  <Link href={getMockItemHref(item.kind, item.listingId)} asChild>
-                    <AppButton label="Ilan Detayi" variant="secondary" />
-                  </Link>
-                  <AppButton label="Mesaj" variant="ghost" />
-                </>
-              }
-              description={`${item.owner} • ${item.updatedAt}`}
-              pills={
-                <>
-                  <MetaPill icon="map-marker-outline" label={item.location} tone="neutral" />
-                  <MetaPill icon="cash" label={item.priceLabel} tone="success" />
-                  <MetaPill icon="shape-outline" label={item.type} tone="primary" />
-                </>
-              }
-              rightSlot={
-                <ModeBadge
-                  label={
-                    item.status === "pending"
-                      ? "Beklemede"
-                      : item.status === "accepted"
-                        ? "Kabul edildi"
-                        : "Reddedildi"
-                  }
-                  tone={
-                    item.status === "pending"
-                      ? "warning"
-                      : item.status === "accepted"
-                        ? "success"
-                        : "muted"
-                  }
-                />
-              }
-              supportingText={item.note}
-              title={item.title}
-            />
-          ))}
-        </View>
+      {isLoading ? (
+        <ActivityIndicator color="primary" />
       ) : (
-        <EmptyState
-          description="Bu durum grubunda gosterilecek basvuru bulunmuyor."
-          icon="file-document-outline"
-          title="Gosterilecek basvuru yok"
-        />
+        <>
+          <View style={styles.summaryRow}>
+            <MetaPill
+              icon="clock-outline"
+              label={`${pendingCount} beklemede`}
+              tone="warning"
+            />
+            <MetaPill
+              icon="check-circle-outline"
+              label={`${acceptedCount} kabul`}
+              tone="success"
+            />
+            <MetaPill
+              icon="close-circle-outline"
+              label={`${rejectedCount} red`}
+              tone="neutral"
+            />
+          </View>
+
+          <SegmentedTabs onChange={setStatus} options={options} value={status} />
+
+          {items.length > 0 ? (
+            <View style={styles.list}>
+              {items.map((app) => {
+                const displayStatus = toDisplayStatus(app.status);
+                const listingType = app.listing?.type;
+                const typeLabel = listingType
+                  ? (listingTypeLabels[listingType] ?? listingType)
+                  : "İlan";
+                const ownerName = app.listing?.creator?.fullName ?? "İlan Sahibi";
+                const city = app.listing?.creator?.city;
+
+                return (
+                  <ManagementItemCard
+                    key={app.id}
+                    actions={
+                      <>
+                        <Link href={getDetailHref(app)} asChild>
+                          <AppButton label="İlan Detayı" variant="secondary" />
+                        </Link>
+                        <AppButton label="Mesaj" variant="ghost" />
+                      </>
+                    }
+                    description={`${ownerName} • ${formatRelativeDate(app.updatedAt)}`}
+                    pills={
+                      <>
+                        {city ? (
+                          <MetaPill icon="map-marker-outline" label={city} tone="neutral" />
+                        ) : null}
+                        <MetaPill icon="shape-outline" label={typeLabel} tone="primary" />
+                      </>
+                    }
+                    rightSlot={
+                      <ModeBadge
+                        label={
+                          displayStatus === "pending"
+                            ? "Beklemede"
+                            : displayStatus === "accepted"
+                              ? "Kabul edildi"
+                              : "Reddedildi"
+                        }
+                        tone={
+                          displayStatus === "pending"
+                            ? "warning"
+                            : displayStatus === "accepted"
+                              ? "success"
+                              : "muted"
+                        }
+                      />
+                    }
+                    supportingText={app.message}
+                    title={app.listing?.title ?? "İlan"}
+                  />
+                );
+              })}
+            </View>
+          ) : (
+            <EmptyState
+              description="Bu durum grubunda gösterilecek başvuru bulunmuyor."
+              icon="file-document-outline"
+              title="Gösterilecek başvuru yok"
+            />
+          )}
+        </>
       )}
     </ScreenContainer>
   );

@@ -1,6 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Controller,
   useForm,
@@ -8,34 +10,25 @@ import {
   type FieldErrors,
   type SubmitHandler
 } from "react-hook-form";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from "react-native";
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { routeBuilders } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
 import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
-import { caregiverServiceOptions } from "../../caregiver/schemas";
-import { useSessionStore } from "../../auth/store/sessionStore";
 import { AppButton } from "../../../shared/ui/AppButton";
-import { AppHeader } from "../../../shared/ui/AppHeader";
 import { AppIcon } from "../../../shared/ui/AppIcon";
 import { FilterChip } from "../../../shared/ui/FilterChip";
-import { InfoCard } from "../../../shared/ui/InfoCard";
 import { MetaPill } from "../../../shared/ui/MetaPill";
 import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
-import { StickyBottomActionBar } from "../../../shared/ui/StickyBottomActionBar";
 import { TextField } from "../../../shared/ui/TextField";
 import { UploadBox } from "../../../shared/ui/UploadBox";
+import { useSessionStore } from "../../auth/store/sessionStore";
+import { caregiverServiceOptions } from "../../caregiver/schemas";
+import { usePublishListing } from "../hooks/usePublishListing";
 import {
   communityCategoryOptions,
   communityContactPreferenceOptions,
-  createTypeMeta,
+  createListingTypeOptions,
   createWizardSchema,
   defaultCreateWizardValues,
   ownerCareNeedOptions,
@@ -45,77 +38,98 @@ import {
   type CreateWizardValues
 } from "../schemas";
 
-const wizardSteps = [
-  "Icerik tipi",
-  "Temel bilgiler",
-  "Detaylar",
-  "Medya",
-  "Onizleme"
-] as const;
+type IconName = React.ComponentProps<typeof AppIcon>["name"];
 
-const caregiverServiceLabels: Record<(typeof caregiverServiceOptions)[number], string> = {
-  "evde-bakim": "Evde bakim",
-  "geceli-bakim": "Geceli bakim",
-  "gunluk-ziyaret": "Gunluk ziyaret",
-  "ilac-takibi": "Ilac takibi",
-  "kopek-gezdirme": "Kopek gezdirme"
-};
+const TYPES: { description: string; icon: IconName; label: string; value: CreateListingType }[] = [
+  {
+    description: "Hizmet, ücret ve deneyim bilgisiyle bakım ilanı yayınla.",
+    icon: "shield-account-outline",
+    label: "Bakıcı ilanı",
+    value: "caregiver-listing"
+  },
+  {
+    description: "Evcil hayvanın için tarih, bütçe ve ihtiyaçları paylaş.",
+    icon: "paw-outline",
+    label: "Bakıcı arıyorum",
+    value: "owner-request"
+  },
+  {
+    description: "Sahiplendirme, destek veya topluluk çağrısı oluştur.",
+    icon: "hand-heart-outline",
+    label: "Topluluk paylaşımı",
+    value: "community-post"
+  },
+  {
+    description: "Mağazan için sade bir kampanya taslağı hazırla.",
+    icon: "storefront-outline",
+    label: "Petshop kampanyası",
+    value: "petshop-campaign"
+  }
+];
 
-const caregiverAvailabilityLabels: Record<
-  "esnek" | "hafta-ici" | "hafta-sonu",
-  string
-> = {
-  esnek: "Esnek",
-  "hafta-ici": "Hafta ici",
-  "hafta-sonu": "Hafta sonu"
-};
+const LISTING_TYPES = TYPES.filter((item) => item.value === "caregiver-listing" || item.value === "owner-request");
+const CHANNEL_TYPES = TYPES.filter((item) => item.value === "community-post" || item.value === "petshop-campaign");
 
-const ownerNeedLabels: Record<(typeof ownerCareNeedOptions)[number], string> = {
+const SERVICE_LABELS = {
+  "evde-bakim": "Evde bakım",
+  "geceli-bakim": "Geceli bakım",
+  "gunluk-ziyaret": "Günlük ziyaret",
+  "ilac-takibi": "İlaç takibi",
+  "kopek-gezdirme": "Köpek gezdirme"
+} as const;
+
+const NEED_LABELS = {
   "gece-konaklama": "Gece konaklama",
-  "gunluk-rutin": "Gunluk rutin",
-  "ilac-takibi": "Ilac takibi",
-  "kopek-gezdirme": "Kopek gezdirme"
-};
+  "gunluk-rutin": "Günlük rutin",
+  "ilac-takibi": "İlaç takibi",
+  "kopek-gezdirme": "Köpek gezdirme"
+} as const;
 
-const communityCategoryLabels: Record<(typeof communityCategoryOptions)[number], string> = {
-  diger: "Diger",
+const CATEGORY_LABELS = {
+  diger: "Diğer",
   sahiplendirme: "Sahiplendirme",
-  "ucretsiz-mama": "Ucretsiz mama"
-};
+  "ucretsiz-mama": "Ücretsiz mama"
+} as const;
 
-const communityContactLabels: Record<
-  (typeof communityContactPreferenceOptions)[number],
-  string
-> = {
+const CONTACT_LABELS = {
   mesaj: "Mesaj",
   telefon: "Telefon",
   yorum: "Yorum"
-};
+} as const;
 
-const petshopCampaignTypeLabels: Record<(typeof petshopCampaignTypeOptions)[number], string> = {
+const CAMPAIGN_LABELS = {
   aksesuar: "Aksesuar",
-  bakim: "Bakim",
+  bakim: "Bakım",
   mama: "Mama",
-  saglik: "Saglik"
-};
+  saglik: "Sağlık"
+} as const;
 
-type CreateFieldName = keyof CreateWizardValues;
+const availabilityOptions = [
+  { label: "Hafta içi", value: "hafta-ici" },
+  { label: "Hafta sonu", value: "hafta-sonu" },
+  { label: "Esnek", value: "esnek" }
+] as const;
+
+function isCreateListingType(value: unknown): value is CreateListingType {
+  return typeof value === "string" && (createListingTypeOptions as readonly string[]).includes(value);
+}
+
+function errorText(message: unknown) {
+  return typeof message === "string" ? message : undefined;
+}
 
 export function CreateEntryScreen() {
-  const params = useLocalSearchParams<{ listingType?: CreateListingType }>();
+  const params = useLocalSearchParams<{ listingType?: string }>();
+  const tabBarHeight = useBottomTabBarHeight();
   const user = useSessionStore((state) => state.user);
   const createDrafts = useSessionStore((state) => state.createDrafts);
   const saveCreateDraft = useSessionStore((state) => state.saveCreateDraft);
   const clearCreateDraft = useSessionStore((state) => state.clearCreateDraft);
-  const [currentStep, setCurrentStep] = useState(0);
+  const publishMutation = usePublishListing();
   const [pickerError, setPickerError] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{
-    message: string;
-    tone: "info" | "success";
-    title: string;
-  } | null>(null);
+  const [feedback, setFeedback] = useState<{ message: string; tone: "info" | "success"; title: string } | null>(null);
 
-  const initialValues = useMemo(
+  const initialValues = useMemo<CreateWizardValues>(
     () => ({
       ...defaultCreateWizardValues,
       city: user?.city ?? "",
@@ -131,7 +145,6 @@ export function CreateEntryScreen() {
     handleSubmit,
     reset,
     setValue,
-    trigger,
     watch,
     formState: { errors }
   } = useForm<CreateWizardValues>({
@@ -141,61 +154,45 @@ export function CreateEntryScreen() {
 
   const values = watch();
   const selectedType = values.listingType;
-  const activeDraft = selectedType ? createDrafts[selectedType] : undefined;
   const media = values.media ?? [];
+  const selectedMeta = TYPES.find((item) => item.value === selectedType);
 
-  const handleSelectType = useCallback(
+  const selectType = useCallback(
     (type: CreateListingType) => {
       const draft = createDrafts[type];
 
-      if (draft) {
-        reset({
-          ...initialValues,
-          ...draft.values,
-          listingType: type
-        });
-        setCurrentStep(Math.min(Math.max(draft.currentStep, 0), wizardSteps.length - 1));
-        setFeedback({
-          message: "Kayitli taslak geri yuklendi. Kaldigin yerden devam edebilirsin.",
-          title: "Taslak geri geldi",
-          tone: "info"
-        });
-        return;
-      }
-
       reset({
         ...initialValues,
+        ...(draft?.values ?? {}),
         listingType: type
       });
-      setCurrentStep(0);
-      setFeedback({
-        message: "Tip secildi. Adim adim ilerleyerek formu daha rahat tamamlayabilirsin.",
-        title: createTypeMeta[type].shortLabel,
-        tone: "info"
-      });
+
+      setPickerError(null);
+      setFeedback(
+        draft
+          ? {
+              message: "Kaydedilmiş taslak yüklendi. Eksik alanları tamamlayıp devam edebilirsin.",
+              title: "Taslak yüklendi",
+              tone: "info"
+            }
+          : null
+      );
     },
     [createDrafts, initialValues, reset]
   );
 
   useEffect(() => {
-    if (
-      params.listingType &&
-      (params.listingType === "caregiver-listing" ||
-        params.listingType === "owner-request" ||
-        params.listingType === "community-post" ||
-        params.listingType === "petshop-campaign") &&
-      !selectedType
-    ) {
-      handleSelectType(params.listingType);
+    if (isCreateListingType(params.listingType) && selectedType !== params.listingType) {
+      selectType(params.listingType);
     }
-  }, [handleSelectType, params.listingType, selectedType]);
+  }, [params.listingType, selectType, selectedType]);
 
-  const handlePickMedia = async () => {
+  async function handlePickMedia() {
     setPickerError(null);
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
-      setPickerError("Gorsel eklemek icin galeri izni gerekiyor.");
+      setPickerError("Görsel eklemek için galeri izni gerekiyor.");
       return;
     }
 
@@ -206,1232 +203,1098 @@ export function CreateEntryScreen() {
       quality: 0.85
     });
 
-    if (result.canceled || !result.assets[0]) {
-      return;
-    }
+    if (result.canceled || !result.assets[0]) return;
 
     setValue("media", [...media, result.assets[0].uri], {
       shouldDirty: true,
       shouldValidate: true
     });
-  };
+  }
 
-  const handleSaveDraft = () => {
+  function saveDraft() {
     if (!selectedType) {
       setFeedback({
-        message: "Once hangi tur icerik olusturacagini sec.",
-        title: "Icerik tipi gerekli",
+        message: "Taslak kaydetmeden önce bir içerik tipi seç.",
+        title: "İçerik tipi gerekli",
         tone: "info"
       });
       return;
     }
 
-    saveCreateDraft(selectedType, getValues(), currentStep);
+    saveCreateDraft(selectedType, getValues(), 0);
     setFeedback({
-      message: "Bu tip icin mevcut alanlarin kaydedildi. Daha sonra ayni ekrana donup devam edebilirsin.",
+      message: "Alanlar taslak olarak kaydedildi.",
       title: "Taslak kaydedildi",
       tone: "success"
     });
-  };
+  }
 
-  const handleBack = () => {
-    if (currentStep === 0) {
-      router.back();
+  const onSubmit: SubmitHandler<CreateWizardValues> = async (submittedValues) => {
+    if (!submittedValues.listingType) return;
+
+    if (submittedValues.listingType === "petshop-campaign") {
+      saveCreateDraft(submittedValues.listingType, submittedValues, 0);
+      setFeedback({
+        message: "Petshop kampanya yayını yakında açılacak. Kampanya taslak olarak saklandı.",
+        title: "Taslak hazır",
+        tone: "success"
+      });
       return;
     }
 
-    setCurrentStep((previous) => previous - 1);
-  };
+    try {
+      const newListing = await publishMutation.publish(submittedValues);
+      clearCreateDraft(submittedValues.listingType);
+      reset(initialValues);
 
-  const handleNext = async () => {
-    if (currentStep === 0) {
-      if (!selectedType) {
-        setFeedback({
-          message: "Wizard'i baslatmak icin once bir ilan tipi sec.",
-          title: "Tip secimi gerekiyor",
-          tone: "info"
-        });
+      if (!newListing) return;
+
+      if (submittedValues.listingType === "caregiver-listing") {
+        router.replace(routeBuilders.caregiverListingDetail(newListing.id));
         return;
       }
-
-      setCurrentStep(1);
-      return;
+      if (submittedValues.listingType === "owner-request") {
+        router.replace(routeBuilders.ownerRequestDetail(newListing.id));
+        return;
+      }
+      router.replace(routeBuilders.communityPostDetail(newListing.id));
+    } catch (error) {
+      setFeedback({
+        message: error instanceof Error ? error.message : "İlan yayınlanırken bir hata oluştu.",
+        title: "Yayınlanamadı",
+        tone: "info"
+      });
     }
-
-    const fields = getStepFields(selectedType, currentStep);
-    const isValid = await trigger(fields, { shouldFocus: true });
-
-    if (!isValid) {
-      return;
-    }
-
-    setCurrentStep((previous) => Math.min(previous + 1, wizardSteps.length - 1));
   };
 
-  const onSubmit: SubmitHandler<CreateWizardValues> = (submittedValues) => {
-    if (!submittedValues.listingType) {
-      return;
-    }
-
-    clearCreateDraft(submittedValues.listingType);
-    reset(initialValues);
-    setCurrentStep(0);
-    setFeedback({
-      message: `${createTypeMeta[submittedValues.listingType].shortLabel} icin onizleme onaylandi. Akis yayina alinmaya hazir olarak tamamlandi.`,
-      title: "Icerik hazir",
-      tone: "success"
-    });
-  };
+  const primaryLabel =
+    selectedType === "petshop-campaign"
+      ? "Taslak Olarak Sakla"
+      : publishMutation.isPending
+        ? "Yayınlanıyor..."
+        : "Yayınla";
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarHeight + spacing.large }]}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <AppHeader
-          description="Uzun tek sayfa formlar yerine adim adim ilerleyen profesyonel bir olusturma merkezi."
-          showBackButton
-          title="Ilan Olustur"
-        />
-
-        <InfoCard
-          description="Tip secimi, dinamik alanlar, medya ve onizleme tek wizard omurgasinda toplandi."
-          title="Wizard durumu"
-          variant="accent"
-        >
-          <View style={styles.metaWrap}>
-            <MetaPill
-              icon="shape-plus-outline"
-              label={selectedType ? createTypeMeta[selectedType].shortLabel : "Tip secilmedi"}
-              tone="primary"
-            />
-            <MetaPill
-              icon="progress-pencil"
-              label={`${currentStep + 1}/${wizardSteps.length} adim`}
-              tone="neutral"
-            />
-            <MetaPill
-              icon="content-save-outline"
-              label={`${Object.keys(createDrafts).length} taslak`}
-              tone="success"
-            />
+        <View style={styles.composeShell}>
+          <View style={styles.composeIntro}>
+            <View style={styles.composeIntroText}>
+              <Text style={styles.eyebrow}>İçerik oluştur</Text>
+              <Text style={styles.composeTitle}>{selectedMeta ? selectedMeta.label : "Ne paylaşmak istiyorsun?"}</Text>
+              <Text style={styles.composeDescription}>
+                {selectedMeta ? selectedMeta.description : "İçerik tipini seç, ardından tek ekranda gerekli alanları tamamla."}
+              </Text>
+            </View>
+            <View style={styles.composeStats}>
+              <MetaPill icon="file-document-edit-outline" label={`${Object.keys(createDrafts).length} taslak`} tone="neutral" />
+              <MetaPill icon="image-outline" label={`${media.length} görsel`} tone="primary" />
+            </View>
           </View>
-        </InfoCard>
 
-        {feedback ? (
-          <InfoCard
-            description={feedback.message}
-            title={feedback.title}
-            variant={feedback.tone === "success" ? "accent" : "default"}
-          />
-        ) : null}
-
-        <StepIndicator currentStep={currentStep} />
-
-        {currentStep === 0 ? (
-          <InfoCard
-            description="Her tip farkli bir form akisi acar. Taslak varsa secim karti uzerinden geri yuklenir."
-            title="1. Icerik tipini sec"
+          <View style={styles.typeRailHeader}>
+            <Text style={styles.typeRailTitle}>İlan tipi</Text>
+            <Text style={styles.typeRailHint}>{selectedType ? "Yatay menüden değiştir" : "Yatay menüden seç"}</Text>
+          </View>
+          <ScrollView
+            horizontal
+            keyboardShouldPersistTaps="handled"
+            showsHorizontalScrollIndicator={false}
+            style={styles.typeRail}
+            contentContainerStyle={styles.typeRailContent}
           >
-            <View style={styles.typeGrid}>
-              {(Object.keys(createTypeMeta) as CreateListingType[]).map((type) => {
-                const draft = createDrafts[type];
-                const selected = selectedType === type;
+            {LISTING_TYPES.map((item) => {
+              const selected = selectedType === item.value;
+
+              return (
+                <Pressable
+                  key={item.value}
+                  onPress={() => selectType(item.value)}
+                  style={[styles.typePill, selected ? styles.typePillSelected : null]}
+                >
+                  <View style={[styles.typePillIcon, selected ? styles.typePillIconSelected : null]}>
+                    <AppIcon
+                      backgrounded={false}
+                      color={selected ? colors.textInverse : colors.primary}
+                      name={item.icon}
+                      size={18}
+                    />
+                  </View>
+                  <View style={styles.typePillText}>
+                    <Text style={[styles.typePillTitle, selected ? styles.typePillTitleSelected : null]}>
+                      {item.label}
+                    </Text>
+                    <Text style={[styles.typePillMeta, selected ? styles.typePillMetaSelected : null]}>
+                      {createDrafts[item.value] ? (selected ? "Taslak yüklü" : "Taslak var") : selected ? "Seçili" : "Seç"}
+                    </Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+          <View style={styles.channelBlock}>
+            <View style={styles.channelHeader}>
+              <Text style={styles.channelTitle}>Topluluk ve mağaza</Text>
+              <Text style={styles.channelHint}>Paylaşım veya kampanya</Text>
+            </View>
+            <View style={styles.channelOptions}>
+              {CHANNEL_TYPES.map((item) => {
+                const selected = selectedType === item.value;
 
                 return (
                   <Pressable
-                    key={type}
-                    onPress={() => {
-                      handleSelectType(type);
-                    }}
-                    style={[
-                      styles.typeCard,
-                      selected ? styles.typeCardActive : null
-                    ]}
+                    key={item.value}
+                    onPress={() => selectType(item.value)}
+                    style={[styles.channelOption, selected ? styles.channelOptionSelected : null]}
                   >
-                    <View style={styles.typeCardHeader}>
-                      <View style={styles.typeIcon}>
-                        <AppIcon name={createTypeMeta[type].icon} size={22} />
-                      </View>
-                      {draft ? (
-                        <MetaPill
-                          icon="content-save-outline"
-                          label="Taslak var"
-                          tone="success"
-                        />
-                      ) : null}
+                    <View style={[styles.channelIcon, selected ? styles.channelIconSelected : null]}>
+                      <AppIcon
+                        backgrounded={false}
+                        color={selected ? colors.textInverse : colors.accent}
+                        name={item.icon}
+                        size={18}
+                      />
                     </View>
-                    <View style={styles.typeTexts}>
-                      <Text style={styles.typeTitle}>{createTypeMeta[type].label}</Text>
-                      <Text style={styles.typeDescription}>
-                        {createTypeMeta[type].description}
+                    <View style={styles.channelText}>
+                      <Text style={[styles.channelOptionTitle, selected ? styles.channelOptionTitleSelected : null]}>
+                        {item.label}
+                      </Text>
+                      <Text style={[styles.channelOptionDescription, selected ? styles.channelOptionDescriptionSelected : null]}>
+                        {item.description}
                       </Text>
                     </View>
                   </Pressable>
                 );
               })}
             </View>
-            {errors.listingType?.message ? (
-              <Text style={styles.error}>{errors.listingType.message}</Text>
-            ) : null}
-          </InfoCard>
-        ) : null}
+          </View>
+          {errors.listingType?.message ? <Text style={styles.error}>{errors.listingType.message}</Text> : null}
+        </View>
 
-        {currentStep === 1 ? (
-          <InfoCard
-            description="Tum tiplerde ortak olan temel alanlari once toplayip formu sade tutuyoruz."
-            title="2. Temel bilgileri gir"
-          >
-            <Controller
-              control={control}
-              name="title"
-              render={({ field }) => (
-                <FieldBlock helper="Kartta ve onizlemede once bu baslik gorunur. Kisa ama ayirt edici olsun.">
-                  <TextField
-                    error={errors.title?.message}
-                    label="Baslik"
-                    onChangeText={field.onChange}
-                    placeholder="Orn. Deneyimli evde bakici"
-                    value={field.value}
-                  />
-                </FieldBlock>
-              )}
-            />
-            <View style={styles.grid}>
-              <View style={styles.gridItem}>
-                <Controller
-                  control={control}
-                  name="city"
-                  render={({ field }) => (
-                    <FieldBlock helper="Kesif ve yakinindakiler bloklarinda kullanilir.">
-                      <TextField
-                        error={errors.city?.message}
-                        label="Sehir"
-                        onChangeText={field.onChange}
-                        placeholder="Istanbul"
-                        value={field.value}
-                      />
-                    </FieldBlock>
-                  )}
-                />
+        {selectedType && selectedMeta ? (
+          <View style={styles.editorPanel}>
+            <View style={styles.editorTop}>
+              <View style={styles.editorIcon}>
+                <AppIcon name={selectedMeta.icon} size={24} />
               </View>
-              <View style={styles.gridItem}>
-                <Controller
-                  control={control}
-                  name="district"
-                  render={({ field }) => (
-                    <FieldBlock helper="Daha net konum hissi vermek icin kullanilir.">
-                      <TextField
-                        error={errors.district?.message}
-                        label="Ilce"
-                        onChangeText={field.onChange}
-                        placeholder="Kadikoy"
-                        value={field.value}
-                      />
-                    </FieldBlock>
-                  )}
-                />
+              <View style={styles.editorTopText}>
+                <Text style={styles.editorTitle}>{selectedMeta.label}</Text>
+                <Text style={styles.editorDescription}>{selectedMeta.description}</Text>
               </View>
             </View>
-          </InfoCard>
-        ) : null}
 
-        {currentStep === 2 && selectedType ? (
-          <DynamicDetailStep
-            control={control}
-            errors={errors}
-            values={values}
-          />
-        ) : null}
+            <View style={styles.editorMetaRow}>
+              <MetaPill icon="map-marker-outline" label={values.city && values.district ? `${values.city} / ${values.district}` : "Konum"} tone="neutral" />
+              <MetaPill icon="image-outline" label={`${media.length} görsel`} tone="primary" />
+              {createDrafts[selectedType] ? <MetaPill icon="content-save-outline" label="Taslak yüklü" tone="success" /> : null}
+            </View>
 
-        {currentStep === 3 ? (
-          <InfoCard
-            description="Ilk gorsel kart kapainda kullanilir; ek gorseller premium his ve guven katar."
-            title="4. Medya ekle"
-          >
-            <FieldBlock helper="Galeriden en az bir gorsel sec. Gorseller kart ve detay ekranlarinda kullanilacak.">
+            {feedback ? <FeedbackBanner {...feedback} /> : null}
+
+            <CommonFields control={control} errors={errors} />
+            <Details control={control} errors={errors} selectedType={selectedType} />
+            <Section description="İlk görsel kartlarda kapak olarak kullanılır." title="Görsel">
               <UploadBox
-                description={
-                  media.length > 0
-                    ? `${media.length} gorsel secildi`
-                    : "Kapak gorseli ve gerekiyorsa ek destekleyici gorseller yukle."
-                }
-                error={pickerError ?? errors.media?.message}
+                description={media.length > 0 ? `${media.length} görsel eklendi` : "Kart ve detay ekranı için bir kapak görseli ekle."}
+                error={pickerError ?? errorText(errors.media?.message)}
                 imageUri={media[0]}
-                label="Gorsel ekle"
+                label="Görsel ekle"
                 onPress={handlePickMedia}
               />
-            </FieldBlock>
-            {media.length > 0 ? (
-              <View style={styles.mediaList}>
-                {media.map((item, index) => (
-                  <Pressable
-                    key={`${item}-${index}`}
-                    onPress={() => {
-                      setValue(
-                        "media",
-                        media.filter((_, mediaIndex) => mediaIndex !== index),
-                        { shouldDirty: true, shouldValidate: true }
-                      );
-                    }}
-                    style={styles.mediaPill}
-                  >
-                    <Text style={styles.mediaPillText}>
-                      {index === 0 ? "Kapak gorseli" : `Ek gorsel ${index}`}
-                    </Text>
-                    <AppIcon backgrounded={false} name="close" size={14} />
-                  </Pressable>
-                ))}
-              </View>
-            ) : null}
-          </InfoCard>
-        ) : null}
+              {media.length > 0 ? (
+                <View style={styles.chipRow}>
+                  {media.map((item, index) => (
+                    <FilterChip
+                      key={`${item}-${index}`}
+                      icon="image-outline"
+                      label={index === 0 ? "Kapak görseli" : `Görsel ${index + 1}`}
+                      onPress={() => {
+                        setValue(
+                          "media",
+                          media.filter((_, mediaIndex) => mediaIndex !== index),
+                          { shouldDirty: true, shouldValidate: true }
+                        );
+                      }}
+                      selected
+                    />
+                  ))}
+                </View>
+              ) : null}
+            </Section>
+          </View>
+        ) : (
+          <StartPanel draftCount={Object.keys(createDrafts).length} />
+        )}
 
-        {currentStep === 4 && selectedType ? (
-          <PreviewStep selectedType={selectedType} values={values} activeDraft={activeDraft?.updatedAt} />
+        {selectedType ? (
+          <View style={styles.embeddedActions}>
+            {selectedType !== "petshop-campaign" ? (
+              <AppButton label="Taslak Kaydet" onPress={saveDraft} variant="secondary" />
+            ) : null}
+            <AppButton
+              disabled={publishMutation.isPending}
+              label={primaryLabel}
+              leftSlot={
+                <AppIcon
+                  backgrounded={false}
+                  color={colors.textInverse}
+                  name={selectedType === "petshop-campaign" ? "content-save-outline" : "check-bold"}
+                  size={18}
+                />
+              }
+              onPress={handleSubmit(onSubmit)}
+            />
+          </View>
         ) : null}
       </ScrollView>
-
-      <StickyBottomActionBar>
-        <View style={styles.footerGrid}>
-          <AppButton
-            label={currentStep === 0 ? "Vazgec" : "Geri"}
-            onPress={handleBack}
-            variant="secondary"
-          />
-          <AppButton
-            disabled={!selectedType}
-            label="Taslagi Kaydet"
-            leftSlot={<AppIcon backgrounded={false} name="content-save-outline" size={18} />}
-            onPress={handleSaveDraft}
-            variant="ghost"
-          />
-        </View>
-        <AppButton
-          label={currentStep === wizardSteps.length - 1 ? "Onizlemeyi Onayla" : "Ileri"}
-          leftSlot={
-            <AppIcon
-              backgrounded={false}
-              color="#FFFFFF"
-              name={currentStep === wizardSteps.length - 1 ? "check-bold" : "arrow-right"}
-              size={18}
-            />
-          }
-          onPress={
-            currentStep === wizardSteps.length - 1
-              ? handleSubmit(onSubmit)
-              : handleNext
-          }
-        />
-      </StickyBottomActionBar>
     </SafeAreaView>
   );
 }
 
-function DynamicDetailStep({
+function CommonFields({
   control,
-  errors,
-  values
+  errors
 }: {
   control: Control<CreateWizardValues>;
   errors: FieldErrors<CreateWizardValues>;
-  values: CreateWizardValues;
 }) {
-  if (values.listingType === "caregiver-listing") {
+  return (
+    <Section description="Kartlarda ve arama sonuçlarında görünen temel bilgiler." title="Temel bilgiler">
+      <View style={styles.formStack}>
+        <Controller
+          control={control}
+          name="title"
+          render={({ field }) => (
+            <TextField
+              error={errorText(errors.title?.message)}
+              label="Başlık"
+              onChangeText={field.onChange}
+              placeholder="Kısa ve net bir başlık"
+              value={field.value}
+            />
+          )}
+        />
+        <View style={styles.row}>
+          <View style={styles.flex}>
+            <Controller
+              control={control}
+              name="city"
+              render={({ field }) => (
+                <TextField
+                  error={errorText(errors.city?.message)}
+                  label="Şehir"
+                  onChangeText={field.onChange}
+                  placeholder="İstanbul"
+                  value={field.value}
+                />
+              )}
+            />
+          </View>
+          <View style={styles.flex}>
+            <Controller
+              control={control}
+              name="district"
+              render={({ field }) => (
+                <TextField
+                  error={errorText(errors.district?.message)}
+                  label="İlçe"
+                  onChangeText={field.onChange}
+                  placeholder="Kadıköy"
+                  value={field.value}
+                />
+              )}
+            />
+          </View>
+        </View>
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <TextField
+              error={errorText(errors.description?.message)}
+              label="Açıklama"
+              multiline
+              onChangeText={field.onChange}
+              placeholder="İhtiyacı, koşulları ve beklentiyi sade şekilde anlat."
+              value={field.value}
+            />
+          )}
+        />
+      </View>
+    </Section>
+  );
+}
+
+function Details({
+  control,
+  errors,
+  selectedType
+}: {
+  control: Control<CreateWizardValues>;
+  errors: FieldErrors<CreateWizardValues>;
+  selectedType: CreateListingType;
+}) {
+  if (selectedType === "caregiver-listing") {
     return (
-      <>
-        <InfoCard
-          description="Hizmet kapsamini ve uygunluk bilgisini netlestirerek daha guvenilir bir profil ciz."
-          title="3. Bakici ilani detaylari"
-        >
-          <FieldBlock helper="Aldigin hizmet turlerini sec. Kartta rozet olarak one cikarilir.">
-            <Controller
-              control={control}
-              name="caregiverServiceTypes"
-              render={({ field }) => (
-                <View style={styles.optionGrid}>
-                  {caregiverServiceOptions.map((option) => {
-                    const selectedValues = field.value ?? [];
-                    const selected = selectedValues.includes(option);
-
-                    return (
-                      <FilterChip
-                        key={option}
-                        icon={selected ? "check-circle-outline" : "briefcase-outline"}
-                        label={caregiverServiceLabels[option]}
-                        onPress={() => {
-                          field.onChange(
-                            selected
-                              ? selectedValues.filter((item) => item !== option)
-                              : [...selectedValues, option]
-                          );
-                        }}
-                        selected={selected}
-                      />
-                    );
-                  })}
-                </View>
-              )}
-            />
-            {errors.caregiverServiceTypes?.message ? (
-              <Text style={styles.error}>{errors.caregiverServiceTypes.message}</Text>
-            ) : null}
-          </FieldBlock>
-
-          <FieldBlock helper="Musaitlik algisini guclu gostermek icin tek secim yeterli.">
-            <Controller
-              control={control}
-              name="caregiverAvailability"
-              render={({ field }) => (
-                <SegmentedTabs
+      <Section description="Bakıcı ilanı için karar vermeyi kolaylaştıran kısa bilgiler." title="Bakıcı detayı">
+        <View style={styles.formStack}>
+          <Controller
+            control={control}
+            name="caregiverServiceTypes"
+            render={({ field }) => (
+              <FieldGroup error={errorText(errors.caregiverServiceTypes?.message)} label="Hizmetler">
+                <Chips
+                  items={caregiverServiceOptions.map((item) => ({
+                    icon: "briefcase-outline" as IconName,
+                    label: SERVICE_LABELS[item],
+                    value: item
+                  }))}
                   onChange={field.onChange}
-                  options={[
-                    { label: "Hafta ici", value: "hafta-ici" },
-                    { label: "Hafta sonu", value: "hafta-sonu" },
-                    { label: "Esnek", value: "esnek" }
-                  ]}
-                  value={field.value}
+                  selectedValues={field.value ?? []}
                 />
-              )}
-            />
-          </FieldBlock>
-
-          <Controller
-            control={control}
-            name="caregiverRate"
-            render={({ field }) => (
-              <FieldBlock helper="Marketplace kartinda fiyat bilgisi olarak gorunur.">
-                <TextField
-                  error={errors.caregiverRate?.message}
-                  label="Ucret beklentisi"
-                  onChangeText={field.onChange}
-                  placeholder="Orn. Gunluk 900 TL"
-                  value={field.value}
-                />
-              </FieldBlock>
+              </FieldGroup>
             )}
           />
-
           <Controller
             control={control}
-            name="caregiverExperience"
+            name="caregiverAvailability"
             render={({ field }) => (
-              <FieldBlock helper="Kisa ve güven veren bir deneyim ozeti yaz.">
-                <TextField
-                  error={errors.caregiverExperience?.message}
-                  label="Deneyim ozeti"
-                  multiline
-                  onChangeText={field.onChange}
-                  placeholder="Rutin takibi, ilac kullanimi veya onceki deneyimlerini ozetle."
-                  value={field.value}
-                />
-              </FieldBlock>
+              <FieldGroup label="Müsaitlik">
+                <SegmentedTabs onChange={field.onChange} options={[...availabilityOptions]} value={field.value} />
+              </FieldGroup>
             )}
           />
-
-          <Controller
-            control={control}
-            name="description"
-            render={({ field }) => (
-              <FieldBlock helper="Detay ekranindaki aciklama bolumu icin kullanilir.">
-                <TextField
-                  error={errors.description?.message}
-                  label="Ilan aciklamasi"
-                  multiline
-                  onChangeText={field.onChange}
-                  placeholder="Hangi hayvanlar icin, nasil bir bakim sundugunu anlat."
-                  value={field.value}
-                />
-              </FieldBlock>
-            )}
-          />
-        </InfoCard>
-      </>
+          <View style={styles.row}>
+            <View style={styles.flex}>
+              <Controller
+                control={control}
+                name="caregiverRate"
+                render={({ field }) => (
+                  <TextField
+                    error={errorText(errors.caregiverRate?.message)}
+                    label="Ücret"
+                    onChangeText={field.onChange}
+                    placeholder="Günlük 900 TL"
+                    value={field.value}
+                  />
+                )}
+              />
+            </View>
+            <View style={styles.flex}>
+              <Controller
+                control={control}
+                name="caregiverExperience"
+                render={({ field }) => (
+                  <TextField
+                    error={errorText(errors.caregiverExperience?.message)}
+                    label="Deneyim"
+                    onChangeText={field.onChange}
+                    placeholder="3 yıl deneyim"
+                    value={field.value}
+                  />
+                )}
+              />
+            </View>
+          </View>
+        </View>
+      </Section>
     );
   }
 
-  if (values.listingType === "owner-request") {
+  if (selectedType === "owner-request") {
     return (
-      <InfoCard
-        description="Bakici arayan kullanicinin beklentisi ne kadar netse eslesme kalitesi o kadar yukselir."
-        title="3. Bakici ariyorum detaylari"
-      >
-        <FieldBlock helper="Evcil hayvan turu kartta ilk gorunen rozetlerden biri olur.">
+      <Section description="Bakıcıların hızlı karar verebilmesi için gerekli alanlar." title="Bakım ihtiyacı">
+        <View style={styles.formStack}>
           <Controller
             control={control}
             name="ownerPetType"
             render={({ field }) => (
-              <SegmentedTabs
-                onChange={field.onChange}
-                options={ownerPetTypeOptions.map((item) => ({ label: item, value: item }))}
-                value={field.value}
-              />
+              <FieldGroup label="Hayvan türü">
+                <SegmentedTabs
+                  onChange={field.onChange}
+                  options={ownerPetTypeOptions.map((item) => ({
+                    label: item === "Kopek" ? "Köpek" : item === "Diger" ? "Diğer" : item,
+                    value: item
+                  }))}
+                  value={field.value}
+                />
+              </FieldGroup>
             )}
           />
-        </FieldBlock>
-
-        <Controller
-          control={control}
-          name="ownerDatePlan"
-          render={({ field }) => (
-            <FieldBlock helper="Tarih araligi, hafta sonu veya duzenli plan gibi bir ifade kullanabilirsin.">
-              <TextField
-                error={errors.ownerDatePlan?.message}
-                label="Bakim tarihi / plan"
-                onChangeText={field.onChange}
-                placeholder="Orn. 26-27 Nisan hafta sonu"
-                value={field.value}
-              />
-            </FieldBlock>
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="ownerBudget"
-          render={({ field }) => (
-            <FieldBlock helper="Net butce bilgisi dogru basvuru kalitesini artirir.">
-              <TextField
-                error={errors.ownerBudget?.message}
-                label="Butce"
-                onChangeText={field.onChange}
-                placeholder="Orn. 3.500 TL"
-                value={field.value}
-              />
-            </FieldBlock>
-          )}
-        />
-
-        <FieldBlock helper="Bakim ihtiyacini birden fazla secimle netlestirebilirsin.">
           <Controller
             control={control}
             name="ownerCareNeeds"
             render={({ field }) => (
-              <View style={styles.optionGrid}>
-                {ownerCareNeedOptions.map((option) => {
-                  const selectedValues = field.value ?? [];
-                  const selected = selectedValues.includes(option);
-
-                  return (
-                    <FilterChip
-                      key={option}
-                      icon={selected ? "check-circle-outline" : "paw-outline"}
-                      label={ownerNeedLabels[option]}
-                      onPress={() => {
-                        field.onChange(
-                          selected
-                            ? selectedValues.filter((item) => item !== option)
-                            : [...selectedValues, option]
-                        );
-                      }}
-                      selected={selected}
-                    />
-                  );
-                })}
-              </View>
+              <FieldGroup error={errorText(errors.ownerCareNeeds?.message)} label="İhtiyaçlar">
+                <Chips
+                  items={ownerCareNeedOptions.map((item) => ({
+                    icon: "check-circle-outline" as IconName,
+                    label: NEED_LABELS[item],
+                    value: item
+                  }))}
+                  onChange={field.onChange}
+                  selectedValues={field.value ?? []}
+                />
+              </FieldGroup>
             )}
           />
-          {errors.ownerCareNeeds?.message ? (
-            <Text style={styles.error}>{errors.ownerCareNeeds.message}</Text>
-          ) : null}
-        </FieldBlock>
-
-        <Controller
-          control={control}
-          name="description"
-          render={({ field }) => (
-            <FieldBlock helper="Hayvanin rutini, beklentiler ve dikkat edilmesi gerekenleri yaz.">
-              <TextField
-                error={errors.description?.message}
-                label="Talep aciklamasi"
-                multiline
-                onChangeText={field.onChange}
-                placeholder="Beslenme, yuruyus, ilac veya gunluk rutin detaylarini belirt."
-                value={field.value}
+          <View style={styles.row}>
+            <View style={styles.flex}>
+              <Controller
+                control={control}
+                name="ownerDatePlan"
+                render={({ field }) => (
+                  <TextField
+                    error={errorText(errors.ownerDatePlan?.message)}
+                    label="Tarih / plan"
+                    onChangeText={field.onChange}
+                    placeholder="Bu hafta sonu"
+                    value={field.value}
+                  />
+                )}
               />
-            </FieldBlock>
-          )}
-        />
-      </InfoCard>
+            </View>
+            <View style={styles.flex}>
+              <Controller
+                control={control}
+                name="ownerBudget"
+                render={({ field }) => (
+                  <TextField
+                    error={errorText(errors.ownerBudget?.message)}
+                    label="Bütçe"
+                    onChangeText={field.onChange}
+                    placeholder="3.500 TL"
+                    value={field.value}
+                  />
+                )}
+              />
+            </View>
+          </View>
+        </View>
+      </Section>
     );
   }
 
-  if (values.listingType === "community-post") {
+  if (selectedType === "community-post") {
     return (
-      <InfoCard
-        description="Topluluk paylasimlari sicak ama duzenli kalmali; kategori ve iletisim sekli bunu belirler."
-        title="3. Topluluk paylasimi detaylari"
-      >
-        <FieldBlock helper="Feed rozetini belirleyecek kategori secimi.">
+      <Section description="Topluluk paylaşımını kategorisi ve iletişim yöntemiyle netleştir." title="Topluluk detayı">
+        <View style={styles.formStack}>
           <Controller
             control={control}
             name="communityCategory"
             render={({ field }) => (
-              <SegmentedTabs
-                onChange={field.onChange}
-                options={communityCategoryOptions.map((item) => ({
-                  label: communityCategoryLabels[item],
-                  value: item
-                }))}
-                value={field.value}
-              />
+              <FieldGroup label="Kategori">
+                <SegmentedTabs
+                  onChange={field.onChange}
+                  options={communityCategoryOptions.map((item) => ({
+                    label: CATEGORY_LABELS[item],
+                    value: item
+                  }))}
+                  value={field.value}
+                />
+              </FieldGroup>
             )}
           />
-        </FieldBlock>
-
-        <FieldBlock helper="Insanlarin sana nasil ulasmasini istedigini belirle.">
           <Controller
             control={control}
             name="communityContactPreference"
             render={({ field }) => (
-              <SegmentedTabs
-                onChange={field.onChange}
-                options={communityContactPreferenceOptions.map((item) => ({
-                  label: communityContactLabels[item],
-                  value: item
-                }))}
+              <FieldGroup label="İletişim">
+                <SegmentedTabs
+                  onChange={field.onChange}
+                  options={communityContactPreferenceOptions.map((item) => ({
+                    label: CONTACT_LABELS[item],
+                    value: item
+                  }))}
+                  value={field.value}
+                />
+              </FieldGroup>
+            )}
+          />
+          <Controller
+            control={control}
+            name="communitySupportWindow"
+            render={({ field }) => (
+              <TextField
+                error={errorText(errors.communitySupportWindow?.message)}
+                label="Geçerlilik / zaman"
+                onChangeText={field.onChange}
+                placeholder="Bu hafta sonuna kadar"
                 value={field.value}
               />
             )}
           />
-        </FieldBlock>
-
-        <Controller
-          control={control}
-          name="communitySupportWindow"
-          render={({ field }) => (
-            <FieldBlock helper="Paylasimin ne kadar sure acik kalacagini veya ne zaman teslim alinacagini belirt.">
-              <TextField
-                error={errors.communitySupportWindow?.message}
-                label="Paylasim suresi / teslim plani"
-                onChangeText={field.onChange}
-                placeholder="Orn. Bu hafta sonuna kadar"
-                value={field.value}
-              />
-            </FieldBlock>
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="description"
-          render={({ field }) => (
-            <FieldBlock helper="Destek cagrisi, sahiplendirme detayi veya topluluk notunu acik yaz.">
-              <TextField
-                error={errors.description?.message}
-                label="Paylasim aciklamasi"
-                multiline
-                onChangeText={field.onChange}
-                placeholder="Ne paylastigini, kimin icin uygun oldugunu ve iletisim detayini ozetle."
-                value={field.value}
-              />
-            </FieldBlock>
-          )}
-        />
-      </InfoCard>
+        </View>
+      </Section>
     );
   }
 
   return (
-    <InfoCard
-      description="Kampanya detaylari net ve kurumsal gorundugunde daha guvenilir bir magaza deneyimi olusur."
-      title="3. Petshop kampanyasi detaylari"
-    >
-      <Controller
-        control={control}
-        name="petshopStoreName"
-        render={({ field }) => (
-          <FieldBlock helper="Magaza profilinde ve kampanya kartinda gorunur.">
-            <TextField
-              error={errors.petshopStoreName?.message}
-              label="Magaza adi"
-              onChangeText={field.onChange}
-              placeholder="Orn. Pati Market"
-              value={field.value}
-            />
-          </FieldBlock>
-        )}
-      />
-
-      <FieldBlock helper="Kampanyayi kategori bazli ayirmak icin kullanilir.">
+    <Section description="Petshop kampanyası şimdilik taslak olarak saklanır." title="Kampanya detayı">
+      <View style={styles.formStack}>
         <Controller
           control={control}
-          name="petshopCampaignType"
+          name="petshopStoreName"
           render={({ field }) => (
-            <SegmentedTabs
-              onChange={field.onChange}
-              options={petshopCampaignTypeOptions.map((item) => ({
-                label: petshopCampaignTypeLabels[item],
-                value: item
-              }))}
+            <TextField
+              error={errorText(errors.petshopStoreName?.message)}
+              label="Mağaza adı"
+              onChangeText={field.onChange}
+              placeholder="Pati Market"
               value={field.value}
             />
           )}
         />
-      </FieldBlock>
-
-      <View style={styles.grid}>
-        <View style={styles.gridItem}>
-          <Controller
-            control={control}
-            name="petshopDiscount"
-            render={({ field }) => (
-              <FieldBlock helper="Rozet ve fiyat satirinda kullanilir.">
+        <Controller
+          control={control}
+          name="petshopCampaignType"
+          render={({ field }) => (
+            <FieldGroup label="Kategori">
+              <SegmentedTabs
+                onChange={field.onChange}
+                options={petshopCampaignTypeOptions.map((item) => ({
+                  label: CAMPAIGN_LABELS[item],
+                  value: item
+                }))}
+                value={field.value}
+              />
+            </FieldGroup>
+          )}
+        />
+        <View style={styles.row}>
+          <View style={styles.flex}>
+            <Controller
+              control={control}
+              name="petshopDiscount"
+              render={({ field }) => (
                 <TextField
-                  error={errors.petshopDiscount?.message}
-                  label="Indirim"
+                  error={errorText(errors.petshopDiscount?.message)}
+                  label="İndirim"
                   onChangeText={field.onChange}
                   placeholder="%20"
                   value={field.value}
                 />
-              </FieldBlock>
-            )}
-          />
-        </View>
-        <View style={styles.gridItem}>
-          <Controller
-            control={control}
-            name="petshopPrice"
-            render={({ field }) => (
-              <FieldBlock helper="Net fiyat veya kampanya etiketi.">
+              )}
+            />
+          </View>
+          <View style={styles.flex}>
+            <Controller
+              control={control}
+              name="petshopPrice"
+              render={({ field }) => (
                 <TextField
-                  error={errors.petshopPrice?.message}
+                  error={errorText(errors.petshopPrice?.message)}
                   label="Fiyat"
                   onChangeText={field.onChange}
                   placeholder="799 TL"
                   value={field.value}
                 />
-              </FieldBlock>
-            )}
-          />
+              )}
+            />
+          </View>
+        </View>
+        <View style={styles.row}>
+          <View style={styles.flex}>
+            <Controller
+              control={control}
+              name="petshopDeadline"
+              render={({ field }) => (
+                <TextField
+                  error={errorText(errors.petshopDeadline?.message)}
+                  label="Son tarih"
+                  onChangeText={field.onChange}
+                  placeholder="3 gün kaldı"
+                  value={field.value}
+                />
+              )}
+            />
+          </View>
+          <View style={styles.flex}>
+            <Controller
+              control={control}
+              name="petshopCampaignBadge"
+              render={({ field }) => (
+                <TextField
+                  error={errorText(errors.petshopCampaignBadge?.message)}
+                  label="Rozet"
+                  onChangeText={field.onChange}
+                  placeholder="Bahar fırsatı"
+                  value={field.value}
+                />
+              )}
+            />
+          </View>
         </View>
       </View>
-
-      <Controller
-        control={control}
-        name="petshopDeadline"
-        render={({ field }) => (
-          <FieldBlock helper="Son tarih veya sure sinirini belirt.">
-            <TextField
-              error={errors.petshopDeadline?.message}
-              label="Son tarih"
-              onChangeText={field.onChange}
-              placeholder="Orn. 3 gun kaldi"
-              value={field.value}
-            />
-          </FieldBlock>
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="petshopCampaignBadge"
-        render={({ field }) => (
-          <FieldBlock helper="Kart uzerinde kampanyayi one cikaracak kisa rozet.">
-            <TextField
-              error={errors.petshopCampaignBadge?.message}
-              label="Kampanya rozeti"
-              onChangeText={field.onChange}
-              placeholder="Bahar firsati"
-              value={field.value}
-            />
-          </FieldBlock>
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="description"
-        render={({ field }) => (
-          <FieldBlock helper="Stok, teslimat ve avantaj bilgisini kisa ama guven veren sekilde anlat.">
-            <TextField
-              error={errors.description?.message}
-              label="Kampanya aciklamasi"
-              multiline
-              onChangeText={field.onChange}
-              placeholder="Urun kapsami, teslimat ve kampanya kosullarini acikla."
-              value={field.value}
-            />
-          </FieldBlock>
-        )}
-      />
-    </InfoCard>
+    </Section>
   );
 }
 
-function PreviewStep({
-  activeDraft,
-  selectedType,
-  values
-}: {
-  activeDraft?: string;
-  selectedType: CreateListingType;
-  values: CreateWizardValues;
-}) {
+function StartPanel({ draftCount }: { draftCount: number }) {
   return (
-    <>
-      <InfoCard
-        description="Yayina almadan once kart mantigi ve detay ozeti bir arada gorunur."
-        title="5. Onizleme"
-        variant="accent"
-      >
-        <View style={styles.previewHeader}>
-          <View style={styles.previewIcon}>
-            <AppIcon name={createTypeMeta[selectedType].icon} size={22} />
-          </View>
-          <View style={styles.previewTexts}>
-            <Text style={styles.previewTitle}>
-              {values.title || createTypeMeta[selectedType].label}
-            </Text>
-            <Text style={styles.previewDescription}>
-              {createTypeMeta[selectedType].description}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.metaWrap}>
-          <MetaPill icon="map-marker-outline" label={`${values.city} / ${values.district}`} tone="neutral" />
-          {selectedType === "caregiver-listing" ? (
-            <>
-              <MetaPill
-                icon="cash"
-                label={values.caregiverRate || "Ucret belirtilmedi"}
-                tone="success"
-              />
-              <MetaPill
-                icon="calendar-range"
-                label={caregiverAvailabilityLabels[values.caregiverAvailability ?? "esnek"]}
-                tone="primary"
-              />
-            </>
-          ) : null}
-          {selectedType === "owner-request" ? (
-            <>
-              <MetaPill
-                icon="paw-outline"
-                label={values.ownerPetType ?? "Kopek"}
-                tone="primary"
-              />
-              <MetaPill icon="cash" label={values.ownerBudget || "Butce"} tone="success" />
-            </>
-          ) : null}
-          {selectedType === "community-post" ? (
-            <>
-              <MetaPill
-                icon="shape-outline"
-                label={communityCategoryLabels[values.communityCategory ?? "diger"]}
-                tone="primary"
-              />
-              <MetaPill
-                icon="message-text-outline"
-                label={communityContactLabels[values.communityContactPreference ?? "mesaj"]}
-                tone="success"
-              />
-            </>
-          ) : null}
-          {selectedType === "petshop-campaign" ? (
-            <>
-              <MetaPill
-                icon="sale-outline"
-                label={values.petshopDiscount || "Indirim"}
-                tone="warning"
-              />
-              <MetaPill
-                icon="storefront-outline"
-                label={values.petshopStoreName || "Magaza"}
-                tone="primary"
-              />
-            </>
-          ) : null}
-        </View>
-      </InfoCard>
-
-      <InfoCard
-        description="Detay ekraninda kullanilacak aciklama metni."
-        title="Aciklama ozeti"
-      >
-        <Text style={styles.previewBody}>{values.description}</Text>
-      </InfoCard>
-
-      <InfoCard
-        description="Wizard boyunca girdigin dinamik alanlar burada toplu gorunur."
-        title="Hizli kontrol"
-      >
-        <View style={styles.previewChecklist}>
-          {selectedType === "caregiver-listing"
-            ? (values.caregiverServiceTypes ?? []).map((item) => (
-                <MetaPill
-                  icon="check-circle-outline"
-                  key={item}
-                  label={caregiverServiceLabels[item]}
-                  tone="success"
-                />
-              ))
-            : null}
-          {selectedType === "owner-request"
-            ? (values.ownerCareNeeds ?? []).map((item) => (
-                <MetaPill
-                  icon="check-circle-outline"
-                  key={item}
-                  label={ownerNeedLabels[item]}
-                  tone="success"
-                />
-              ))
-            : null}
-          {selectedType === "community-post" ? (
-            <MetaPill
-              icon="clock-outline"
-              label={values.communitySupportWindow || "Sure bilgisi"}
-              tone="warning"
-            />
-          ) : null}
-          {selectedType === "petshop-campaign" ? (
-            <>
-              <MetaPill
-                icon="tag-outline"
-                label={values.petshopCampaignBadge || "Kampanya rozeti"}
-                tone="warning"
-              />
-              <MetaPill
-                icon="clock-outline"
-                label={values.petshopDeadline || "Son tarih"}
-                tone="neutral"
-              />
-            </>
-          ) : null}
-          <MetaPill
-            icon="image-outline"
-            label={`${(values.media ?? []).length} gorsel eklendi`}
-            tone="neutral"
-          />
-          {activeDraft ? (
-            <MetaPill
-              icon="content-save-outline"
-              label="Kayitli taslak bulundu"
-              tone="success"
-            />
-          ) : null}
-        </View>
-      </InfoCard>
-    </>
-  );
-}
-
-function FieldBlock({
-  children,
-  helper
-}: {
-  children: React.ReactNode;
-  helper: string;
-}) {
-  return (
-    <View style={styles.fieldBlock}>
-      {children}
-      <Text style={styles.helper}>{helper}</Text>
+    <View style={styles.startPanel}>
+      <View style={styles.startIcon}>
+        <AppIcon name="cursor-default-click-outline" size={26} />
+      </View>
+      <View style={styles.startTexts}>
+        <Text style={styles.startTitle}>Bir içerik tipi seç</Text>
+        <Text style={styles.startDescription}>
+          Bakıcı ilanı, bakım talebi, topluluk paylaşımı veya petshop kampanyası için alanlar seçimine göre açılır.
+        </Text>
+      </View>
+      <View style={styles.metaRow}>
+        <MetaPill icon="content-save-outline" label={`${draftCount} taslak`} tone="neutral" />
+        <MetaPill icon="form-select" label="Tek ekran form" tone="primary" />
+      </View>
     </View>
   );
 }
 
-function StepIndicator({ currentStep }: { currentStep: number }) {
+function Section({
+  children,
+  description,
+  title
+}: {
+  children: React.ReactNode;
+  description: string;
+  title: string;
+}) {
   return (
-    <InfoCard
-      description="Nerede oldugunu ve siradaki adimi net gormen icin wizard ilerleyisi burada."
-      title="Adim gostergesi"
-    >
-      <View style={styles.stepRow}>
-        {wizardSteps.map((step, index) => {
-          const active = index === currentStep;
-          const completed = index < currentStep;
-
-          return (
-            <View key={step} style={styles.stepItem}>
-              <View
-                style={[
-                  styles.stepDot,
-                  completed ? styles.stepDotCompleted : null,
-                  active ? styles.stepDotActive : null
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.stepDotLabel,
-                    active || completed ? styles.stepDotLabelActive : null
-                  ]}
-                >
-                  {index + 1}
-                </Text>
-              </View>
-              <Text
-                style={[
-                  styles.stepLabel,
-                  active ? styles.stepLabelActive : null
-                ]}
-              >
-                {step}
-              </Text>
-              {index < wizardSteps.length - 1 ? (
-                <View
-                  style={[
-                    styles.stepLine,
-                    completed ? styles.stepLineCompleted : null
-                  ]}
-                />
-              ) : null}
-            </View>
-          );
-        })}
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        <Text style={styles.sectionDescription}>{description}</Text>
       </View>
-    </InfoCard>
+      {children}
+    </View>
   );
 }
 
-function getStepFields(
-  listingType: CreateListingType | undefined,
-  currentStep: number
-): CreateFieldName[] {
-  if (!listingType) {
-    return ["listingType"];
-  }
+function Chips<T extends string>({
+  items,
+  onChange,
+  selectedValues
+}: {
+  items: { icon: IconName; label: string; value: T }[];
+  onChange: (value: T[]) => void;
+  selectedValues: T[];
+}) {
+  return (
+    <View style={styles.chipRow}>
+      {items.map((item) => {
+        const selected = selectedValues.includes(item.value);
 
-  if (currentStep === 1) {
-    return ["title", "city", "district"];
-  }
+        return (
+          <FilterChip
+            key={item.value}
+            icon={selected ? "check-circle-outline" : item.icon}
+            label={item.label}
+            onPress={() => {
+              onChange(
+                selected
+                  ? selectedValues.filter((value) => value !== item.value)
+                  : [...selectedValues, item.value]
+              );
+            }}
+            selected={selected}
+          />
+        );
+      })}
+    </View>
+  );
+}
 
-  if (currentStep === 2) {
-    if (listingType === "caregiver-listing") {
-      return [
-        "description",
-        "caregiverServiceTypes",
-        "caregiverAvailability",
-        "caregiverRate",
-        "caregiverExperience"
-      ];
-    }
+function FieldGroup({
+  children,
+  error,
+  label
+}: {
+  children: React.ReactNode;
+  error?: string;
+  label: string;
+}) {
+  return (
+    <View style={styles.fieldGroup}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      {children}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+    </View>
+  );
+}
 
-    if (listingType === "owner-request") {
-      return [
-        "description",
-        "ownerPetType",
-        "ownerDatePlan",
-        "ownerBudget",
-        "ownerCareNeeds"
-      ];
-    }
-
-    if (listingType === "community-post") {
-      return [
-        "description",
-        "communityCategory",
-        "communityContactPreference",
-        "communitySupportWindow"
-      ];
-    }
-
-    return [
-      "description",
-      "petshopStoreName",
-      "petshopCampaignType",
-      "petshopDiscount",
-      "petshopPrice",
-      "petshopDeadline",
-      "petshopCampaignBadge"
-    ];
-  }
-
-  if (currentStep === 3) {
-    return ["media"];
-  }
-
-  return [];
+function FeedbackBanner({
+  message,
+  tone,
+  title
+}: {
+  message: string;
+  tone: "info" | "success";
+  title: string;
+}) {
+  return (
+    <View style={[styles.feedback, tone === "success" ? styles.feedbackSuccess : styles.feedbackInfo]}>
+      <AppIcon
+        backgrounded={false}
+        name={tone === "success" ? "check-circle-outline" : "information-outline"}
+        size={18}
+        tone={tone === "success" ? "success" : "primary"}
+      />
+      <View style={styles.feedbackTexts}>
+        <Text style={styles.feedbackTitle}>{title}</Text>
+        <Text style={styles.feedbackMessage}>{message}</Text>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
+  channelBlock: {
+    borderTopColor: colors.divider,
+    borderTopWidth: 1,
+    gap: spacing.compact,
+    paddingTop: spacing.standard
+  },
+  channelHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  channelHint: {
+    color: colors.textSubtle,
+    ...typography.caption,
+    letterSpacing: 0
+  },
+  channelIcon: {
+    alignItems: "center",
+    backgroundColor: colors.accentSoft,
+    borderRadius: radius.small,
+    height: 36,
+    justifyContent: "center",
+    width: 36
+  },
+  channelIconSelected: {
+    backgroundColor: "rgba(255,255,255,0.18)"
+  },
+  channelOption: {
+    alignItems: "flex-start",
+    backgroundColor: colors.surfaceAlt,
+    borderColor: colors.border,
+    borderRadius: radius.small,
+    borderWidth: 1,
+    flex: 1,
+    flexDirection: "row",
+    gap: spacing.tight,
+    minWidth: 180,
+    padding: spacing.compact
+  },
+  channelOptionDescription: {
+    color: colors.textMuted,
+    ...typography.caption,
+    letterSpacing: 0
+  },
+  channelOptionDescriptionSelected: {
+    color: colors.textInverse
+  },
+  channelOptionSelected: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent
+  },
+  channelOptionTitle: {
+    color: colors.text,
+    ...typography.label,
+    letterSpacing: 0
+  },
+  channelOptionTitleSelected: {
+    color: colors.textInverse
+  },
+  channelOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.tight
+  },
+  channelText: {
+    flex: 1,
+    gap: spacing.nano,
+    minWidth: 0
+  },
+  channelTitle: {
+    color: colors.text,
+    ...typography.label,
+    letterSpacing: 0
+  },
+  chipRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.tight
+  },
+  composeDescription: {
+    color: colors.textMuted,
+    ...typography.body,
+    letterSpacing: 0
+  },
+  composeIntro: {
+    gap: spacing.compact
+  },
+  composeIntroText: {
+    gap: spacing.micro
+  },
+  composeShell: {
+    ...shadows.card,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xlarge,
+    gap: spacing.standard,
+    padding: spacing.standard
+  },
+  composeStats: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.tight
+  },
+  composeTitle: {
+    color: colors.text,
+    ...typography.h2,
+    letterSpacing: 0
+  },
   content: {
     gap: spacing.section,
-    paddingBottom: spacing.large,
     paddingHorizontal: spacing.comfortable,
     paddingTop: spacing.standard
   },
-  error: {
-    color: colors.error,
-    ...typography.caption
-  },
-  fieldBlock: {
-    gap: spacing.tight
-  },
-  footerGrid: {
-    flexDirection: "row",
-    gap: spacing.compact
-  },
-  grid: {
-    flexDirection: "row",
-    gap: spacing.compact
-  },
-  gridItem: {
-    flex: 1
-  },
-  helper: {
-    color: colors.textSubtle,
-    ...typography.caption
-  },
-  mediaList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.tight
-  },
-  mediaPill: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
-    borderRadius: radius.pill,
-    flexDirection: "row",
-    gap: spacing.tight,
-    paddingHorizontal: spacing.standard,
-    paddingVertical: spacing.tight
-  },
-  mediaPillText: {
+  editorDescription: {
     color: colors.textMuted,
-    ...typography.caption
+    ...typography.body,
+    letterSpacing: 0
   },
-  metaWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.tight
-  },
-  optionGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.tight
-  },
-  previewBody: {
-    color: colors.textMuted,
-    ...typography.body
-  },
-  previewChecklist: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.tight
-  },
-  previewDescription: {
-    color: colors.textMuted,
-    ...typography.body
-  },
-  previewHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: spacing.compact
-  },
-  previewIcon: {
+  editorIcon: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.large,
-    height: 52,
+    borderRadius: radius.medium,
+    height: 48,
     justifyContent: "center",
-    width: 52
+    width: 48
   },
-  previewTexts: {
+  editorMetaRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.tight
+  },
+  editorPanel: {
+    ...shadows.card,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xlarge,
+    gap: spacing.section,
+    padding: spacing.standard
+  },
+  editorTitle: {
+    color: colors.text,
+    ...typography.h3,
+    letterSpacing: 0
+  },
+  editorTop: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.standard
+  },
+  editorTopText: {
     flex: 1,
     gap: spacing.micro
   },
-  previewTitle: {
+  embeddedActions: {
+    ...shadows.card,
+    backgroundColor: colors.surface,
+    borderRadius: radius.xlarge,
+    gap: spacing.compact,
+    padding: spacing.standard
+  },
+  error: {
+    color: colors.error,
+    ...typography.caption,
+    letterSpacing: 0
+  },
+  eyebrow: {
+    color: colors.primary,
+    ...typography.overline
+  },
+  feedback: {
+    alignItems: "flex-start",
+    borderRadius: radius.small,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.tight,
+    padding: spacing.standard
+  },
+  feedbackInfo: {
+    backgroundColor: colors.infoSoft,
+    borderColor: colors.border
+  },
+  feedbackMessage: {
+    color: colors.textMuted,
+    ...typography.body,
+    letterSpacing: 0
+  },
+  feedbackSuccess: {
+    backgroundColor: colors.successSoft,
+    borderColor: colors.border
+  },
+  feedbackTexts: {
+    flex: 1,
+    gap: spacing.micro
+  },
+  feedbackTitle: {
     color: colors.text,
-    ...typography.h3
+    ...typography.bodyStrong,
+    letterSpacing: 0
+  },
+  fieldGroup: {
+    gap: spacing.tight
+  },
+  fieldLabel: {
+    color: colors.text,
+    ...typography.label,
+    letterSpacing: 0
+  },
+  flex: {
+    flex: 1,
+    minWidth: 140
+  },
+  formStack: {
+    gap: spacing.standard
+  },
+  metaRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.tight
+  },
+  row: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.compact
   },
   safeArea: {
     backgroundColor: colors.background,
     flex: 1
   },
-  stepDot: {
-    alignItems: "center",
-    backgroundColor: colors.surfaceMuted,
-    borderRadius: radius.pill,
-    height: 34,
-    justifyContent: "center",
-    width: 34
-  },
-  stepDotActive: {
-    backgroundColor: colors.primarySoft,
-    borderColor: colors.primaryBorder,
-    borderWidth: 1
-  },
-  stepDotCompleted: {
-    backgroundColor: colors.primary
-  },
-  stepDotLabel: {
-    color: colors.textSubtle,
-    ...typography.caption
-  },
-  stepDotLabelActive: {
-    color: colors.textInverse
-  },
-  stepItem: {
-    alignItems: "center",
-    flex: 1,
-    gap: spacing.tight
-  },
-  stepLabel: {
-    color: colors.textSubtle,
-    textAlign: "center",
-    ...typography.caption
-  },
-  stepLabelActive: {
-    color: colors.text,
-    fontWeight: "700"
-  },
-  stepLine: {
-    backgroundColor: colors.border,
-    height: 2,
-    position: "absolute",
-    right: "-50%",
-    top: 16,
-    width: "100%"
-  },
-  stepLineCompleted: {
-    backgroundColor: colors.primary
-  },
-  stepRow: {
-    flexDirection: "row"
-  },
-  typeCard: {
-    ...shadows.card,
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.large,
-    borderWidth: 1,
+  section: {
+    borderTopColor: colors.divider,
+    borderTopWidth: 1,
     gap: spacing.standard,
-    padding: spacing.comfortable
+    paddingTop: spacing.standard
   },
-  typeCardActive: {
-    backgroundColor: colors.backgroundAccent,
-    borderColor: colors.primaryBorder
-  },
-  typeCardHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between"
-  },
-  typeDescription: {
+  sectionDescription: {
     color: colors.textMuted,
-    ...typography.body
+    ...typography.body,
+    letterSpacing: 0
   },
-  typeGrid: {
-    gap: spacing.compact
+  sectionHeader: {
+    gap: spacing.micro
   },
-  typeIcon: {
+  sectionTitle: {
+    color: colors.text,
+    ...typography.subheading,
+    letterSpacing: 0
+  },
+  startDescription: {
+    color: colors.textMuted,
+    ...typography.body,
+    letterSpacing: 0
+  },
+  startIcon: {
     alignItems: "center",
-    backgroundColor: colors.primarySoft,
-    borderRadius: radius.large,
+    backgroundColor: colors.accentSoft,
+    borderRadius: radius.medium,
     height: 48,
     justifyContent: "center",
     width: 48
   },
-  typeTexts: {
-    gap: spacing.tight
+  startPanel: {
+    ...shadows.card,
+    alignItems: "flex-start",
+    backgroundColor: colors.surface,
+    borderRadius: radius.xlarge,
+    gap: spacing.standard,
+    padding: spacing.comfortable
   },
-  typeTitle: {
+  startTexts: {
+    gap: spacing.micro
+  },
+  startTitle: {
     color: colors.text,
-    ...typography.h3
+    ...typography.h2,
+    letterSpacing: 0
+  },
+  typePill: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceAlt,
+    borderColor: colors.border,
+    borderRadius: radius.small,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.tight,
+    minWidth: 168,
+    paddingHorizontal: spacing.compact,
+    paddingVertical: spacing.tight
+  },
+  typePillIcon: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.small,
+    height: 36,
+    justifyContent: "center",
+    width: 36
+  },
+  typePillIconSelected: {
+    backgroundColor: "rgba(255,255,255,0.18)"
+  },
+  typePillMeta: {
+    color: colors.textSubtle,
+    ...typography.caption,
+    letterSpacing: 0
+  },
+  typePillMetaSelected: {
+    color: colors.textInverse
+  },
+  typePillSelected: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary
+  },
+  typePillText: {
+    flex: 1,
+    gap: spacing.nano,
+    minWidth: 0
+  },
+  typePillTitle: {
+    color: colors.text,
+    ...typography.label,
+    letterSpacing: 0
+  },
+  typePillTitleSelected: {
+    color: colors.textInverse
+  },
+  typeRail: {
+    marginHorizontal: -spacing.standard
+  },
+  typeRailContent: {
+    gap: spacing.tight,
+    paddingHorizontal: spacing.standard
+  },
+  typeRailHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  typeRailHint: {
+    color: colors.textSubtle,
+    ...typography.caption,
+    letterSpacing: 0
+  },
+  typeRailTitle: {
+    color: colors.text,
+    ...typography.label,
+    letterSpacing: 0
   }
 });

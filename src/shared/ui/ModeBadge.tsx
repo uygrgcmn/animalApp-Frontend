@@ -1,14 +1,25 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 
 import { colors } from "../../core/theme/colors";
 import { radius, spacing } from "../../core/theme/tokens";
 
 type ModeBadgeProps = {
+  icon?: string;
   label: string;
   tone?: "primary" | "success" | "muted" | "warning";
 };
 
-export function ModeBadge({ label, tone = "primary" }: ModeBadgeProps) {
+const toneColors: Record<NonNullable<ModeBadgeProps["tone"]>, string> = {
+  primary: colors.primary,
+  success: colors.success,
+  muted: colors.textMuted,
+  warning: colors.warning
+};
+
+export function ModeBadge({ icon, label, tone = "primary" }: ModeBadgeProps) {
+  const iconColor = toneColors[tone];
+
   return (
     <View
       style={[
@@ -19,6 +30,9 @@ export function ModeBadge({ label, tone = "primary" }: ModeBadgeProps) {
         tone === "warning" && styles.warningBadge
       ]}
     >
+      {icon ? (
+        <MaterialCommunityIcons color={iconColor} name={icon as any} size={13} />
+      ) : null}
       <Text
         style={[
           styles.text,

@@ -1,11 +1,16 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { router } from "expo-router";
+import { useEffect, useRef } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors } from "../../core/theme/colors";
-import { mainTabs, routes, type MainTabKey } from "../../core/navigation/routes";
+import { mainTabs, type MainTabKey } from "../../core/navigation/routes";
 import { radius, shadows, spacing } from "../../core/theme/tokens";
 
 export function AppTabBar({ descriptors, navigation, state }: BottomTabBarProps) {
@@ -13,31 +18,17 @@ export function AppTabBar({ descriptors, navigation, state }: BottomTabBarProps)
 
   return (
     <View pointerEvents="box-none" style={styles.root}>
-      <Pressable
-        onPress={() => {
-          router.push(routes.app.create);
-        }}
-        style={[styles.fab, { bottom: insets.bottom + 100 }]}
-      >
-        <MaterialCommunityIcons color={colors.textInverse} name="plus" size={26} />
-      </Pressable>
-
       <View
         style={[
           styles.bar,
-          {
-            paddingBottom: Math.max(insets.bottom, spacing.standard),
-            marginBottom: spacing.standard
-          }
+          { paddingBottom: Math.max(insets.bottom + 4, spacing.compact) }
         ]}
       >
         {state.routes.map((route, index) => {
           const config = mainTabs[route.name as MainTabKey];
           const focused = state.index === index;
 
-          if (!config) {
-            return null;
-          }
+          if (!config) return null;
 
           const onPress = () => {
             const event = navigation.emit({
@@ -52,26 +43,13 @@ export function AppTabBar({ descriptors, navigation, state }: BottomTabBarProps)
           };
 
           return (
-            <Pressable
+            <TabItemButton
               key={route.key}
               accessibilityLabel={descriptors[route.key]?.options.tabBarAccessibilityLabel}
-              accessibilityRole="button"
-              accessibilityState={focused ? { selected: true } : {}}
+              config={config}
+              focused={focused}
               onPress={onPress}
-              style={styles.tabItem}
-            >
-              <View style={[styles.iconWrap, focused ? styles.iconWrapActive : null]}>
-                <MaterialCommunityIcons
-                  color={focused ? colors.primary : colors.textSubtle}
-                  name={focused ? config.iconActive : config.icon}
-                  size={24}
-                />
-              </View>
-              <Text style={[styles.label, focused ? styles.labelActive : null]}>
-                {config.label}
-              </Text>
-              {focused && <View style={styles.indicator} />}
-            </Pressable>
+            />
           );
         })}
       </View>
@@ -79,69 +57,102 @@ export function AppTabBar({ descriptors, navigation, state }: BottomTabBarProps)
   );
 }
 
+type TabConfig = (typeof mainTabs)[MainTabKey];
+
+function TabItemButton({
+  accessibilityLabel,
+  config,
+  focused,
+  onPress
+}: {
+  accessibilityLabel: string | undefined;
+  config: TabConfig;
+  focused: boolean;
+  onPress: () => void;
+}) {
+  const iconScale = useSharedValue(1);
+  const isMounted = useRef(false);
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+    if (focused) {
+      iconScale.value = withSpring(1.18, { damping: 6, stiffness: 280 }, () => {
+        "worklet";
+        iconScale.value = withSpring(1, { damping: 12, stiffness: 300 });
+      });
+    }
+  }, [focused, iconScale]);
+
+  const iconAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: iconScale.value }]
+  }));
+
+  return (
+    <Pressable
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      accessibilityState={focused ? { selected: true } : {}}
+      onPress={onPress}
+      style={styles.tabItem}
+    >
+      {focused && <View style={styles.activeBackground} />}
+      <Animated.View style={iconAnimStyle}>
+        <MaterialCommunityIcons
+          color={focused ? colors.primary : colors.textTertiary}
+          name={focused ? config.iconActive : config.icon}
+          size={24}
+        />
+      </Animated.View>
+      <Text style={[styles.label, focused ? styles.labelActive : null]}>
+        {config.label}
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   bar: {
     ...shadows.floating,
     backgroundColor: colors.surface,
-    borderColor: colors.border,
     borderRadius: radius.xlarge,
-    borderWidth: 1,
     flexDirection: "row",
+    marginBottom: spacing.compact,
     marginHorizontal: spacing.standard,
     paddingHorizontal: spacing.tight,
-    paddingTop: spacing.compact
+    paddingTop: spacing.tight
   },
-  fab: {
-    ...shadows.floating,
-    alignItems: "center",
-    backgroundColor: colors.primary,
-    borderRadius: radius.pill,
-    height: 56,
-    justifyContent: "center",
-    position: "absolute",
-    right: spacing.standard,
-    width: 56,
-    zIndex: 10,
-    elevation: 12
-  },
-  iconWrap: {
-    alignItems: "center",
-    borderRadius: radius.medium,
-    height: 38,
-    justifyContent: "center",
-    width: 48,
-    marginBottom: 2
-  },
-  iconWrapActive: {
-    backgroundColor: colors.primarySoft
-  },
-  indicator: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.pill,
-    height: 4,
-    marginTop: 2,
-    width: 4
+  activeBackground: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.large,
+    marginHorizontal: spacing.micro,
+    marginVertical: spacing.micro
   },
   label: {
-    color: colors.textSubtle,
+    color: colors.textTertiary,
     fontSize: 10,
     fontWeight: "600",
-    letterSpacing: 0.2
+    letterSpacing: 0.1
   },
   labelActive: {
     color: colors.primary
   },
   root: {
     backgroundColor: "transparent",
-    position: "absolute",
     bottom: 0,
     left: 0,
+    position: "absolute",
     right: 0
   },
   tabItem: {
     alignItems: "center",
     flex: 1,
+    gap: 3,
     justifyContent: "center",
-    minHeight: 64
+    minHeight: 58,
+    paddingVertical: spacing.tight
   }
 });

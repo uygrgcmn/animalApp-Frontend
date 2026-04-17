@@ -1,32 +1,51 @@
 import { Link } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { RefreshControl, StyleSheet, View } from "react-native";
 
+import { colors } from "../../../core/theme/colors";
 import { spacing } from "../../../core/theme/tokens";
-import { savedItems } from "../../../shared/mocks/profile";
 import { AppButton } from "../../../shared/ui/AppButton";
-import { AppHeader } from "../../../shared/ui/AppHeader";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { ManagementItemCard } from "../../../shared/ui/ManagementItemCard";
 import { MetaPill } from "../../../shared/ui/MetaPill";
 import { ScreenContainer } from "../../../shared/ui/ScreenContainer";
-import { getMockItemHref } from "../../../shared/utils/mockNavigation";
+import { useSavedItems } from "../hooks/useSavedItems";
 
 export function ProfileSavedScreen() {
-  return (
-    <ScreenContainer contentContainerStyle={styles.content}>
-      <AppHeader
-        description="Kaydedilen ilan ve kampanyalar daha sonra kolayca geri donulebilecek sekilde saklanir."
-        showBackButton
-        title="Kaydettiklerim"
-      />
+  const savedItemsQuery = useSavedItems();
+  const savedItems = savedItemsQuery.data ?? [];
+  const refreshing = savedItemsQuery.isFetching && !savedItemsQuery.isLoading;
 
-      {savedItems.length ? (
+  return (
+    <ScreenContainer
+      contentContainerStyle={styles.content}
+      refreshControl={
+        <RefreshControl
+          onRefresh={() => void savedItemsQuery.refetch()}
+          refreshing={refreshing}
+          tintColor={colors.primary}
+        />
+      }
+    >
+      {savedItemsQuery.isError ? (
+        <EmptyState
+          actionSlot={
+            <AppButton
+              label="Tekrar dene"
+              onPress={() => void savedItemsQuery.refetch()}
+              variant="secondary"
+            />
+          }
+          description="Kaydedilen icerikler su an yuklenemedi. Baglantiyi yenileyip tekrar deneyebilirsin."
+          icon="wifi-off"
+          title="Kaydedilenler getirilemedi"
+        />
+      ) : savedItems.length ? (
         <View style={styles.list}>
           {savedItems.map((item) => (
             <ManagementItemCard
               key={item.id}
               actions={
-                <Link href={getMockItemHref(item.kind, item.listingId)} asChild>
+                <Link href={item.href} asChild>
                   <AppButton label="Detayi Ac" variant="secondary" />
                 </Link>
               }

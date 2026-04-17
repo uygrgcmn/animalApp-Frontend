@@ -4,7 +4,6 @@ import { StyleSheet, View } from "react-native";
 import { colors } from "../../../core/theme/colors";
 import { spacing } from "../../../core/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
-import { AppHeader } from "../../../shared/ui/AppHeader";
 import { AppIcon } from "../../../shared/ui/AppIcon";
 import { CommunityCard } from "../../../shared/ui/CommunityCard";
 import { EmptyState } from "../../../shared/ui/EmptyState";
@@ -35,11 +34,6 @@ export function DesignSystemShowcaseScreen() {
   return (
     <View style={styles.page}>
       <ScreenContainer contentContainerStyle={styles.content}>
-        <AppHeader
-          description="Tum ortak component'lerin ornek kullanimi burada birlikte gorunur."
-          title="UI Showcase"
-        />
-
         <SectionHeader
           description="Tema, arama, filtre ve kart sistemi burada tek bir dille orneklenir."
           eyebrow="Design System"

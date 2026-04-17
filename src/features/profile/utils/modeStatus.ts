@@ -121,29 +121,29 @@ export function normalizePetshopProfile(
 
 export function getCaregiverChecklist(profile: CaregiverActivationValues) {
   return [
-    { done: profile.city.trim().length > 1, label: "Hizmet bolgesi" },
-    { done: profile.district.trim().length > 1, label: "Ilce bilgisi" },
+    { done: profile.city.trim().length > 1, label: "Hizmet bölgesi" },
+    { done: profile.district.trim().length > 1, label: "İlçe bilgisi" },
     { done: profile.experienceYears.trim().length > 0, label: "Deneyim" },
-    { done: profile.serviceTypes.length > 0, label: "Hizmet turleri" },
+    { done: profile.serviceTypes.length > 0, label: "Hizmet türleri" },
     { done: profile.availability.trim().length > 0, label: "Uygunluk" },
-    { done: profile.rateExpectation.trim().length > 0, label: "Ucret beklentisi" },
-    { done: profile.profileBio.trim().length >= 20, label: "Profil aciklamasi" }
+    { done: profile.rateExpectation.trim().length > 0, label: "Ücret beklentisi" },
+    { done: profile.profileBio.trim().length >= 20, label: "Profil açıklaması" }
   ] satisfies ChecklistItem[];
 }
 
 export function getPetshopChecklist(profile: PetshopActivationValues) {
   return [
-    { done: profile.businessName.trim().length > 1, label: "Magaza adi" },
-    { done: profile.authorizedPerson.trim().length > 1, label: "Yetkili kisi" },
+    { done: profile.businessName.trim().length > 1, label: "Mağaza adı" },
+    { done: profile.authorizedPerson.trim().length > 1, label: "Yetkili kişi" },
     { done: profile.address.trim().length > 7, label: "Adres" },
-    { done: profile.contactPhone.trim().length > 9, label: "Iletisim telefonu" },
-    { done: profile.contactEmail.trim().length > 4, label: "Iletisim e-postasi" },
-    { done: profile.taxNumber.trim().length > 7, label: "Vergi / isletme bilgisi" },
-    { done: profile.businessType.trim().length > 0, label: "Isletme tipi" },
-    { done: profile.storeImages.length > 0, label: "Magaza gorselleri" },
+    { done: profile.contactPhone.trim().length > 9, label: "İletişim telefonu" },
+    { done: profile.contactEmail.trim().length > 4, label: "İletişim e-postası" },
+    { done: profile.taxNumber.trim().length > 7, label: "Vergi / işletme bilgisi" },
+    { done: profile.businessType.trim().length > 0, label: "İşletme tipi" },
+    { done: profile.storeImages.length > 0, label: "Mağaza görselleri" },
     {
       done: profile.verificationDocuments.length > 0,
-      label: "Dogrulama belgeleri"
+      label: "Doğrulama belgeleri"
     }
   ] satisfies ChecklistItem[];
 }
@@ -219,7 +219,7 @@ export function getCaregiverModePresentation(status: CaregiverModeStatus): ModeP
         tone: "success",
         icon: "shield-check",
         description:
-          "Bakici modu hazir. Basvuru ve eslesme akislarinda bu profil kullanilir."
+          "Bakıcı modu hazır. Başvuru ve eşleşme akışlarında bu profil kullanılır."
       };
     case "incomplete":
       return {
@@ -228,7 +228,7 @@ export function getCaregiverModePresentation(status: CaregiverModeStatus): ModeP
         tone: "warning",
         icon: "progress-alert",
         description:
-          "Birkaç alan eksik. Tamamladiginda basvuru aksiyonlari dogrudan acilir."
+          "Birkaç alan eksik. Tamamladığında başvuru aksiyonları doğrudan açılır."
       };
     default:
       return {
@@ -237,7 +237,7 @@ export function getCaregiverModePresentation(status: CaregiverModeStatus): ModeP
         tone: "neutral",
         icon: "shield-account-outline",
         description:
-          "Bakici modu kapali. Istersen adim adim acip profesyonel profilini hazirla."
+          "Bakıcı modu kapalı. İstersen adım adım açıp profesyonel profilini hazırla."
       };
   }
 }
@@ -251,16 +251,16 @@ export function getPetshopModePresentation(status: PetshopModeStatus): ModePrese
         tone: "success",
         icon: "store-check",
         description:
-          "Petshop modu aktif. Kampanya ve magaza alanlari kullanima hazir."
+          "Petshop modu aktif. Kampanya ve mağaza alanları kullanıma hazır."
       };
     case "in_review":
       return {
-        label: "Incelemede",
+        label: "İncelemede",
         shortLabel: "incelemede",
         tone: "info",
         icon: "store-clock-outline",
         description:
-          "Basvurun alindi. Belgeler dogrulanirken kayitlarini buradan yonetebilirsin."
+          "Başvurun alındı. Belgeler doğrulanırken kayıtlarını buradan yönetebilirsin."
       };
     case "rejected":
       return {
@@ -269,7 +269,7 @@ export function getPetshopModePresentation(status: PetshopModeStatus): ModePrese
         tone: "error",
         icon: "store-remove-outline",
         description:
-          "Belgelerde duzeltme gerekiyor. Guncelleyip basvuruyu yeniden gonderebilirsin."
+          "Belgelerde düzeltme gerekiyor. Güncelleyip başvuruyu yeniden gönderebilirsin."
       };
     case "incomplete":
       return {
@@ -278,7 +278,7 @@ export function getPetshopModePresentation(status: PetshopModeStatus): ModePrese
         tone: "warning",
         icon: "file-alert-outline",
         description:
-          "Magaza bilgileri veya belgeler eksik. Basvuru oncesi net sekilde tamamlanir."
+          "Mağaza bilgileri veya belgeler eksik. Başvuru öncesi net şekilde tamamlanır."
       };
     default:
       return {
@@ -287,14 +287,14 @@ export function getPetshopModePresentation(status: PetshopModeStatus): ModePrese
         tone: "neutral",
         icon: "storefront-outline",
         description:
-          "Petshop modu kapali. Magaza bilgilerini girdiginde basvuru akisi baslar."
+          "Petshop modu kapalı. Mağaza bilgilerini girdiğinde başvuru akışı başlar."
       };
   }
 }
 
 export function getCaregiverActionLabel(status: CaregiverModeStatus) {
   if (status === "active") {
-    return "Duzenle";
+    return "Düzenle";
   }
 
   if (status === "incomplete") {
@@ -306,20 +306,20 @@ export function getCaregiverActionLabel(status: CaregiverModeStatus) {
 
 export function getPetshopActionLabel(status: PetshopModeStatus) {
   if (status === "active") {
-    return "Duzenle";
+    return "Düzenle";
   }
 
   if (status === "in_review") {
-    return "Basvuruyu Guncelle";
+    return "Başvuruyu Güncelle";
   }
 
   if (status === "rejected") {
-    return "Basvuruyu Yenile";
+    return "Başvuruyu Yenile";
   }
 
   if (status === "incomplete") {
     return "Tamamla";
   }
 
-  return "Basvuruyu Baslat";
+  return "Başvuruyu Başlat";
 }

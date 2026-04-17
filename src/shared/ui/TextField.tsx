@@ -8,16 +8,17 @@ import { radius, spacing, typography } from "../../core/theme/tokens";
 type TextFieldProps = TextInputProps & {
   label: string;
   error?: string;
+  hint?: string;
 };
 
-export function TextField({ label, error, ...props }: TextFieldProps) {
+export function TextField({ label, error, hint, ...props }: TextFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
 
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
-        placeholderTextColor={colors.textSubtle}
+        placeholderTextColor={colors.textTertiary}
         selectionColor={colors.primary}
         style={[
           styles.input,
@@ -35,7 +36,11 @@ export function TextField({ label, error, ...props }: TextFieldProps) {
         }}
         {...props}
       />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <Text style={styles.error}>{error}</Text>
+      ) : hint ? (
+        <Text style={styles.hint}>{hint}</Text>
+      ) : null}
     </View>
   );
 }
@@ -52,7 +57,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderRadius: radius.large,
-    borderWidth: 1,
+    borderWidth: 1.5,
     color: colors.text,
     fontSize: typography.body.fontSize,
     minHeight: 56,
@@ -65,15 +70,19 @@ const styles = StyleSheet.create({
     textAlignVertical: "top"
   },
   inputFocused: {
-    backgroundColor: colors.backgroundAccent,
-    borderColor: colors.primary
+    borderColor: colors.primary,
+    borderWidth: 2
   },
   inputError: {
-    borderColor: colors.warning
+    borderColor: colors.error,
+    borderWidth: 2
   },
   error: {
     color: colors.error,
     ...typography.caption
+  },
+  hint: {
+    color: colors.textSubtle,
+    ...typography.caption
   }
 });
-

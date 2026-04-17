@@ -1,26 +1,39 @@
 export const colors = {
-  background: "#F4F7FB",
-  backgroundAccent: "#EEF4FF",
+  // Backgrounds
+  background: "#F7F9FC",
+  backgroundAccent: "#EDFAF8",
+  // Surfaces
   surface: "#FFFFFF",
-  surfaceAlt: "#F8FAFC",
-  surfaceMuted: "#EFF4FA",
-  border: "#E2EAF3",
-  borderStrong: "#CBD7E6",
-  primary: "#4F46E5",
-  primaryPressed: "#4338CA",
-  primarySoft: "#EEF2FF",
-  primaryBorder: "#C7D2FE",
-  success: "#15803D",
-  successSoft: "#E8F7EE",
-  warning: "#C2410C",
-  warningSoft: "#FFF1E8",
-  error: "#B42318",
-  errorSoft: "#FEECEE",
-  info: "#0F766E",
-  infoSoft: "#E6F7F5",
-  text: "#0F172A",
-  textMuted: "#475569",
-  textSubtle: "#64748B",
+  surfaceAlt: "#F7F9FC",
+  surfaceMuted: "#EDF0F7",
+  surfaceElevated: "#FFFFFF",
+  // Borders — light touch, used only for inputs
+  border: "#E2E8F3",
+  borderSubtle: "#ECF0F8",
+  borderStrong: "#C5D2E5",
+  divider: "#EDF0F7",
+  // Brand — richer teal
+  primary: "#0D9488",
+  primaryPressed: "#0B7A70",
+  primarySoft: "#EDFAF8",
+  primaryBorder: "#99EDE5",
+  // Accent — warm coral
+  accent: "#F97316",
+  accentSoft: "#FFF7ED",
+  accentBorder: "#FED7AA",
+  // Semantic
+  success: "#059669",
+  successSoft: "#ECFDF5",
+  warning: "#D97706",
+  warningSoft: "#FFFBEB",
+  error: "#DC2626",
+  errorSoft: "#FEF2F2",
+  info: "#0284C7",
+  infoSoft: "#EFF6FF",
+  // Text — warmer scale
+  text: "#111827",
+  textMuted: "#4B5563",
+  textSubtle: "#6B7280",
+  textTertiary: "#9CA3AF",
   textInverse: "#FFFFFF"
 } as const;
-

@@ -228,6 +228,10 @@ export type RefreshTokenRequest = {
   refreshToken: string;
 };
 
+export type RequestPasswordResetRequest = {
+  email: string;
+};
+
 export type UpdateMyProfileRequest = {
   fullName?: string;
   bio?: string;

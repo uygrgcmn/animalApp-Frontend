@@ -5,7 +5,6 @@ import { routes } from "../../../core/navigation/routes";
 import { spacing } from "../../../core/theme/tokens";
 import { useSessionStore } from "../../auth/store/sessionStore";
 import { AppButton } from "../../../shared/ui/AppButton";
-import { AppHeader } from "../../../shared/ui/AppHeader";
 import { AppIcon } from "../../../shared/ui/AppIcon";
 import { InfoCard } from "../../../shared/ui/InfoCard";
 import { ModeStatusCard } from "../../../shared/ui/ModeStatusCard";
@@ -42,12 +41,6 @@ export function ProfileModesScreen() {
 
   return (
     <ScreenContainer contentContainerStyle={styles.content}>
-      <AppHeader
-        description="Bakici ve petshop modlarini tek merkezden ac, eksikleri gormeden korkma; net yonlendirmeler burada."
-        showBackButton
-        title="Modlarim"
-      />
-
       <InfoCard
         description="Basvuru sirasinda eksiksen veya petshop alani icin dogrulamaya ihtiyacin varsa bu merkez yonlendirme noktasi olarak calisir."
         title="Mod yonetim merkezi"

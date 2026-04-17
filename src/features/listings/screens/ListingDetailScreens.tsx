@@ -1,20 +1,25 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { Link, router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
+} from "react-native";
 
 import { routeBuilders, routes } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
 import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
 import {
-  caregiverListingDetails,
-  getSimilarCaregiverListings,
-  getSimilarOwnerRequests,
   getSimilarPetshopCampaigns,
-  ownerRequestDetails,
   petshopCampaignDetails
 } from "../../../shared/mocks/listingDetails";
 import { AppButton } from "../../../shared/ui/AppButton";
-import { AppHeader } from "../../../shared/ui/AppHeader";
 import { AppIcon } from "../../../shared/ui/AppIcon";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { InfoCard } from "../../../shared/ui/InfoCard";
@@ -24,7 +29,6 @@ import { PetshopCampaignCard } from "../../../shared/ui/PetshopCampaignCard";
 import { StickyBottomActionBar } from "../../../shared/ui/StickyBottomActionBar";
 import { VerificationBadge } from "../../../shared/ui/VerificationBadge";
 import { useSessionStore } from "../../auth/store/sessionStore";
-import { ActionGateSheet } from "../components/ActionGateSheet";
 import {
   getCaregiverMissingItems,
   getCaregiverModePresentation,
@@ -33,6 +37,15 @@ import {
   normalizeCaregiverProfile,
   normalizePetshopProfile
 } from "../../profile/utils/modeStatus";
+import { ActionGateSheet } from "../components/ActionGateSheet";
+import { ApplyModal } from "../components/ApplyModal";
+import { useListingDetail, useListings } from "../hooks/useListings";
+import { toCaregiverDisplay, toOwnerRequestDisplay } from "../utils/adapters";
+import {
+  getPrimaryMediaUrl,
+  parseEmbeddedListingMetadata
+} from "../utils/embeddedListingMetadata";
+import { formatExpiresAt } from "../../../shared/utils/formatDate";
 
 type GateConfig = {
   ctaLabel: string;
@@ -54,14 +67,17 @@ type GateState = GateConfig & {
 
 type SharedDetailProps = {
   actionSlot?: React.ReactNode;
+  applyDone?: boolean;
   basicInfo: {
     icon: React.ComponentProps<typeof AppIcon>["name"];
     label: string;
     tone?: "primary" | "success" | "warning" | "neutral";
   }[];
+  coverImageUri?: string;
   description: string[];
   emptyTitle: string;
   notFoundDescription: string;
+  onApplyPress?: () => void;
   owner: {
     description: string;
     headline: string;
@@ -82,107 +98,319 @@ type SharedDetailProps = {
   }[];
 };
 
+// ─── Caregiver Listing Detail ────────────────────────────────────────────────
+
 export function CaregiverListingDetailScreen() {
   const params = useLocalSearchParams<{ listingId: string }>();
-  const detail = caregiverListingDetails[params.listingId];
-  const similar = detail ? getSimilarCaregiverListings(detail.similarIds) : [];
+  const listingQuery = useListingDetail(params.listingId);
+  const listing = listingQuery.data;
   const gate = useCaregiverGate({
-    fallbackTitle: "Bu ilana basvurmak icin bakici modu hazir olmali."
+    fallbackTitle: "Bu ilana başvurmak için bakıcı modu hazır olmalı."
   });
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isApplied, setIsApplied] = useState(false);
 
-  if (!detail) {
-    return <MissingDetailState description="Bakici ilani bulunamadi." title="Ilan detayi" />;
+  // Similar listings from cache
+  const sittingQuery = useListings({ type: "SITTING" });
+  const similarListings = useMemo(
+    () =>
+      (sittingQuery.data ?? [])
+        .filter((l) => l.id !== params.listingId)
+        .slice(0, 3)
+        .map(toCaregiverDisplay),
+    [sittingQuery.data, params.listingId]
+  );
+
+  if (listingQuery.isLoading) {
+    return <LoadingDetailState title="Bakıcı İlanı" />;
   }
 
+  if (!listing) {
+    return <MissingDetailState description="Bakıcı ilanı bulunamadı." title="İlan detayı" />;
+  }
+
+  const creator = listing.creator;
+  const { description, metadata } = parseEmbeddedListingMetadata(listing.description);
+  const creatorLocation = [creator?.city ?? metadata.city, creator?.district ?? metadata.district].filter(Boolean).join(" / ");
+
   return (
-    <ListingDetailLayout
-      basicInfo={detail.info}
-      description={detail.description}
-      emptyTitle="Benzer bakici ilani yok"
-      notFoundDescription="Bakici ilani bulunamadi."
-      owner={detail.owner}
-      ownerTitle="Ilan sahibi ozeti"
-      primaryActionLabel="Basvur"
-      similarListings={
-        similar.length > 0 ? (
-          <View style={styles.list}>
-            {similar.map((item) => (
-              <Link href={routeBuilders.caregiverListingDetail(item.id)} key={item.id} asChild>
-                <Pressable>
-                  <ListingCard
-                    avatarLabel={item.avatarLabel}
-                    badges={[
-                      { icon: "calendar-range", label: item.schedule, tone: "primary" },
-                      { icon: "star-four-points-circle", label: item.badge, tone: "warning" }
-                    ]}
-                    description={item.summary}
-                    location={item.city}
-                    priceLabel={item.budget}
-                    subtitle={item.title}
-                    title={item.caretakerName}
-                    verificationState={item.verificationState}
-                  />
-                </Pressable>
-              </Link>
-            ))}
-          </View>
-        ) : null
-      }
-      stickyGate={gate}
-      subtitle={detail.subtitle}
-      title={detail.title}
-      trustSignals={detail.trustSignals}
-    />
+    <>
+      <ListingDetailLayout
+        applyDone={isApplied}
+        basicInfo={[
+          {
+            icon: "map-marker-outline",
+            label: creatorLocation || "Konum belirtilmemiş",
+            tone: "primary"
+          },
+          ...(metadata.priceLabel
+            ? [
+                {
+                  icon: "cash" as const,
+                  label: metadata.priceLabel,
+                  tone: "success" as const
+                }
+              ]
+            : []),
+          ...(metadata.availabilityLabel
+            ? [
+                {
+                  icon: "calendar-range" as const,
+                  label: metadata.availabilityLabel,
+                  tone: "warning" as const
+                }
+              ]
+            : []),
+          ...(listing.expiresAt
+            ? [
+                {
+                  icon: "calendar-clock-outline" as const,
+                  label: formatExpiresAt(listing.expiresAt),
+                  tone: "warning" as const
+                }
+              ]
+            : []),
+          ...(creator?.isSitter
+            ? [
+                {
+                  icon: "shield-check-outline" as const,
+                  label: "Doğrulanmış Bakıcı",
+                  tone: "success" as const
+                }
+              ]
+            : [])
+        ]}
+        coverImageUri={getPrimaryMediaUrl(metadata)}
+        description={[description]}
+        emptyTitle="Benzer bakıcı ilanı yok"
+        notFoundDescription="Bakıcı ilanı bulunamadı."
+        onApplyPress={() => setIsApplyModalOpen(true)}
+        owner={{
+          description: creatorLocation
+            ? `${creatorLocation} bölgesinden aktif bakıcı.`
+            : "Bakıcı profil bilgisi mevcut değil.",
+          headline: creator?.isSitter ? "Aktif Bakıcı" : "Kullanıcı",
+          location: creatorLocation || "Konum belirtilmemiş",
+          name: creator?.fullName ?? "Bakıcı"
+        }}
+        ownerTitle="İlan sahibi özeti"
+        primaryActionLabel="Başvur"
+        similarListings={
+          similarListings.length > 0 ? (
+            <View style={styles.list}>
+              {similarListings.map((item) => (
+                <Link href={routeBuilders.caregiverListingDetail(item.id)} key={item.id} asChild>
+                  <Pressable>
+                    <ListingCard
+                      avatarLabel={item.avatarLabel}
+                      badges={[
+                        { icon: "map-marker-outline", label: item.schedule, tone: "primary" }
+                      ]}
+                      coverImageUri={item.coverImageUri}
+                      description={item.summary}
+                      location={item.city}
+                      priceLabel={item.budget || "Fiyat belirtilmemiş"}
+                      subtitle={item.title}
+                      title={item.caretakerName}
+                      verificationState={item.verificationState}
+                    />
+                  </Pressable>
+                </Link>
+              ))}
+            </View>
+          ) : null
+        }
+        stickyGate={gate}
+        subtitle={creatorLocation || "Bakıcı İlanı"}
+        title={listing.title}
+        trustSignals={[
+          {
+            description: creator?.isSitter
+              ? "Bu kişi bakıcı profilini tamamlamış ve onaylatmıştır."
+              : "Bakıcı profili doğrulama sürecindedir.",
+            label: "Bakıcı Doğrulaması",
+            state: creator?.isSitter ? "verified" : "pending"
+          },
+          {
+            description:
+              listing.status === "ACTIVE"
+                ? "İlan şu anda aktif ve başvuru kabul ediyor."
+                : "İlan aktif değil.",
+            label: "İlan Durumu",
+            state: listing.status === "ACTIVE" ? "verified" : "pending"
+          }
+        ]}
+      />
+      <ApplyModal
+        listingId={listing.id}
+        onClose={() => setIsApplyModalOpen(false)}
+        onSuccess={() => {
+          setIsApplyModalOpen(false);
+          setIsApplied(true);
+        }}
+        visible={isApplyModalOpen}
+      />
+    </>
   );
 }
+
+// ─── Owner Request Detail ─────────────────────────────────────────────────────
 
 export function OwnerRequestDetailScreen() {
   const params = useLocalSearchParams<{ listingId: string }>();
-  const detail = ownerRequestDetails[params.listingId];
-  const similar = detail ? getSimilarOwnerRequests(detail.similarIds) : [];
+  const listingQuery = useListingDetail(params.listingId);
+  const listing = listingQuery.data;
   const gate = useCaregiverGate({
-    fallbackTitle: "Bu talebe basvurmak icin bakici modu hazir olmali."
+    fallbackTitle: "Bu talebe başvurmak için bakıcı modu hazır olmalı."
   });
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isApplied, setIsApplied] = useState(false);
 
-  if (!detail) {
-    return <MissingDetailState description="Bakici arayan ilani bulunamadi." title="Ilan detayi" />;
+  // Similar listings from cache
+  const helpRequestQuery = useListings({ type: "HELP_REQUEST" });
+  const similarRequests = useMemo(
+    () =>
+      (helpRequestQuery.data ?? [])
+        .filter((l) => l.id !== params.listingId)
+        .slice(0, 3)
+        .map(toOwnerRequestDisplay),
+    [helpRequestQuery.data, params.listingId]
+  );
+
+  if (listingQuery.isLoading) {
+    return <LoadingDetailState title="Bakıcı Talebi" />;
   }
 
+  if (!listing) {
+    return (
+      <MissingDetailState description="Bakıcı arayan ilanı bulunamadı." title="İlan detayı" />
+    );
+  }
+
+  const creator = listing.creator;
+  const pet = listing.pet;
+  const { description, metadata } = parseEmbeddedListingMetadata(listing.description);
+  const creatorLocation = [creator?.city ?? metadata.city, creator?.district ?? metadata.district].filter(Boolean).join(" / ");
+
   return (
-    <ListingDetailLayout
-      basicInfo={detail.info}
-      description={detail.description}
-      emptyTitle="Benzer talep bulunmuyor"
-      notFoundDescription="Bakici arayan ilani bulunamadi."
-      owner={detail.owner}
-      ownerTitle="Ilan sahibi ozeti"
-      primaryActionLabel="Basvur"
-      similarListings={
-        similar.length > 0 ? (
-          <View style={styles.list}>
-            {similar.map((item) => (
-              <Link href={routeBuilders.ownerRequestDetail(item.id)} key={item.id} asChild>
-                <Pressable style={styles.relatedCard}>
-                  <Text style={styles.relatedTitle}>{item.title}</Text>
-                  <Text style={styles.relatedDescription}>{item.summary}</Text>
-                  <View style={styles.metaRow}>
-                    <MetaPill icon="paw-outline" label={item.petType} tone="primary" />
-                    <MetaPill icon="calendar-range" label={item.dateLabel} tone="warning" />
-                    <MetaPill icon="cash" label={item.budget} tone="success" />
-                  </View>
-                </Pressable>
-              </Link>
-            ))}
-          </View>
-        ) : null
-      }
-      stickyGate={gate}
-      subtitle={detail.subtitle}
-      title={detail.title}
-      trustSignals={detail.trustSignals}
-    />
+    <>
+      <ListingDetailLayout
+        applyDone={isApplied}
+        basicInfo={[
+          {
+            icon: "paw-outline",
+            label: metadata.petType ?? pet?.species ?? "Evcil Hayvan",
+            tone: "primary"
+          },
+          {
+            icon: "map-marker-outline",
+            label: creatorLocation || "Konum belirtilmemiş",
+            tone: "neutral"
+          },
+          ...(metadata.priceLabel
+            ? [
+                {
+                  icon: "cash" as const,
+                  label: metadata.priceLabel,
+                  tone: "success" as const
+                }
+              ]
+            : []),
+          ...(metadata.datePlan
+            ? [
+                {
+                  icon: "calendar-range" as const,
+                  label: metadata.datePlan,
+                  tone: "warning" as const
+                }
+              ]
+            : []),
+          ...(listing.expiresAt
+            ? [
+                {
+                  icon: "calendar-clock-outline" as const,
+                  label: formatExpiresAt(listing.expiresAt),
+                  tone: "warning" as const
+                }
+              ]
+            : [])
+        ]}
+        coverImageUri={getPrimaryMediaUrl(metadata)}
+        description={[description]}
+        emptyTitle="Benzer talep bulunmuyor"
+        notFoundDescription="Bakıcı arayan ilanı bulunamadı."
+        onApplyPress={() => setIsApplyModalOpen(true)}
+        owner={{
+          description: pet
+            ? `${metadata.petType ?? pet.species}${pet.breed ? ` (${pet.breed})` : ""} sahibi, bakıcı arıyor.`
+            : "Evcil hayvanı için bakıcı arıyor.",
+          headline: "Bakıcı Arıyor",
+          location: creatorLocation || "Konum belirtilmemiş",
+          name: creator?.fullName ?? "İlan Sahibi"
+        }}
+        ownerTitle="İlan sahibi özeti"
+        primaryActionLabel="Başvur"
+        similarListings={
+          similarRequests.length > 0 ? (
+            <View style={styles.list}>
+              {similarRequests.map((item) => (
+                <Link href={routeBuilders.ownerRequestDetail(item.id)} key={item.id} asChild>
+                  <Pressable style={styles.relatedCard}>
+                    {item.coverImageUri ? (
+                      <View style={styles.relatedVisualArea}>
+                        <Image source={{ uri: item.coverImageUri }} style={styles.relatedVisualImage} />
+                      </View>
+                    ) : null}
+                    <Text style={styles.relatedTitle}>{item.title}</Text>
+                    <Text style={styles.relatedDescription}>{item.summary}</Text>
+                    <View style={styles.metaRow}>
+                      <MetaPill icon="paw-outline" label={item.petType} tone="primary" />
+                      {item.budget ? (
+                        <MetaPill icon="cash" label={item.budget} tone="success" />
+                      ) : null}
+                      {item.dateLabel ? (
+                        <MetaPill icon="calendar-range" label={item.dateLabel} tone="warning" />
+                      ) : null}
+                    </View>
+                  </Pressable>
+                </Link>
+              ))}
+            </View>
+          ) : null
+        }
+        stickyGate={gate}
+        subtitle={creatorLocation || "Bakıcı Talebi"}
+        title={listing.title}
+        trustSignals={[
+          {
+            description: "İlan sahibinin kimlik doğrulaması yapılmamıştır.",
+            label: "Kimlik Doğrulaması",
+            state: "pending"
+          },
+          {
+            description:
+              listing.status === "ACTIVE"
+                ? "Talep aktif ve başvuru kabul ediyor."
+                : "Talep şu anda aktif değil.",
+            label: "Talep Durumu",
+            state: listing.status === "ACTIVE" ? "verified" : "pending"
+          }
+        ]}
+      />
+      <ApplyModal
+        listingId={listing.id}
+        onClose={() => setIsApplyModalOpen(false)}
+        onSuccess={() => {
+          setIsApplyModalOpen(false);
+          setIsApplied(true);
+        }}
+        visible={isApplyModalOpen}
+      />
+    </>
   );
 }
+
+// ─── Petshop Campaign Detail (still uses mock) ───────────────────────────────
 
 export function PetshopCampaignDetailScreen() {
   const params = useLocalSearchParams<{ listingId: string }>();
@@ -191,7 +419,7 @@ export function PetshopCampaignDetailScreen() {
   const gate = usePetshopGate();
 
   if (!detail) {
-    return <MissingDetailState description="Petshop kampanyasi bulunamadi." title="Kampanya detayi" />;
+    return <MissingDetailState description="Petshop kampanyası bulunamadı." title="Kampanya detayı" />;
   }
 
   return (
@@ -199,11 +427,11 @@ export function PetshopCampaignDetailScreen() {
       actionSlot={
         <InfoCard
           description={detail.managementNote}
-          title="Yonetici islemleri"
+          title="Yönetici işlemleri"
           variant="accent"
         >
           <AppButton
-            label="Magaza Profiline Git"
+            label="Mağaza Profiline Git"
             leftSlot={<AppIcon backgrounded={false} name="storefront-outline" size={18} />}
             onPress={() => {
               router.push(routeBuilders.petshopStoreProfile(detail.storeId));
@@ -211,21 +439,15 @@ export function PetshopCampaignDetailScreen() {
             variant="secondary"
           />
           <AppButton
-            label="Kampanyayi Yonet"
+            label="Kampanyayı Yönet"
             leftSlot={
-              <AppIcon
-                backgrounded={false}
-                color="#FFFFFF"
-                name="store-cog-outline"
-                size={18}
-              />
+              <AppIcon backgrounded={false} color="#FFFFFF" name="store-cog-outline" size={18} />
             }
             onPress={() => {
               if (gate.isReady) {
                 router.push(routes.app.petshopCampaignManagement);
                 return;
               }
-
               gate.openGate();
             }}
           />
@@ -234,10 +456,10 @@ export function PetshopCampaignDetailScreen() {
       basicInfo={detail.info}
       description={detail.description}
       emptyTitle="Benzer kampanya bulunmuyor"
-      notFoundDescription="Petshop kampanyasi bulunamadi."
+      notFoundDescription="Petshop kampanyası bulunamadı."
       owner={detail.owner}
-      ownerTitle="Magaza ozeti"
-      primaryActionLabel="Iletisime Gec"
+      ownerTitle="Mağaza özeti"
+      primaryActionLabel="İletişime Geç"
       similarListings={
         similar.length > 0 ? (
           <View style={styles.list}>
@@ -268,12 +490,17 @@ export function PetshopCampaignDetailScreen() {
   );
 }
 
+// ─── Shared Layout ────────────────────────────────────────────────────────────
+
 function ListingDetailLayout({
   actionSlot,
+  applyDone = false,
   basicInfo,
+  coverImageUri,
   description,
   emptyTitle,
   notFoundDescription,
+  onApplyPress,
   owner,
   ownerTitle,
   primaryActionLabel,
@@ -285,14 +512,24 @@ function ListingDetailLayout({
   trustSignals
 }: SharedDetailProps) {
   const [isSaved, setIsSaved] = useState(false);
-  const [isApplied, setIsApplied] = useState(false);
+  const [isAppliedFallback, setIsAppliedFallback] = useState(false);
+  const appliedState = applyDone || isAppliedFallback;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <AppHeader description={subtitle} showBackButton title={title} />
+        {coverImageUri ? (
+          <View style={styles.heroImageArea}>
+            <Image source={{ uri: coverImageUri }} style={styles.heroImage} />
+            <LinearGradient
+              colors={["transparent", "rgba(15,23,42,0.45)"]}
+              locations={[0.45, 1]}
+              style={StyleSheet.absoluteFillObject}
+            />
+          </View>
+        ) : null}
 
-        <InfoCard description="Temel bilgiler bir bakista gorunur." title="Baslik alani">
+        <InfoCard title="Genel Bilgiler">
           <View style={styles.metaRow}>
             {basicInfo.map((item) => (
               <MetaPill key={`${item.icon}-${item.label}`} {...item} />
@@ -300,7 +537,7 @@ function ListingDetailLayout({
           </View>
         </InfoCard>
 
-        <InfoCard description="Ilanin acik kapsami ve beklentileri." title="Aciklama">
+        <InfoCard title="Açıklama">
           <View style={styles.textList}>
             {description.map((paragraph) => (
               <Text key={paragraph} style={styles.supportingText}>
@@ -310,23 +547,20 @@ function ListingDetailLayout({
           </View>
         </InfoCard>
 
-        <InfoCard description={owner.headline} title={ownerTitle}>
+        <InfoCard description={owner.description} title={ownerTitle}>
           <View style={styles.ownerHeader}>
             <View style={styles.ownerBadge}>
-              <AppIcon name="account-outline" size={22} />
+              <AppIcon backgrounded={false} color={colors.primary} name="account-outline" size={24} />
             </View>
             <View style={styles.ownerTexts}>
+              <Text style={styles.ownerRole}>{owner.headline}</Text>
               <Text style={styles.ownerName}>{owner.name}</Text>
               <Text style={styles.ownerLocation}>{owner.location}</Text>
             </View>
           </View>
-          <Text style={styles.supportingText}>{owner.description}</Text>
         </InfoCard>
 
-        <InfoCard
-          description="Dogrulama sinyalleri ve guven notlari burada toplanir."
-          title="Guven / dogrulama gostergeleri"
-        >
+        <InfoCard title="Güven Sinyalleri" description="Platform doğrulama ve güven göstergeleri">
           <View style={styles.list}>
             {trustSignals.map((signal) => (
               <View key={signal.label} style={styles.trustRow}>
@@ -342,7 +576,7 @@ function ListingDetailLayout({
 
         {actionSlot}
 
-        <InfoCard description="Benzer yapidaki ilanlar hizli karsilastirma icin listelenir." title="Benzer ilanlar">
+        <InfoCard title="Benzer İlanlar">
           {similarListings ?? (
             <EmptyState
               description={notFoundDescription}
@@ -355,39 +589,56 @@ function ListingDetailLayout({
 
       <StickyBottomActionBar>
         <AppButton
-          label={isApplied ? "Basvuru Hazir" : primaryActionLabel}
+          label={appliedState ? "Başvuru Yapıldı" : primaryActionLabel}
           leftSlot={
             <AppIcon
               backgrounded={false}
-              color="#FFFFFF"
-              name="send-outline"
+              color={colors.textInverse}
+              name={appliedState ? "check-circle-outline" : "send-outline"}
               size={18}
             />
           }
           onPress={() => {
+            if (appliedState) return;
             if (stickyGate && primaryActionUsesGate) {
               stickyGate.openGate();
               return;
             }
-
-            setIsApplied(true);
+            if (onApplyPress) {
+              onApplyPress();
+            } else {
+              setIsAppliedFallback(true);
+            }
           }}
         />
-        <Link href={routes.app.messages} asChild>
-          <AppButton
-            label="Mesaj Gonder"
-            leftSlot={<AppIcon backgrounded={false} name="message-text-outline" size={18} />}
-            variant="secondary"
-          />
-        </Link>
-        <AppButton
-          label={isSaved ? "Kaydedildi" : "Kaydet"}
-          leftSlot={<AppIcon backgrounded={false} name="bookmark-outline" size={18} />}
-          onPress={() => {
-            setIsSaved((current) => !current);
-          }}
-          variant="ghost"
-        />
+        <View style={styles.ctaSecondaryRow}>
+          <View style={styles.ctaSecondaryItem}>
+            <Link href={routes.app.messages} asChild>
+              <AppButton
+                label="Mesaj Gönder"
+                leftSlot={<AppIcon backgrounded={false} name="message-text-outline" size={18} />}
+                variant="secondary"
+              />
+            </Link>
+          </View>
+          <View style={styles.ctaGhostItem}>
+            <AppButton
+              label={isSaved ? "Kaydedildi" : "Kaydet"}
+              leftSlot={
+                <AppIcon
+                  backgrounded={false}
+                  color={isSaved ? colors.primary : colors.textMuted}
+                  name={isSaved ? "bookmark" : "bookmark-outline"}
+                  size={18}
+                />
+              }
+              onPress={() => {
+                setIsSaved((current) => !current);
+              }}
+              variant="ghost"
+            />
+          </View>
+        </View>
       </StickyBottomActionBar>
 
       {stickyGate ? (
@@ -411,11 +662,9 @@ function ListingDetailLayout({
   );
 }
 
-function useCaregiverGate({
-  fallbackTitle
-}: {
-  fallbackTitle: string;
-}) {
+// ─── Gate hooks ───────────────────────────────────────────────────────────────
+
+function useCaregiverGate({ fallbackTitle }: { fallbackTitle: string }) {
   const caregiverStatus = useSessionStore((state) => state.caregiverStatus);
   const caregiverProfile = useSessionStore((state) => state.caregiverProfile);
   const user = useSessionStore((state) => state.user);
@@ -437,21 +686,21 @@ function useCaregiverGate({
 
   return {
     closeGate: () => setVisible(false),
-    ctaLabel: "Bakici Modunu Tamamla",
+    ctaLabel: "Bakıcı Modunu Tamamla",
     ctaRoute: routes.app.caregiverActivation,
     description:
       caregiverStatus === "inactive"
-        ? "Basvuru akisini acabilmek icin once bakici modunu baslatman gerekiyor."
-        : "Bakici modun olusmus ancak basvuruya cikmak icin bazi alanlarin tamamlanmasi gerekiyor.",
+        ? "Başvuru akışını açabilmek için önce bakıcı modunu başlatman gerekiyor."
+        : "Bakıcı modun oluşmuş ancak başvuruya çıkmak için bazı alanların tamamlanması gerekiyor.",
     icon: presentation.icon,
     isReady: false,
     missingItems:
       missingItems.length > 0
         ? missingItems
-        : ["Deneyim", "Hizmet turleri", "Uygunluk", "Profil aciklamasi"],
+        : ["Deneyim", "Hizmet türleri", "Uygunluk", "Profil açıklaması"],
     openGate: () => setVisible(true),
     reasonLabel: presentation.label,
-    reasonTone: presentation.tone === "warning" ? "warning" : "neutral",
+    reasonTone: presentation.tone === "warning" ? "warning" : ("neutral" as const),
     title: fallbackTitle,
     visible
   } satisfies GateState;
@@ -479,10 +728,10 @@ function usePetshopGate() {
     ctaRoute: routes.app.petshopActivation,
     description:
       petshopStatus === "active"
-        ? "Yonetici islemleri icin petshop modun hazir."
+        ? "Yönetici işlemleri için petshop modun hazır."
         : petshopStatus === "in_review"
-          ? "Petshop modun incelemede. Eksik bir alan varsa guncelleyip sureci hizlandirabilirsin."
-          : "Kampanya yonetimi ve kisitli ticari alanlar icin dogrulanmis petshop moduna ihtiyacin var.",
+          ? "Petshop modun incelemede. Eksik alan varsa günceleyip süreci hızlandırabilirsin."
+          : "Kampanya yönetimi için doğrulanmış petshop moduna ihtiyacın var.",
     icon: presentation.icon,
     isReady: petshopStatus === "active",
     missingItems:
@@ -490,7 +739,7 @@ function usePetshopGate() {
         ? []
         : missingItems.length > 0
           ? missingItems
-          : ["Magaza bilgisi", "Dogrulama belgeleri", "Gorseller"],
+          : ["Mağaza bilgisi", "Doğrulama belgeleri", "Görseller"],
     openGate: () => {
       if (petshopStatus !== "active") {
         setVisible(true);
@@ -504,27 +753,36 @@ function usePetshopGate() {
           ? "warning"
           : presentation.tone === "info"
             ? "info"
-            : "neutral",
-    title: "Bu alani yonetmek icin petshop modu hazir olmali.",
+            : ("neutral" as const),
+    title: "Bu alanı yönetmek için petshop modu hazır olmalı.",
     visible
   } satisfies GateState;
 }
 
-function MissingDetailState({
-  description,
-  title
-}: {
-  description: string;
-  title: string;
-}) {
+// ─── Utility screens ──────────────────────────────────────────────────────────
+
+function LoadingDetailState({ title }: { title: string }) {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator color={colors.primary} size="large" />
+        <Text style={styles.loadingText}>{title} yükleniyor...</Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function MissingDetailState({ description, title }: { description: string; title: string }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content}>
-        <AppHeader description={description} showBackButton title={title} />
+        <EmptyState description={description} icon="cards-outline" title={title} />
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+// ─── Stiller ─────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   content: {
@@ -533,8 +791,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.comfortable,
     paddingTop: spacing.standard
   },
+  ctaGhostItem: {
+    flex: 0,
+    minWidth: 100
+  },
+  ctaSecondaryItem: {
+    flex: 1
+  },
+  ctaSecondaryRow: {
+    flexDirection: "row",
+    gap: spacing.compact
+  },
+  heroImage: {
+    height: "100%",
+    width: "100%"
+  },
+  heroImageArea: {
+    borderRadius: radius.large,
+    height: 260,
+    overflow: "hidden"
+  },
   list: {
     gap: spacing.compact
+  },
+  loadingContainer: {
+    alignItems: "center",
+    flex: 1,
+    gap: spacing.standard,
+    justifyContent: "center"
+  },
+  loadingText: {
+    color: colors.textMuted,
+    ...typography.body
   },
   metaRow: {
     flexDirection: "row",
@@ -544,15 +832,17 @@ const styles = StyleSheet.create({
   ownerBadge: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,
+    borderColor: colors.primaryBorder,
     borderRadius: radius.large,
-    height: 48,
+    borderWidth: 1,
+    height: 52,
     justifyContent: "center",
-    width: 48
+    width: 52
   },
   ownerHeader: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.compact
+    gap: spacing.standard
   },
   ownerLocation: {
     color: colors.textSubtle,
@@ -560,10 +850,15 @@ const styles = StyleSheet.create({
   },
   ownerName: {
     color: colors.text,
-    ...typography.h3
+    ...typography.bodyStrong
+  },
+  ownerRole: {
+    color: colors.primary,
+    ...typography.overline
   },
   ownerTexts: {
-    gap: spacing.micro
+    flex: 1,
+    gap: spacing.nano
   },
   relatedCard: {
     ...shadows.card,
@@ -577,6 +872,15 @@ const styles = StyleSheet.create({
   relatedDescription: {
     color: colors.textMuted,
     ...typography.body
+  },
+  relatedVisualArea: {
+    borderRadius: radius.medium,
+    height: 140,
+    overflow: "hidden"
+  },
+  relatedVisualImage: {
+    height: "100%",
+    width: "100%"
   },
   relatedTitle: {
     color: colors.text,
@@ -604,7 +908,7 @@ const styles = StyleSheet.create({
   },
   trustTexts: {
     flex: 1,
-    gap: spacing.micro
+    gap: spacing.nano
   },
   trustTitle: {
     color: colors.text,

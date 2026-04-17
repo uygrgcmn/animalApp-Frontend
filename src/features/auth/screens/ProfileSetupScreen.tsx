@@ -31,27 +31,27 @@ const goalCards: {
   value: ProfileGoal;
 }[] = [
   {
-    description: "Bakici, ilan ve topluluk tarafini incelemek istiyorum.",
+    description: "Bakıcı, ilan ve topluluk tarafını incelemek istiyorum.",
     icon: "compass-outline",
-    label: "Kesfetmek istiyorum",
+    label: "Keşfetmek istiyorum",
     value: "kesfetmek-istiyorum"
   },
   {
-    description: "Bakici modunu tamamlayip ilanlara basvurmak istiyorum.",
+    description: "Bakıcı modunu tamamlayıp ilanlara başvurmak istiyorum.",
     icon: "account-heart-outline",
-    label: "Bakici olmak istiyorum",
+    label: "Bakıcı olmak istiyorum",
     value: "bakici-olmak-istiyorum"
   },
   {
-    description: "Hayvanim icin uygun bakicilar bulmak istiyorum.",
+    description: "Hayvanım için uygun bakıcılar bulmak istiyorum.",
     icon: "dog-side",
-    label: "Hayvanim icin bakici ariyorum",
+    label: "Hayvanım için bakıcı arıyorum",
     value: "hayvanim-icin-bakici-ariyorum"
   },
   {
-    description: "Petshop hesabimi hazirlayip kampanya yonetmek istiyorum.",
+    description: "Petshop hesabımı hazırlayıp kampanya yönetmek istiyorum.",
     icon: "storefront-outline",
-    label: "Petshop hesabi acmak istiyorum",
+    label: "Petshop hesabı açmak istiyorum",
     value: "petshop-hesabi-acmak-istiyorum"
   }
 ];
@@ -89,7 +89,7 @@ export function ProfileSetupScreen() {
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
-      setPickerError("Fotograf secmek icin galeri izni gerekiyor.");
+      setPickerError("Fotoğraf seçmek için galeri izni gerekiyor.");
       return;
     }
 
@@ -107,7 +107,7 @@ export function ProfileSetupScreen() {
     const asset = result.assets[0];
 
     if (!asset) {
-      setPickerError("Fotograf secimi tamamlanamadi.");
+      setPickerError("Fotoğraf seçimi tamamlanamadı.");
       return;
     }
 
@@ -127,7 +127,7 @@ export function ProfileSetupScreen() {
       setSubmissionError(
         error instanceof Error
           ? error.message
-          : "Profil kurulumu tamamlanirken beklenmeyen bir sorun olustu."
+          : "Profil kurulumu tamamlanırken beklenmeyen bir sorun oluştu."
       );
     }
   };
@@ -135,17 +135,17 @@ export function ProfileSetupScreen() {
   return (
     <ScreenContainer contentContainerStyle={styles.content}>
       <VisualHero
-        description="Seni yormadan temel profilini tamamlayalim; sonraki tum yonlendirmeler bu bilgilerle netlesir."
+        description="Temel bilgilerini tamamla; tüm yönlendirmeler ve mod önerileri bu profilden şekillenir."
         icon="account-check-outline"
         metrics={[
           { icon: "account-outline", label: "Temel bilgiler", tone: "primary" },
-          { icon: "shield-check-outline", label: "Guven veren profil", tone: "success" }
+          { icon: "shield-check-outline", label: "Güven veren profil", tone: "success" }
         ]}
-        title="Ilk profil kurulumu"
+        title="Profil kurulumu"
       />
 
       <InfoCard
-        description="Kisa, net ve kolay okunur alanlarla profilini hazirla."
+        description="Kısa, net ve kolay okunur alanlarla profilini hazırla."
         title="Temel bilgiler"
       >
         <View style={styles.formFields}>
@@ -168,7 +168,7 @@ export function ProfileSetupScreen() {
                 name="city"
                 render={({ field }) => (
                   <TextField
-                    label="Sehir"
+                    label="Şehir"
                     value={field.value}
                     onChangeText={field.onChange}
                     error={errors.city?.message}
@@ -182,7 +182,7 @@ export function ProfileSetupScreen() {
                 name="district"
                 render={({ field }) => (
                   <TextField
-                    label="Ilce"
+                    label="İlçe"
                     value={field.value}
                     onChangeText={field.onChange}
                     error={errors.district?.message}
@@ -192,18 +192,18 @@ export function ProfileSetupScreen() {
             </View>
           </View>
           <UploadBox
-            description="Guven veren bir ilk izlenim icin tek bir kare yeterli."
+            description="Güven veren bir ilk izlenim için tek bir kare yeterli."
             error={pickerError ?? errors.photoUri?.message}
             imageUri={photoUri}
-            label="Profil fotografi"
+            label="Profil fotoğrafı"
             onPress={handlePickImage}
           />
         </View>
       </InfoCard>
 
       <InfoCard
-        description="Sana uygun ana aksiyonlari ve yonlendirmeleri buna gore hazirlariz."
-        title="Kullanim amaci"
+        description="Sana uygun ana aksiyonları ve yönlendirmeleri buna göre hazırlarız."
+        title="Kullanım amacı"
         variant="accent"
       >
         <View style={styles.goalGrid}>
@@ -230,7 +230,7 @@ export function ProfileSetupScreen() {
 
       <AppButton
         disabled={isSubmitting}
-        label={isSubmitting ? "Profil hazirlaniyor..." : "Profili Tamamla"}
+        label={isSubmitting ? "Profil hazırlanıyor…" : "Profili Tamamla"}
         leftSlot={<AppIcon backgrounded={false} color="#FFFFFF" name="check-bold" size={18} />}
         onPress={handleSubmit(onSubmit)}
       />
@@ -254,17 +254,26 @@ function PressableGoalCard({
   onPress
 }: GoalCardProps) {
   return (
-    <Pressable onPress={onPress} style={[styles.goalCard, isSelected ? styles.goalCardSelected : null]}>
+    <Pressable
+      onPress={onPress}
+      style={[styles.goalCard, isSelected ? styles.goalCardSelected : null]}
+    >
+      {isSelected ? <View style={styles.goalCardAccentBar} /> : null}
       <View style={styles.goalHeader}>
-        <AppIcon name={icon} size={18} />
+        <AppIcon
+          backgrounded={false}
+          color={isSelected ? colors.primary : colors.textMuted}
+          name={icon}
+          size={20}
+        />
         <FilterChip
           icon={isSelected ? "check-circle-outline" : "circle-outline"}
-          label={isSelected ? "Secildi" : "Sec"}
+          label={isSelected ? "Seçildi" : "Seç"}
           onPress={onPress}
           selected={isSelected}
         />
       </View>
-      <Text style={styles.goalTitle}>{label}</Text>
+      <Text style={[styles.goalTitle, isSelected ? styles.goalTitleSelected : null]}>{label}</Text>
       <Text style={styles.goalDescription}>{description}</Text>
     </Pressable>
   );
@@ -287,11 +296,21 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     gap: spacing.tight,
+    overflow: "hidden",
     padding: spacing.standard
   },
+  goalCardAccentBar: {
+    backgroundColor: colors.primary,
+    borderRadius: 999,
+    height: "100%",
+    left: 0,
+    position: "absolute",
+    top: 0,
+    width: 4
+  },
   goalCardSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySoft
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primary
   },
   goalDescription: {
     color: colors.textMuted,
@@ -308,6 +327,9 @@ const styles = StyleSheet.create({
   goalTitle: {
     color: colors.text,
     ...typography.bodyStrong
+  },
+  goalTitleSelected: {
+    color: colors.primary
   },
   locationField: {
     flex: 1

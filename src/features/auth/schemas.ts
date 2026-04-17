@@ -1,18 +1,18 @@
 import { z } from "zod";
 
 export const signInSchema = z.object({
-  email: z.string().email("Gecerli bir e-posta girin."),
-  password: z.string().min(6, "Sifre en az 6 karakter olmali.")
+  email: z.string().email("Geçerli bir e-posta girin."),
+  password: z.string().min(6, "Şifre en az 6 karakter olmalı.")
 });
 
 export const signUpSchema = z.object({
-  fullName: z.string().min(3, "Ad soyad en az 3 karakter olmali."),
-  email: z.string().email("Gecerli bir e-posta girin."),
-  password: z.string().min(6, "Sifre en az 6 karakter olmali.")
+  fullName: z.string().min(3, "Ad soyad en az 3 karakter olmalı."),
+  email: z.string().email("Geçerli bir e-posta girin."),
+  password: z.string().min(6, "Şifre en az 6 karakter olmalı.")
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email("Gecerli bir e-posta girin.")
+  email: z.string().email("Geçerli bir e-posta girin.")
 });
 
 export const profileGoalOptions = [
@@ -28,12 +28,12 @@ export const profileGoalOptions = [
 ];
 
 export const profileSetupSchema = z.object({
-  fullName: z.string().min(3, "Ad soyad en az 3 karakter olmali."),
-  city: z.string().min(2, "Sehir bilgisini ekleyin."),
-  district: z.string().min(2, "Ilce bilgisini ekleyin."),
-  photoUri: z.string().min(1, "Profil fotografi ekleyin."),
+  fullName: z.string().min(3, "Ad soyad en az 3 karakter olmalı."),
+  city: z.string().min(2, "Şehir bilgisini ekleyin."),
+  district: z.string().min(2, "İlçe bilgisini ekleyin."),
+  photoUri: z.string().min(1, "Profil fotoğrafı ekleyin."),
   goal: z.enum(profileGoalOptions, {
-    message: "Kullanim amacinizi secin."
+    message: "Kullanım amacınızı seçin."
   })
 });
 

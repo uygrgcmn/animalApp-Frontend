@@ -1,5 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring
+} from "react-native-reanimated";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useCallback } from "react";
 
 import { colors } from "../../core/theme/colors";
 import { radius, spacing, typography } from "../../core/theme/tokens";
@@ -20,22 +26,43 @@ export function FilterChip({
   onPress,
   selected = false
 }: FilterChipProps) {
+  const scale = useSharedValue(1);
+
+  const handlePressIn = useCallback(() => {
+    scale.value = withSpring(0.95, { damping: 15, stiffness: 400 });
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+  }, [scale]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }]
+  }));
+
   return (
-    <Pressable onPress={onPress} style={[styles.chip, selected ? styles.selectedChip : null]}>
-      {icon ? (
-        <MaterialCommunityIcons
-          color={selected ? colors.primary : colors.textSubtle}
-          name={icon}
-          size={16}
-        />
-      ) : null}
-      <Text style={[styles.label, selected ? styles.selectedLabel : null]}>{label}</Text>
-      {typeof count === "number" ? (
-        <View style={[styles.countWrap, selected ? styles.selectedCountWrap : null]}>
-          <Text style={[styles.count, selected ? styles.selectedCount : null]}>{count}</Text>
-        </View>
-      ) : null}
-    </Pressable>
+    <Animated.View style={animStyle}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={[styles.chip, selected ? styles.selectedChip : null]}
+      >
+        {icon ? (
+          <MaterialCommunityIcons
+            color={selected ? colors.primary : colors.textSubtle}
+            name={icon}
+            size={14}
+          />
+        ) : null}
+        <Text style={[styles.label, selected ? styles.selectedLabel : null]}>{label}</Text>
+        {typeof count === "number" ? (
+          <View style={[styles.countWrap, selected ? styles.selectedCountWrap : null]}>
+            <Text style={[styles.count, selected ? styles.selectedCount : null]}>{count}</Text>
+          </View>
+        ) : null}
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -45,11 +72,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderRadius: radius.pill,
-    borderWidth: 1,
+    borderWidth: 1.5,
     flexDirection: "row",
-    gap: spacing.tight,
-    minHeight: 40,
-    paddingHorizontal: 14
+    gap: spacing.micro + 2,
+    minHeight: 36,
+    paddingHorizontal: spacing.compact
   },
   count: {
     color: colors.textMuted,
@@ -62,18 +89,18 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.micro
   },
   label: {
-    color: colors.text,
+    color: colors.textMuted,
     ...typography.label
   },
   selectedChip: {
     backgroundColor: colors.primarySoft,
-    borderColor: colors.primaryBorder
+    borderColor: colors.primary
   },
   selectedCount: {
     color: colors.primary
   },
   selectedCountWrap: {
-    backgroundColor: "#FFFFFFAA"
+    backgroundColor: "rgba(255,255,255,0.7)"
   },
   selectedLabel: {
     color: colors.primary

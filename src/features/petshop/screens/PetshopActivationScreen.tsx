@@ -7,12 +7,13 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { routes } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
-import { spacing } from "../../../core/theme/tokens";
+import { radius, spacing, typography } from "../../../core/theme/tokens";
 import { useSessionStore } from "../../auth/store/sessionStore";
 import { AppButton } from "../../../shared/ui/AppButton";
 import { AppIcon } from "../../../shared/ui/AppIcon";
 import { FilterChip } from "../../../shared/ui/FilterChip";
 import { InfoCard } from "../../../shared/ui/InfoCard";
+import { MetaPill } from "../../../shared/ui/MetaPill";
 import { ScreenContainer } from "../../../shared/ui/ScreenContainer";
 import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
 import { TextField } from "../../../shared/ui/TextField";
@@ -33,8 +34,8 @@ import {
 const businessTypeOptions = [
   { label: "Petshop", value: "petshop" },
   { label: "Veteriner", value: "veteriner" },
-  { label: "Bakim merkezi", value: "bakim-merkezi" },
-  { label: "Karma magaza", value: "karma-magaza" }
+  { label: "Bakım merkezi", value: "bakim-merkezi" },
+  { label: "Karma mağaza", value: "karma-magaza" }
 ] as const;
 
 export function PetshopActivationScreen() {
@@ -79,7 +80,7 @@ export function PetshopActivationScreen() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
-      const message = "Dosya secmek icin galeri izni gerekiyor.";
+      const message = "Dosya seçmek için galeri izni gerekiyor.";
       if (kind === "verificationDocuments") {
         setDocumentError(message);
       } else {
@@ -119,11 +120,12 @@ export function PetshopActivationScreen() {
   return (
     <ScreenContainer contentContainerStyle={styles.content}>
       <VisualHero
-        description="Magaza kimligi ve kampanya odagini ekleyerek petshop alanini profesyonel olarak ac."
+        description="Mağaza kimliği, iletişim ve belge bilgilerini ekleyerek petshop alanını profesyonel olarak aç."
         icon="store-check-outline"
         metrics={[
-          { icon: "store-marker-outline", label: "Magaza bilgisi", tone: "primary" },
-          { icon: "sale-outline", label: "Kampanya hazir", tone: "warning" }
+          { icon: "store-marker-outline", label: "Mağaza kimlik bilgisi", tone: "primary" },
+          { icon: "shield-check-outline", label: "Belge doğrulaması", tone: "success" },
+          { icon: "sale-outline", label: "Kampanya erişimi", tone: "warning" }
         ]}
         title="Petshop modunu aktif et"
       />
@@ -133,28 +135,42 @@ export function PetshopActivationScreen() {
         title="Basvuru durumu"
         description={modeSummary.description}
       >
+        <View style={styles.progressRow}>
+          <View style={styles.progressBarTrack}>
+            <View
+              style={[
+                styles.progressBarFill,
+                { width: `${getPetshopCompletion(values)}%` as `${number}%` }
+              ]}
+            />
+          </View>
+          <Text style={styles.progressPercent}>%{getPetshopCompletion(values)}</Text>
+        </View>
         <View style={styles.summaryRow}>
-          <Text style={styles.summaryValue}>Tamamlanma %{getPetshopCompletion(values)}</Text>
-          <Text style={styles.summaryLabel}>
-            {getPetshopMissingItems(values).length > 0
-              ? `${getPetshopMissingItems(values).length} alan eksik`
-              : petshopStatus === "in_review"
-                ? "Belgeler incelemede"
-                : "Basvuru gonderime hazir"}
-          </Text>
+          {getPetshopMissingItems(values).length > 0 ? (
+            <MetaPill
+              icon="alert-circle-outline"
+              label={`${getPetshopMissingItems(values).length} alan eksik`}
+              tone="warning"
+            />
+          ) : petshopStatus === "in_review" ? (
+            <MetaPill icon="clock-outline" label="Belgeler incelemede" tone="primary" />
+          ) : (
+            <MetaPill icon="check-circle-outline" label="Gönderime hazır" tone="success" />
+          )}
         </View>
       </InfoCard>
 
       <InfoCard
-        title="Magaza kimligi"
-        description="Kurumsal gorunen ama uzun hissettirmeyen temel kimlik alanlari."
+        title="Mağaza kimliği"
+        description="Kurumsal görünen ama uzun hissettirmeyen temel kimlik alanları."
       >
         <Controller
           control={control}
           name="businessName"
           render={({ field }) => (
             <TextField
-              label="Magaza adi"
+              label="Mağaza adı"
               value={field.value}
               onChangeText={field.onChange}
               error={errors.businessName?.message}
@@ -167,7 +183,7 @@ export function PetshopActivationScreen() {
           name="authorizedPerson"
           render={({ field }) => (
             <TextField
-              label="Yetkili kisi"
+              label="Yetkili kişi"
               value={field.value}
               onChangeText={field.onChange}
               error={errors.authorizedPerson?.message}
@@ -189,8 +205,8 @@ export function PetshopActivationScreen() {
       </InfoCard>
 
       <InfoCard
-        title="Adres ve iletisim"
-        description="Magazaya ulasim ve guven icin kritik bilgileri tek blokta topla."
+        title="Adres ve iletişim"
+        description="Mağazaya ulaşım ve güven için kritik bilgileri tek blokta topla."
       >
         <Controller
           control={control}
@@ -199,7 +215,7 @@ export function PetshopActivationScreen() {
             <TextField
               label="Adres"
               multiline
-              placeholder="Mahalle, sokak, bina no ve ilce bilgisi"
+              placeholder="Mahalle, sokak, bina no ve ilçe bilgisi"
               value={field.value}
               onChangeText={field.onChange}
               error={errors.address?.message}
@@ -215,7 +231,7 @@ export function PetshopActivationScreen() {
               render={({ field }) => (
                 <TextField
                   keyboardType="phone-pad"
-                  label="Iletisim telefonu"
+                  label="İletişim telefonu"
                   value={field.value}
                   onChangeText={field.onChange}
                   error={errors.contactPhone?.message}
@@ -231,7 +247,7 @@ export function PetshopActivationScreen() {
                 <TextField
                   autoCapitalize="none"
                   keyboardType="email-address"
-                  label="Iletisim e-postasi"
+                  label="İletişim e-postası"
                   value={field.value}
                   onChangeText={field.onChange}
                   error={errors.contactEmail?.message}
@@ -247,8 +263,8 @@ export function PetshopActivationScreen() {
           render={({ field }) => (
             <TextField
               keyboardType="number-pad"
-              label="Vergi / isletme bilgisi"
-              placeholder="Vergi no veya isletme kaydi"
+              label="Vergi / işletme bilgisi"
+              placeholder="Vergi no veya işletme kaydı"
               value={field.value}
               onChangeText={field.onChange}
               error={errors.taxNumber?.message}
@@ -258,18 +274,18 @@ export function PetshopActivationScreen() {
       </InfoCard>
 
       <InfoCard
-        title="Gorseller ve belgeler"
-        description="Magaza guvenini gosteren iki alan: vitrin ve dogrulama belgeleri."
+        title="Görseller ve belgeler"
+        description="Mağaza güvenini gösteren iki alan: vitrin ve doğrulama belgeleri."
       >
         <UploadBox
           description={
             values.storeImages.length > 0
-              ? `${values.storeImages.length} magaza gorseli eklendi`
-              : "Dis cephe, raf veya ic mekan gorseli ekle."
+              ? `${values.storeImages.length} mağaza görseli eklendi`
+              : "Dış cephe, raf veya iç mekân görseli ekle."
           }
           error={storeImageError ?? errors.storeImages?.message}
           imageUri={values.storeImages[0]}
-          label="Magaza gorselleri"
+          label="Mağaza görselleri"
           onPress={() => {
             void pickAsset("storeImages");
           }}
@@ -280,7 +296,7 @@ export function PetshopActivationScreen() {
               <FilterChip
                 key={asset}
                 icon="image-outline"
-                label={`Gorsel ${index + 1}`}
+                label={`Görsel ${index + 1}`}
                 onPress={() => {
                   setValue(
                     "storeImages",
@@ -298,11 +314,11 @@ export function PetshopActivationScreen() {
           description={
             values.verificationDocuments.length > 0
               ? `${values.verificationDocuments.length} belge eklendi`
-              : "Vergi levhasi veya isletme yetki belgesi ekle."
+              : "Vergi levhası veya işletme yetki belgesi ekle."
           }
           error={documentError ?? errors.verificationDocuments?.message}
           imageUri={values.verificationDocuments[0]}
-          label="Dogrulama belgeleri"
+          label="Doğrulama belgeleri"
           onPress={() => {
             void pickAsset("verificationDocuments");
           }}
@@ -337,8 +353,8 @@ export function PetshopActivationScreen() {
           />
           <AppButton
             disabled={isSubmitting}
-            label={isSubmitting ? "Gonderiliyor..." : "Basvuruyu Gonder"}
-            leftSlot={<AppIcon backgrounded={false} color="#FFFFFF" name="send-outline" size={18} />}
+            label={isSubmitting ? "Gönderiliyor..." : "Başvuruyu Gönder"}
+            leftSlot={<AppIcon backgrounded={false} color={colors.textInverse} name="send-outline" size={18} />}
             onPress={handleSubmit(onSubmit)}
           />
         </View>
@@ -366,18 +382,33 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: spacing.tight
   },
-  summaryLabel: {
-    color: colors.textMuted,
-    fontSize: 13,
-    fontWeight: "600"
+  progressBarFill: {
+    backgroundColor: colors.primary,
+    borderRadius: radius.pill,
+    height: "100%"
+  },
+  progressBarTrack: {
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radius.pill,
+    flex: 1,
+    height: 8,
+    overflow: "hidden"
+  },
+  progressPercent: {
+    color: colors.primary,
+    ...typography.label,
+    minWidth: 36,
+    textAlign: "right"
+  },
+  progressRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.compact
   },
   summaryRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.tight
-  },
-  summaryValue: {
-    color: colors.text,
-    fontSize: 18,
-    fontWeight: "800"
   }
 });
 

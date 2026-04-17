@@ -28,6 +28,16 @@ export const queryKeys = {
       ["community", "proximity", query] as const,
     detail: (listingId: string) => ["community", "detail", listingId] as const
   },
+  petshop: {
+    discovery: ["petshop", "discovery"] as const,
+    dashboard: ["petshop", "dashboard"] as const,
+    campaigns: ["petshop", "campaigns"] as const,
+    store: (storeId: string) => ["petshop", "store", storeId] as const
+  },
+  profile: {
+    saved: ["profile", "saved"] as const,
+    settings: ["profile", "settings"] as const
+  },
   pets: {
     all: ["pets", "all"] as const,
     detail: (petId: string) => ["pets", "detail", petId] as const

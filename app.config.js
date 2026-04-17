@@ -8,7 +8,8 @@ module.exports = () => ({
   newArchEnabled: true,
   plugins: ["expo-router", "expo-font"],
   android: {
-    package: "com.uygar.animalapp"
+    package: "com.uygar.animalapp",
+    usesCleartextTraffic: true
   },
   ios: {
     bundleIdentifier: "com.uygar.animalapp"

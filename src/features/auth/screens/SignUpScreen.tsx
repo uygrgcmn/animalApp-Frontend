@@ -3,16 +3,15 @@ import { Link } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ApiError } from "../../../core/api/errors";
 import { colors } from "../../../core/theme/colors";
-import { spacing, typography } from "../../../core/theme/tokens";
+import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
-import { AppIcon } from "../../../shared/ui/AppIcon";
-import { InfoCard } from "../../../shared/ui/InfoCard";
-import { ScreenContainer } from "../../../shared/ui/ScreenContainer";
 import { TextField } from "../../../shared/ui/TextField";
-import { VisualHero } from "../../../shared/ui/VisualHero";
 import { signUpSchema, type SignUpValues } from "../schemas";
 import { useSessionStore } from "../store/sessionStore";
 import { routes } from "../../../core/navigation/routes";
@@ -26,16 +25,11 @@ export function SignUpScreen() {
     formState: { errors, isSubmitting }
   } = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      password: ""
-    }
+    defaultValues: { fullName: "", email: "", password: "" }
   });
 
   const onSubmit = async (values: SignUpValues) => {
     setSubmissionError(null);
-
     try {
       await signUp(values);
     } catch (error) {
@@ -43,29 +37,35 @@ export function SignUpScreen() {
         setSubmissionError(error.message);
         return;
       }
-
       setSubmissionError(
-        error instanceof Error
-          ? error.message
-          : "Kayit tamamlanirken beklenmeyen bir sorun olustu."
+        error instanceof Error ? error.message : "Kayıt tamamlanırken bir sorun oluştu."
       );
     }
   };
 
   return (
-    <ScreenContainer contentContainerStyle={styles.content}>
-      <VisualHero
-        description="Kayit sonrasi tum alanlara yonlenebilecegin gorsel agirlikli ana deneyim hemen hazir olacak."
-        icon="account-plus"
-        metrics={[
-          { icon: "paw", label: "Bakici ve sahip", tone: "primary" },
-          { icon: "storefront-outline", label: "Petshop", tone: "neutral" }
-        ]}
-        title="Yeni hesabini olustur"
-      />
+    <SafeAreaView style={styles.root} edges={["top", "bottom"]}>
+      <View style={styles.content}>
+        {/* Brand */}
+        <View style={styles.brand}>
+          <LinearGradient
+            colors={[colors.primary, "#2DD4BF"]}
+            end={{ x: 1, y: 1 }}
+            start={{ x: 0, y: 0 }}
+            style={styles.brandIcon}
+          >
+            <MaterialCommunityIcons name="account-plus" size={32} color={colors.textInverse} />
+          </LinearGradient>
+          <View style={styles.brandTexts}>
+            <Text style={styles.brandTitle}>Hesap oluştur</Text>
+            <Text style={styles.brandSubtitle}>
+              Tek hesapla bakıcı, sahip ve petshop deneyimine tam erişim.
+            </Text>
+          </View>
+        </View>
 
-      <InfoCard title="Kayit bilgileri" description="Temel bilgilerini ekleyerek uygulamaya dahil ol.">
-        <View style={styles.formFields}>
+        {/* Form */}
+        <View style={styles.form}>
           <Controller
             control={control}
             name="fullName"
@@ -75,10 +75,10 @@ export function SignUpScreen() {
                 value={field.value}
                 onChangeText={field.onChange}
                 error={errors.fullName?.message}
+                returnKeyType="next"
               />
             )}
           />
-
           <Controller
             control={control}
             name="email"
@@ -90,65 +90,123 @@ export function SignUpScreen() {
                 value={field.value}
                 onChangeText={field.onChange}
                 error={errors.email?.message}
+                returnKeyType="next"
               />
             )}
           />
-
           <Controller
             control={control}
             name="password"
             render={({ field }) => (
               <TextField
-                label="Sifre"
+                label="Şifre"
                 secureTextEntry
                 value={field.value}
                 onChangeText={field.onChange}
                 error={errors.password?.message}
+                hint="En az 8 karakter"
+                returnKeyType="done"
+                onSubmitEditing={handleSubmit(onSubmit)}
               />
             )}
           />
 
-          <Text style={styles.helper}>
-            Kayit sonrasi kisa onboarding ve ilk profil kurulumu ile seni uygun akislara yonlendiririz.
-          </Text>
-
-          {submissionError ? <Text style={styles.error}>{submissionError}</Text> : null}
+          {submissionError ? (
+            <View style={styles.errorBox}>
+              <MaterialCommunityIcons name="alert-circle-outline" size={16} color={colors.error} />
+              <Text style={styles.errorText}>{submissionError}</Text>
+            </View>
+          ) : null}
 
           <AppButton
             disabled={isSubmitting}
-            label={isSubmitting ? "Hesap hazirlaniyor..." : "Kaydi Tamamla"}
-            leftSlot={<AppIcon backgrounded={false} color="#FFFFFF" name="check-bold" size={18} />}
+            loading={isSubmitting}
+            label="Kaydı Tamamla"
+            size="lg"
             onPress={handleSubmit(onSubmit)}
           />
         </View>
-      </InfoCard>
 
-      <Link href={routes.auth.signIn} asChild>
-        <AppButton
-          label="Zaten hesabim var"
-          leftSlot={<AppIcon backgrounded={false} name="login" size={18} />}
-          variant="ghost"
-        />
-      </Link>
-    </ScreenContainer>
+        <View style={styles.dividerRow}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerLabel}>ya da</Text>
+          <View style={styles.divider} />
+        </View>
+
+        <Link href={routes.auth.signIn} asChild>
+          <AppButton label="Zaten hesabım var" variant="secondary" size="lg" />
+        </Link>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
-    gap: spacing.section
+  root: {
+    backgroundColor: colors.background,
+    flex: 1
   },
-  formFields: {
+  content: {
+    flex: 1,
+    gap: spacing.section,
+    justifyContent: "center",
+    paddingHorizontal: spacing.comfortable,
+    paddingVertical: spacing.comfortable
+  },
+  brand: {
+    alignItems: "center",
     gap: spacing.standard
   },
-  error: {
-    color: colors.warning,
-    fontSize: 13,
-    fontWeight: "600"
+  brandIcon: {
+    alignItems: "center",
+    borderRadius: radius.xlarge,
+    height: 80,
+    justifyContent: "center",
+    width: 80,
+    ...shadows.card
   },
-  helper: {
+  brandTexts: {
+    alignItems: "center",
+    gap: spacing.tight
+  },
+  brandTitle: {
+    color: colors.text,
+    ...typography.h1,
+    textAlign: "center"
+  },
+  brandSubtitle: {
     color: colors.textMuted,
+    ...typography.body,
+    textAlign: "center"
+  },
+  form: {
+    gap: spacing.standard
+  },
+  errorBox: {
+    alignItems: "center",
+    backgroundColor: colors.errorSoft,
+    borderRadius: radius.medium,
+    flexDirection: "row",
+    gap: spacing.tight,
+    padding: spacing.standard
+  },
+  errorText: {
+    color: colors.error,
+    flex: 1,
+    ...typography.caption
+  },
+  dividerRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.standard
+  },
+  divider: {
+    backgroundColor: colors.divider,
+    flex: 1,
+    height: 1
+  },
+  dividerLabel: {
+    color: colors.textTertiary,
     ...typography.caption
   }
 });
-

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { colors } from "../../core/theme/colors";
@@ -12,8 +12,10 @@ import { VerificationBadge } from "./VerificationBadge";
 type PetshopCampaignCardProps = {
   actionSlot?: ReactNode;
   campaignLabel: string;
+  coverImageUri?: string;
   deadline: string;
   description: string;
+  onPress?: () => void;
   priceLabel: string;
   storeName: string;
   title: string;
@@ -24,8 +26,10 @@ type PetshopCampaignCardProps = {
 export function PetshopCampaignCard({
   actionSlot,
   campaignLabel,
+  coverImageUri,
   deadline,
   description,
+  onPress,
   priceLabel,
   storeName,
   title,
@@ -33,14 +37,35 @@ export function PetshopCampaignCard({
   visualLabel
 }: PetshopCampaignCardProps) {
   return (
-    <Pressable style={({ pressed }) => [styles.card, pressed ? styles.pressed : null]}>
-      <LinearGradient colors={["#F5F3FF", "#EEF6FF"]} style={styles.visual}>
-        <View style={styles.visualTextBlock}>
-          <AppIcon name="storefront-outline" size={28} />
-          {visualLabel ? <Text style={styles.visualLabel}>{visualLabel}</Text> : null}
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.card, pressed ? styles.pressed : null]}
+    >
+      {coverImageUri ? (
+        <View style={styles.visualArea}>
+          <Image source={{ uri: coverImageUri }} style={styles.visualImage} />
+          <LinearGradient
+            colors={["transparent", "rgba(15,23,42,0.60)"]}
+            style={styles.visualOverlay}
+          >
+            <StatusPill label={campaignLabel} tone="warning" />
+            {visualLabel ? <Text style={styles.visualLabel}>{visualLabel}</Text> : null}
+          </LinearGradient>
         </View>
-        <StatusPill label={campaignLabel} tone="warning" />
-      </LinearGradient>
+      ) : (
+        <LinearGradient
+          colors={["#FFF7ED", "#F0FDFA"]}
+          end={{ x: 1, y: 1 }}
+          start={{ x: 0, y: 0 }}
+          style={styles.visual}
+        >
+          <View style={styles.visualTextBlock}>
+            <AppIcon name="storefront-outline" size={28} />
+            {visualLabel ? <Text style={styles.visualLabelMuted}>{visualLabel}</Text> : null}
+          </View>
+          <StatusPill label={campaignLabel} tone="warning" />
+        </LinearGradient>
+      )}
 
       <View style={styles.body}>
         <View style={styles.heading}>
@@ -51,13 +76,13 @@ export function PetshopCampaignCard({
           <VerificationBadge state={verificationState} />
         </View>
 
-        <Text numberOfLines={3} style={styles.description}>
+        <Text numberOfLines={2} style={styles.description}>
           {description}
         </Text>
 
         <View style={styles.metaRow}>
-          <MetaPill icon="cash" label={priceLabel} tone="success" />
-          <MetaPill icon="calendar-clock-outline" label={deadline} tone="warning" />
+          <MetaPill icon="tag-outline" label={priceLabel} tone="warning" />
+          <MetaPill icon="calendar-clock-outline" label={deadline} tone="neutral" />
         </View>
       </View>
 
@@ -73,9 +98,7 @@ const styles = StyleSheet.create({
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.large,
-    borderWidth: 1,
+    borderRadius: radius.xlarge,
     gap: spacing.standard,
     overflow: "hidden",
     padding: spacing.standard
@@ -99,8 +122,9 @@ const styles = StyleSheet.create({
     opacity: 0.92
   },
   store: {
-    color: colors.textSubtle,
-    ...typography.caption
+    color: colors.primary,
+    ...typography.caption,
+    fontWeight: "600"
   },
   texts: {
     flex: 1,
@@ -118,9 +142,34 @@ const styles = StyleSheet.create({
     minHeight: 120,
     paddingHorizontal: spacing.standard
   },
+  visualArea: {
+    borderRadius: radius.medium,
+    height: 160,
+    overflow: "hidden",
+    position: "relative"
+  },
+  visualImage: {
+    height: "100%",
+    width: "100%"
+  },
   visualLabel: {
+    ...typography.caption,
+    color: colors.textInverse,
+    fontWeight: "600"
+  },
+  visualLabelMuted: {
     color: colors.textMuted,
     ...typography.caption
+  },
+  visualOverlay: {
+    alignItems: "center",
+    bottom: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    left: 0,
+    padding: spacing.compact,
+    position: "absolute",
+    right: 0
   },
   visualTextBlock: {
     gap: spacing.tight

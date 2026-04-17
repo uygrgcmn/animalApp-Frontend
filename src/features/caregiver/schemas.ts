@@ -15,15 +15,15 @@ export const caregiverServiceOptions = [
 ] as const;
 
 export const caregiverActivationSchema = z.object({
-  city: z.string().min(2, "Sehir gerekli."),
-  district: z.string().min(2, "Ilce gerekli."),
-  experienceYears: z.string().min(1, "Deneyim suresi gerekli."),
-  serviceTypes: z.array(z.string()).min(1, "En az bir hizmet turu sec."),
+  city: z.string().min(2, "Şehir gerekli."),
+  district: z.string().min(2, "İlçe gerekli."),
+  experienceYears: z.string().min(1, "Deneyim süresi gerekli."),
+  serviceTypes: z.array(z.string()).min(1, "En az bir hizmet türü seç."),
   availability: z.enum(caregiverAvailabilityOptions, {
     message: "Uygunluk tercih et."
   }),
-  rateExpectation: z.string().min(2, "Ucret beklentisi gerekli."),
-  profileBio: z.string().min(20, "Kisa bir profil aciklamasi ekle."),
+  rateExpectation: z.string().min(2, "Ücret beklentisi gerekli."),
+  profileBio: z.string().min(20, "Kısa bir profil açıklaması ekle."),
   supportingAssets: z.array(z.string())
 });
 

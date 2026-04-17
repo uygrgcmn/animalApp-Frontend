@@ -3,25 +3,25 @@ export const caregiverListings = [
     id: "cg-1",
     avatarLabel: "DA",
     caretakerName: "Derya Acar",
-    title: "Deneyimli evde bakici",
+    title: "Deneyimli evde bakıcı",
     city: "Istanbul",
-    schedule: "Hafta ici yarim gun",
-    summary: "Kedi ve kopek bakiminda deneyimli profil ilani. Asili takip ve gunluk raporlama sunuyor.",
+    schedule: "Hafta içi yarım gün",
+    summary: "Kedi ve köpek bakımında deneyimli profil ilanı. Asılı takip ve günlük raporlama sunuyor.",
     budget: "5.000 - 7.500 TL",
-    badge: "Guvenilir profil",
-    availability: "Hafta ici",
+    badge: "Güvenilir profil",
+    availability: "Hafta içi",
     verificationState: "verified" as const
   },
   {
     id: "cg-2",
     avatarLabel: "BT",
     caretakerName: "Baris Tan",
-    title: "Yatili bakim destegi",
+    title: "Yatılı bakım desteği",
     city: "Ankara",
-    schedule: "Haftalik",
-    summary: "Uzun sureli seyahatlerde yatili bakim, ilac takibi ve oyun rutini odakli profil ilani.",
+    schedule: "Haftalık",
+    summary: "Uzun süreli seyahatlerde yatılı bakım, ilaç takibi ve oyun rutini odaklı profil ilanı.",
     budget: "8.000 - 12.000 TL",
-    badge: "Hizli donus",
+    badge: "Hızlı dönüş",
     availability: "Esnek",
     verificationState: "pending" as const
   },
@@ -29,12 +29,12 @@ export const caregiverListings = [
     id: "cg-3",
     avatarLabel: "SY",
     caretakerName: "Selin Yalcin",
-    title: "Kedi odakli gunluk ziyaret",
+    title: "Kedi odaklı günlük ziyaret",
     city: "Izmir",
-    schedule: "Gunluk kontrol",
-    summary: "Kediler icin mama, su, kum takibi ve foto raporu sunan sakin bakim profili.",
+    schedule: "Günlük kontrol",
+    summary: "Kediler için mama, su, kum takibi ve fotoğraf raporu sunan sakin bakım profili.",
     budget: "2.400 - 3.200 TL",
-    badge: "Ayni gun donus",
+    badge: "Aynı gün dönüş",
     availability: "Hafta sonu",
     verificationState: "verified" as const
   }
@@ -43,34 +43,34 @@ export const caregiverListings = [
 export const ownerRequests = [
   {
     id: "ow-1",
-    title: "Golden icin hafta sonu bakici ariyorum",
+    title: "Golden için hafta sonu bakıcı arıyorum",
     city: "Izmir",
-    petType: "Kopek",
+    petType: "Köpek",
     dateLabel: "26-27 Nisan",
     schedule: "Cumartesi-Pazar",
-    summary: "Enerjik kopegim icin gezdirme ve temel beslenme destegi ariyorum.",
+    summary: "Enerjik köpeğim için gezdirme ve temel beslenme desteği arıyorum.",
     budget: "3.500 TL",
     distanceLabel: "2,4 km"
   },
   {
     id: "ow-2",
-    title: "Iki kediye gunluk kontrol",
+    title: "İki kediye günlük kontrol",
     city: "Bursa",
     petType: "Kedi",
-    dateLabel: "10 gunluk plan",
-    schedule: "10 gun",
-    summary: "Mama, su, kum temizligi ve kisa oyun seanslari icin destek ihtiyaci.",
+    dateLabel: "10 günlük plan",
+    schedule: "10 gün",
+    summary: "Mama, su, kum temizliği ve kısa oyun seansları için destek ihtiyacı.",
     budget: "2.200 TL",
     distanceLabel: "5,1 km"
   },
   {
     id: "ow-3",
-    title: "Muhabbet kusu icin gunluk ziyaret",
+    title: "Muhabbet kuşu için günlük ziyaret",
     city: "Istanbul",
-    petType: "Kus",
+    petType: "Kuş",
     dateLabel: "Bu hafta",
-    schedule: "5 gun",
-    summary: "Sabah yem degisimi ve kisa kafes temizligi icin deneyimli destek ariyorum.",
+    schedule: "5 gün",
+    summary: "Sabah yem değişimi ve kısa kafes temizliği için deneyimli destek arıyorum.",
     budget: "1.200 TL",
     distanceLabel: "1,1 km"
   }
@@ -79,30 +79,30 @@ export const ownerRequests = [
 export const communityPosts = [
   {
     id: "cm-1",
-    title: "Barinak icin ucretsiz mama destegi",
+    title: "Barınak için ücretsiz mama desteği",
     categoryKey: "ucretsiz-mama",
-    category: "Ucretsiz mama",
+    category: "Ücretsiz mama",
     city: "Eskisehir",
-    district: "Tepebasi",
-    summary: "Acil kuru mama ihtiyaci bulunan gecici bakim evi icin destek cagrisi.",
-    status: "Basvuruya acik",
+    district: "Tepebaşı",
+    summary: "Acil kuru mama ihtiyacı bulunan geçici bakım evi için destek çağrısı.",
+    status: "Başvuruya açık",
     author: "Pati Dayanisma Agi",
-    authorRole: "Gonullu topluluk",
+    authorRole: "Gönüllü topluluk",
     dateLabel: "Bugun",
     imageUri: "https://images.unsplash.com/photo-1583511655826-05700d52f4d9?auto=format&fit=crop&w=1200&q=80",
-    visualLabel: "Mama destek noktasi",
+    visualLabel: "Mama destek noktası",
     supportWindow: "Bu hafta sonuna kadar",
     quickActionLabel: "Destek Ol",
     trustState: "verified" as const,
-    trustLabel: "Topluluk tarafindan dogrulandi",
+    trustLabel: "Topluluk tarafından doğrulandı",
     description: [
-      "Gecici bakim evinde ayni anda birden fazla kopek ve kedi icin destek veriliyor. Kuru mama stoklari beklenenden hizli tukendigi icin kisa sureli ama acil bir destek cagrisi acildi.",
-      "Teslimat dogrudan topluluk sorumlusu ile koordine ediliyor. Istenirse mesaj uzerinden hangi urunlerin daha oncelikli oldugu da paylasiliyor."
+      "Geçici bakım evinde aynı anda birden fazla köpek ve kedi için destek veriliyor. Kuru mama stokları beklenenden hızlı tükendiği için kısa süreli ama acil bir destek çağrısı açıldı.",
+      "Teslimat doğrudan topluluk sorumlusu ile koordine ediliyor. İstenirse mesaj üzerinden hangi ürünlerin daha öncelikli olduğu da paylaşılıyor."
     ],
     trustNotes: [
-      "Teslim noktasi ve iletisim bilgisi dogrulanmis.",
-      "Daha once ayni topluluk icinde tamamlanmis destek paylasimlari var.",
-      "Ihtiyac listesi guncel tutuluyor."
+      "Teslim noktası ve iletişim bilgisi doğrulanmış.",
+      "Daha önce aynı topluluk içinde tamamlanmış destek paylaşımları var.",
+      "İhtiyaç listesi güncel tutuluyor."
     ],
     similarIds: ["cm-3", "cm-4"]
   },
@@ -113,112 +113,112 @@ export const communityPosts = [
     category: "Sahiplendirme",
     city: "Istanbul",
     district: "Besiktas",
-    summary: "Asilari tamamlanmis 6 aylik tekir icin kalici yuva araniyor.",
-    status: "Gorusturmeler suruyor",
+    summary: "Aşıları tamamlanmış 6 aylık tekir için kalıcı yuva aranıyor.",
+    status: "Görüşmeler sürüyor",
     author: "Gonul Aslan",
     authorRole: "Bireysel paylasim",
     dateLabel: "Dun",
     imageUri: "https://images.unsplash.com/photo-1511044568932-338cba0ad803?auto=format&fit=crop&w=1200&q=80",
-    visualLabel: "Sakin ev ortami",
-    supportWindow: "Bu hafta gorusmeler acik",
-    quickActionLabel: "Basvur",
+    visualLabel: "Sakin ev ortamı",
+    supportWindow: "Bu hafta görüşmeler açık",
+    quickActionLabel: "Başvur",
     trustState: "verified" as const,
-    trustLabel: "Asi ve temel saglik bilgileri paylasildi",
+    trustLabel: "Aşı ve temel sağlık bilgileri paylaşıldı",
     description: [
-      "6 aylik tekir, ev ortamina alisik ve insanla iletisimi guclu. Kalici yuva arayisinda sakin, guvenli ve uzun vadeli bir eslesme hedefleniyor.",
-      "Ilk gorusmeler mesaj uzerinden yapiliyor. Uygun gorulen kisilerle yuva kosullari ve teslim sureci detayli konusuluyor."
+      "6 aylık tekir, ev ortamına alışık ve insanla iletişimi güçlü. Kalıcı yuva arayışında sakin, güvenli ve uzun vadeli bir eşleşme hedefleniyor.",
+      "İlk görüşmeler mesaj üzerinden yapılıyor. Uygun görülen kişilerle yuva koşulları ve teslim süreci detaylı konuşuluyor."
     ],
     trustNotes: [
-      "Asi karti ve temel veteriner bilgisi mevcut.",
-      "Sahiplendirme sureci kontrollu gorusmelerle ilerliyor.",
-      "Fotograflar ve karakter notlari duzenli paylasiliyor."
+      "Aşı kartı ve temel veteriner bilgisi mevcut.",
+      "Sahiplendirme süreci kontrollü görüşmelerle ilerliyor.",
+      "Fotoğraflar ve karakter notları düzenli paylaşılıyor."
     ],
     similarIds: ["cm-4", "cm-3"]
   },
   {
     id: "cm-3",
-    title: "Mahalle kedileri icin kuru mama paylasimi",
+    title: "Mahalle kedileri için kuru mama paylaşımı",
     categoryKey: "ucretsiz-mama",
-    category: "Ucretsiz mama",
+    category: "Ücretsiz mama",
     city: "Izmir",
     district: "Bornova",
-    summary: "Duzenli besleme noktasi icin paketli mama destegi bekleniyor.",
-    status: "Mesaja acik",
+    summary: "Düzenli besleme noktası için paketli mama desteği bekleniyor.",
+    status: "Mesaja açık",
     author: "Sokak Dostlari Ekibi",
-    authorRole: "Mahalle dayanismasi",
-    dateLabel: "2 gun once",
+    authorRole: "Mahalle dayanışması",
+    dateLabel: "2 gün önce",
     imageUri: "https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&w=1200&q=80",
-    visualLabel: "Acik besleme noktasi",
-    supportWindow: "Hafta ici teslim alinabilir",
+    visualLabel: "Açık besleme noktası",
+    supportWindow: "Hafta içi teslim alınabilir",
     quickActionLabel: "Destek Ol",
     trustState: "pending" as const,
     trustLabel: "Yeni topluluk paylasimi",
     description: [
-      "Mahallede sabit iki besleme noktasi icin duzenli mama destegi araniyor. Paketli kuru mama tercih ediliyor ve haftalik planlama yapiliyor.",
-      "Teslim alinacak urunler onceden mesajlasma ile netlestiriliyor. Ihtiyac dengeli ilerledigi icin parcali destek de kabul ediliyor."
+      "Mahallede sabit iki besleme noktası için düzenli mama desteği aranıyor. Paketli kuru mama tercih ediliyor ve haftalık planlama yapılıyor.",
+      "Teslim alınacak ürünler önceden mesajlaşma ile netleştiriliyor. İhtiyaç dengeli ilerlediği için parçalı destek de kabul ediliyor."
     ],
     trustNotes: [
       "Teslimat sorumlusu bilgisi mevcut.",
-      "Yeni acilan bir paylasim oldugu icin topluluk geri bildirimi toplanmaya devam ediyor.",
-      "Ihtiyac durumu haftalik guncelleniyor."
+      "Yeni açılan bir paylaşım olduğu için topluluk geri bildirimi toplanmaya devam ediyor.",
+      "İhtiyaç durumu haftalık güncelleniyor."
     ],
     similarIds: ["cm-1", "cm-4"]
   },
   {
     id: "cm-4",
-    title: "Sakin bir ev arayan yetiskin kopek",
+    title: "Sakin bir ev arayan yetişkin köpek",
     categoryKey: "sahiplendirme",
     category: "Sahiplendirme",
     city: "Ankara",
     district: "Cankaya",
-    summary: "Ev ortamina uyumlu, temel egitimi olan kopek icin kalici yuva araniyor.",
-    status: "Degerlendirme suruyor",
+    summary: "Ev ortamına uyumlu, temel eğitimi olan köpek için kalıcı yuva aranıyor.",
+    status: "Değerlendirme sürüyor",
     author: "Mina Kose",
     authorRole: "Koruyucu aile",
-    dateLabel: "3 gun once",
+    dateLabel: "3 gün önce",
     imageUri: "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=1200&q=80",
     visualLabel: "Ev uyumlu profil",
-    supportWindow: "Bu ay icinde teslim planlanabilir",
-    quickActionLabel: "Basvur",
+    supportWindow: "Bu ay içinde teslim planlanabilir",
+    quickActionLabel: "Başvur",
     trustState: "verified" as const,
     trustLabel: "Karakter notlari detayli paylasildi",
     description: [
-      "Yetiskin kopek ev hayatina uyumlu, temel komutlari biliyor ve insanlarla iletisimi sakin. Yogun olmayan, stabil bir ev ortami hedefleniyor.",
-      "Gorusmeler once mesaj ile basliyor, uygun durumda tanisma randevusu ayarlaniyor. Ev kosullari ve zaman plani onceden konusuluyor."
+      "Yetişkin köpek ev hayatına uyumlu, temel komutları biliyor ve insanlarla iletişimi sakin. Yoğun olmayan, stabil bir ev ortamı hedefleniyor.",
+      "Görüşmeler önce mesaj ile başlıyor, uygun durumda tanışma randevusu ayarlanıyor. Ev koşulları ve zaman planı önceden konuşuluyor."
     ],
     trustNotes: [
-      "Temel egitim ve rutin notlari paylasildi.",
-      "Koruyucu aile aktif geri donus sagliyor.",
-      "Eslesme surecinde kontrollu ilerleniyor."
+      "Temel eğitim ve rutin notları paylaşıldı.",
+      "Koruyucu aile aktif geri dönüş sağlıyor.",
+      "Eşleşme sürecinde kontrollü ilerleniyor."
     ],
     similarIds: ["cm-2", "cm-1"]
   },
   {
     id: "cm-5",
-    title: "Veteriner sonrasi gecici tasima destegi",
+    title: "Veteriner sonrası geçici taşıma desteği",
     categoryKey: "diger",
-    category: "Diger",
+    category: "Diğer",
     city: "Bursa",
-    district: "Nilufer",
-    summary: "Kisa sureli tasima ve refakat destegi araniyor.",
-    status: "Bugun oncelikli",
+    district: "Nilüfer",
+    summary: "Kısa süreli taşıma ve refakat desteği aranıyor.",
+    status: "Bugün öncelikli",
     author: "Pelin Yildiz",
-    authorRole: "Topluluk cagrisi",
+    authorRole: "Topluluk çağrısı",
     dateLabel: "Bugun",
     imageUri: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=1200&q=80",
-    visualLabel: "Kisa sureli destek",
+    visualLabel: "Kısa süreli destek",
     supportWindow: "Aksam saatlerine kadar",
-    quickActionLabel: "Mesaj Gonder",
+    quickActionLabel: "Mesaj Gönder",
     trustState: "pending" as const,
-    trustLabel: "Hizli yardim cagrisi",
+    trustLabel: "Hızlı yardım çağrısı",
     description: [
-      "Veteriner cikisi sonrasinda hayvani guvenli sekilde eve ulastirmak icin kisa sureli refakat destegi aranıyor.",
-      "Konum ve saat bilgisi net oldugu icin hizli mesajlasma ile plan yapmak oncelikli."
+      "Veteriner çıkışı sonrasında hayvanı güvenli şekilde eve ulaştırmak için kısa süreli refakat desteği aranıyor.",
+      "Konum ve saat bilgisi net olduğu için hızlı mesajlaşma ile plan yapmak öncelikli."
     ],
     trustNotes: [
       "Saat ve konum bilgisi net girildi.",
-      "Hizli organize olunmasi gereken bir yardim talebi.",
-      "Mesajlasma ile detaylar aninda paylasiliyor."
+      "Hızlı organize olunması gereken bir yardım talebi.",
+      "Mesajlaşma ile detaylar anında paylaşılıyor."
     ],
     similarIds: ["cm-3", "cm-1"]
   }
@@ -228,15 +228,15 @@ export const petshopCampaigns = [
   {
     id: "ps-1",
     storeId: "store-1",
-    title: "Premium mama bahar kampanyasi",
+    title: "Premium mama bahar kampanyası",
     city: "Istanbul",
     priceLabel: "799 TL",
-    summary: "Yetiskin kedi mamalarinda kampanyali paketler ve ayni gun teslimat.",
+    summary: "Yetişkin kedi mamalarında kampanyalı paketler ve aynı gün teslimat.",
     discount: "%20 indirim",
     storeName: "Pati Market",
-    deadline: "3 gun kaldi",
-    campaignLabel: "Bahar kampanyasi",
-    visualLabel: "Kedi + kopek mama serisi"
+    deadline: "3 gün kaldı",
+    campaignLabel: "Bahar kampanyası",
+    visualLabel: "Kedi + köpek mama serisi"
   },
   {
     id: "ps-2",
@@ -244,25 +244,25 @@ export const petshopCampaigns = [
     title: "Tasma ve oyuncak seti",
     city: "Ankara",
     priceLabel: "549 TL",
-    summary: "Kopekler icin kampanyali aksesuar paketi, stoklarla sinirli.",
+    summary: "Köpekler için kampanyalı aksesuar paketi, stoklarla sınırlı.",
     discount: "%15 indirim",
     storeName: "Miyav Store",
     deadline: "Hafta sonuna kadar",
     campaignLabel: "Yeni sezon",
-    visualLabel: "Aksesuar seckisi"
+    visualLabel: "Aksesuar seçkisi"
   },
   {
     id: "ps-3",
     storeId: "store-3",
-    title: "Mini irk kuru mama paketi",
+    title: "Mini ırk kuru mama paketi",
     city: "Izmir",
     priceLabel: "459 TL",
-    summary: "Mini irk kopekler icin ozel formullu mama paketinde stok temizleme kampanyasi.",
+    summary: "Mini ırk köpekler için özel formüllü mama paketinde stok temizleme kampanyası.",
     discount: "%10 indirim",
     storeName: "Dost Petshop",
     deadline: "Son 48 saat",
-    campaignLabel: "Stok firsati",
-    visualLabel: "Mini irk secimi"
+    campaignLabel: "Stok fırsatı",
+    visualLabel: "Mini ırk seçimi"
   }
 ];
 

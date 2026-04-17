@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import { ApiError } from "../../../core/api/errors";
 import { authApi } from "../../../core/api/services/authApi";
-import { mediaApi } from "../../../core/api/services/mediaApi";
+import { uploadMediaAsset } from "../../../core/media/uploadMediaAsset";
 import { usersApi } from "../../../core/api/services/usersApi";
 import { clearStoredAuthTokens, getStoredAuthTokens, setStoredAuthTokens } from "../../../core/api/tokenStorage";
 import type { MyProfile } from "../../../core/api/contracts";
@@ -60,9 +60,9 @@ type SessionState = {
   completeOnboarding: () => void;
   completeProfileSetup: (payload: ProfileSetupValues) => Promise<void>;
   saveCaregiverDraft: (payload: CaregiverActivationValues) => void;
-  submitCaregiverProfile: (payload: CaregiverActivationValues) => void;
+  submitCaregiverProfile: (payload: CaregiverActivationValues) => Promise<void>;
   savePetshopDraft: (payload: PetshopActivationValues) => void;
-  submitPetshopApplication: (payload: PetshopActivationValues) => void;
+  submitPetshopApplication: (payload: PetshopActivationValues) => Promise<void>;
   saveCreateDraft: (
     listingType: CreateListingType,
     payload: CreateWizardValues,
@@ -268,38 +268,11 @@ async function uploadProfileAvatar(uri: string) {
     };
   }
 
-  const fileName = uri.split("/").pop() || `avatar-${Date.now()}.jpg`;
-  const extension = fileName.split(".").pop()?.toLowerCase();
-  const contentType =
-    extension === "png"
-      ? "image/png"
-      : extension === "webp"
-        ? "image/webp"
-        : "image/jpeg";
   try {
-    const { uploadUrl, publicUrl } = await mediaApi.createPresignedUploadUrl({
-      fileName,
-      contentType,
-      folder: "avatars"
-    });
-    const fileResponse = await fetch(uri);
-    const fileBlob = await fileResponse.blob();
-    const uploadResponse = await fetch(uploadUrl, {
-      method: "PUT",
-      headers: {
-        "Content-Type": contentType
-      },
-      body: fileBlob
-    });
-
-    if (!uploadResponse.ok) {
-      throw new Error("Profil fotografi yuklenemedi.");
-    }
-
-    return {
-      avatar: publicUrl,
-      persisted: true
-    };
+    const uploaded = await uploadMediaAsset({ folder: "avatars", uri });
+    // uploadMediaAsset upload hatalarında yerel URI'yi döndürür — API'ye gönderme
+    const persisted = !uploaded.startsWith("file:");
+    return { avatar: uploaded, persisted };
   } catch (error) {
     if (
       error instanceof ApiError ||
@@ -308,10 +281,7 @@ async function uploadProfileAvatar(uri: string) {
           error.message.includes("presigned") ||
           error.message.includes("Sunucuya ulasilamadi")))
     ) {
-      return {
-        avatar: uri,
-        persisted: false
-      };
+      return { avatar: uri, persisted: false };
     }
 
     throw error;
@@ -463,14 +433,24 @@ export const useSessionStore = create<SessionState>()(
             caregiverProfile
           };
         }),
-      submitCaregiverProfile: (payload) =>
+      submitCaregiverProfile: async (payload) => {
+        const normalized = normalizeCaregiverProfile(payload);
+        const experience = Number(normalized.experienceYears) || 0;
+        const dailyRate = Number(normalized.rateExpectation) || 0;
+
+        const updatedProfile = await usersApi.convertToSitter({
+          experience,
+          bio: normalized.profileBio,
+          dailyRate,
+          services: normalized.serviceTypes
+        });
+
         set((state) => ({
-          caregiverStatus: "active",
-          caregiverProfile: normalizeCaregiverProfile(payload, {
-            city: state.user?.city,
-            district: state.user?.district
-          })
-        })),
+          ...toSessionState(updatedProfile, state.profileGoal, state),
+          hasCompletedOnboarding: state.hasCompletedOnboarding,
+          hasCompletedProfileSetup: state.hasCompletedProfileSetup
+        }));
+      },
       savePetshopDraft: (payload) =>
         set((state) => {
           const petshopProfile = normalizePetshopProfile(payload, {
@@ -483,14 +463,24 @@ export const useSessionStore = create<SessionState>()(
             petshopProfile
           };
         }),
-      submitPetshopApplication: (payload) =>
+      submitPetshopApplication: async (payload) => {
+        const normalized = normalizePetshopProfile(payload);
+
+        const updatedProfile = await usersApi.convertToPetshop({
+          businessName: normalized.businessName,
+          taxNumber: normalized.taxNumber,
+          address: normalized.address,
+          latitude: 0,
+          longitude: 0,
+          phoneNumber: normalized.contactPhone
+        });
+
         set((state) => ({
-          petshopStatus: "in_review",
-          petshopProfile: normalizePetshopProfile(payload, {
-            email: state.user?.email,
-            fullName: state.user?.fullName
-          })
-        })),
+          ...toSessionState(updatedProfile, state.profileGoal, state),
+          hasCompletedOnboarding: state.hasCompletedOnboarding,
+          hasCompletedProfileSetup: state.hasCompletedProfileSetup
+        }));
+      },
       saveCreateDraft: (listingType, payload, currentStep) =>
         set((state) => ({
           createDrafts: {

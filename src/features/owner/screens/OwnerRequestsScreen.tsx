@@ -3,8 +3,8 @@ import { StyleSheet, View } from "react-native";
 import { spacing } from "../../../core/theme/tokens";
 import { ownerRequests } from "../../../shared/mocks/marketplace";
 import { InfoCard } from "../../../shared/ui/InfoCard";
-import { MarketplaceCard } from "../../../shared/ui/MarketplaceCard";
 import { ModeBadge } from "../../../shared/ui/ModeBadge";
+import { OwnerRequestCard } from "../../../shared/ui/OwnerRequestCard";
 import { ScreenContainer } from "../../../shared/ui/ScreenContainer";
 import { VisualHero } from "../../../shared/ui/VisualHero";
 
@@ -31,17 +31,15 @@ export function OwnerRequestsScreen() {
 
       <View style={styles.list}>
         {ownerRequests.map((request) => (
-          <MarketplaceCard
+          <OwnerRequestCard
             key={request.id}
-            chips={[
-              { icon: "map-marker-outline", label: request.city, tone: "neutral" },
-              { icon: "paw-outline", label: request.petType, tone: "success" },
-              { icon: "calendar-range", label: request.schedule, tone: "warning" }
-            ]}
-            icon="clipboard-text-clock-outline"
-            summary={request.summary}
+            budget={request.budget}
+            dateLabel={request.dateLabel}
+            description={request.summary}
+            distanceLabel={request.distanceLabel}
+            location={request.city}
+            petType={request.petType}
             title={request.title}
-            tone="success"
           />
         ))}
       </View>

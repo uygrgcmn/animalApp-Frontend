@@ -4,12 +4,13 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { colors } from "../../core/theme/colors";
-import { radius, shadows, spacing } from "../../core/theme/tokens";
-import { AppIcon, type AppIconName } from "./AppIcon";
+import { radius, spacing } from "../../core/theme/tokens";
+import type { AppIconName } from "./AppIcon";
 
 type NavigationCardProps = {
   description: string;
   icon: AppIconName;
+  iconColor?: string;
   rightMeta?: ReactNode;
   title: string;
 } & PressableProps;
@@ -17,6 +18,7 @@ type NavigationCardProps = {
 export function NavigationCard({
   description,
   icon,
+  iconColor = colors.primary,
   rightMeta,
   title,
   ...pressableProps
@@ -26,17 +28,22 @@ export function NavigationCard({
       style={({ pressed }) => [styles.card, pressed ? styles.pressed : null]}
       {...pressableProps}
     >
-      <View style={styles.leading}>
-        <AppIcon name={icon} size={20} />
-        <View style={styles.texts}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.description}>{description}</Text>
-        </View>
+      <View style={[styles.iconContainer, { backgroundColor: `${iconColor}18` }]}>
+        <MaterialCommunityIcons color={iconColor} name={icon as any} size={20} />
       </View>
 
-      <View style={styles.trailing}>
-        {rightMeta}
-        <MaterialCommunityIcons color={colors.textSubtle} name="chevron-right" size={20} />
+      <View style={styles.content}>
+        <View style={styles.texts}>
+          <Text style={styles.title}>{title}</Text>
+          <Text numberOfLines={1} style={styles.description}>
+            {description}
+          </Text>
+        </View>
+
+        <View style={styles.trailing}>
+          {rightMeta}
+          <MaterialCommunityIcons color={colors.textTertiary} name="chevron-right" size={18} />
+        </View>
       </View>
     </Pressable>
   );
@@ -44,39 +51,45 @@ export function NavigationCard({
 
 const styles = StyleSheet.create({
   card: {
-    ...shadows.card,
     alignItems: "center",
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.large,
-    borderWidth: 1,
     flexDirection: "row",
-    justifyContent: "space-between",
-    minHeight: 84,
-    padding: spacing.standard
+    gap: spacing.standard,
+    paddingHorizontal: spacing.standard,
+    paddingVertical: spacing.compact + 2
   },
-  description: {
-    color: colors.textMuted,
-    fontSize: 13,
-    lineHeight: 20
-  },
-  leading: {
+  content: {
     alignItems: "center",
+    borderBottomColor: colors.divider,
+    borderBottomWidth: 1,
     flex: 1,
     flexDirection: "row",
-    gap: spacing.compact
+    justifyContent: "space-between",
+    paddingBottom: spacing.compact + 2
+  },
+  description: {
+    color: colors.textSubtle,
+    fontSize: 13,
+    lineHeight: 18
+  },
+  iconContainer: {
+    alignItems: "center",
+    borderRadius: radius.medium,
+    height: 38,
+    justifyContent: "center",
+    width: 38
   },
   pressed: {
-    opacity: 0.92
+    opacity: 0.65
   },
   texts: {
     flex: 1,
-    gap: spacing.micro
+    gap: 2
   },
   title: {
     color: colors.text,
     fontSize: 15,
-    fontWeight: "800"
+    fontWeight: "700"
   },
   trailing: {
     alignItems: "center",

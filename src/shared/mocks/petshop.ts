@@ -23,11 +23,11 @@ export const petshopStores: PetshopStoreProfile[] = [
     responseRate: "%96 geri donus",
     responseTime: "Ortalama 18 dk",
     storeName: "Pati Market",
-    tagline: "Premium mama ve hizli teslimat odakli magaza",
+    tagline: "Premium mama ve hızlı teslimat odaklı mağaza",
     summary:
-      "Mamalar, hijyen urunleri ve ayni gun teslimat odakli kampanyalarla guven veren bir magaza profili. Kurumsal tonunu korurken uygulamanin genel diline uyumlu kalir.",
+      "Mamalar, hijyen ürünleri ve aynı gün teslimat odaklı kampanyalarla güven veren bir mağaza profili. Kurumsal tonunu korurken uygulamanın genel diline uyumlu kalır.",
     trustNotes: [
-      "Magaza dogrulama belgeleri aktif.",
+      "Mağaza doğrulama belgeleri aktif.",
       "Teslimat ve stok bilgileri gunluk guncelleniyor.",
       "Musteri mesajlarina hizli geri donus sagliyor."
     ],
@@ -43,10 +43,10 @@ export const petshopStores: PetshopStoreProfile[] = [
     storeName: "Miyav Store",
     tagline: "Aksesuar ve sezon kampanyalari odakli vitrin",
     summary:
-      "Aksesuar kategorisinde duzenli kampanyalar acan, urun sunumunu temiz gorsellerle destekleyen magaza. Kisa sureli kampanyalarda hizli iletisim one cikiyor.",
+      "Aksesuar kategorisinde düzenli kampanyalar açan, ürün sunumunu temiz görsellerle destekleyen mağaza. Kısa süreli kampanyalarda hızlı iletişim öne çıkıyor.",
     trustNotes: [
       "Kampanya sartlari net yaziliyor.",
-      "Gorsel ve fiyat bilgisi tutarli.",
+      "Görsel ve fiyat bilgisi tutarlı.",
       "Destek hattina hizli ulasilabiliyor."
     ],
     verifiedState: "verified"
@@ -61,7 +61,7 @@ export const petshopStores: PetshopStoreProfile[] = [
     storeName: "Dost Petshop",
     tagline: "Kisa sureli firsatlar ve stok odakli kampanya dili",
     summary:
-      "Stok bazli kampanyalari hizli acan ve mini irk urunlerinde guclu secenekler sunan bir magaza profili. Acik kampanya kosullari ile guven vermeyi hedefler.",
+      "Stok bazlı kampanyaları hızlı açan ve mini ırk ürünlerinde güçlü seçenekler sunan bir mağaza profili. Açık kampanya koşulları ile güven vermeyi hedefler.",
     trustNotes: [
       "Stok kampanyalari aktif takip ediliyor.",
       "Kampanya kosullari acik belirtiliyor.",
@@ -97,9 +97,9 @@ export const managedPetshopCampaigns = [
 
 export const petshopPerformanceSummary = {
   conversion: "%7.8 etkileşim",
-  monthlyViews: "27.2K aylik goruntulenme",
+  monthlyViews: "27.2K aylık görüntülenme",
   unreadMessages: 11,
-  verificationLabel: "Belge ve magaza kimligi guncel"
+  verificationLabel: "Belge ve mağaza kimliği güncel"
 };
 
 export function getStoreById(storeId: string) {

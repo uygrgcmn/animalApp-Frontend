@@ -1,159 +1,176 @@
 import { useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors } from "../../../core/theme/colors";
-import { spacing, typography } from "../../../core/theme/tokens";
-import { EmptyState } from "../../../shared/ui/EmptyState";
-import { MetaPill } from "../../../shared/ui/MetaPill";
-import { ScreenContainer } from "../../../shared/ui/ScreenContainer";
-import { SearchBar } from "../../../shared/ui/SearchBar";
-import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
+import { shadows, spacing, typography } from "../../../core/theme/tokens";
 import { conversations } from "../../../shared/mocks/messages";
 import { getMockItemHref } from "../../../shared/utils/mockNavigation";
+import { EmptyState } from "../../../shared/ui/EmptyState";
+import { SearchBar } from "../../../shared/ui/SearchBar";
+import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
 import { ConversationPreviewCard } from "../components/ConversationPreviewCard";
 
 type MessageFilter = "all" | "unread" | "archived";
 
 const filterOptions: { label: string; value: MessageFilter }[] = [
-  { label: "Tum Konusmalar", value: "all" },
-  { label: "Okunmamis", value: "unread" },
-  { label: "Arsiv", value: "archived" }
+  { label: "Tüm Konuşmalar", value: "all" },
+  { label: "Okunmamış", value: "unread" },
+  { label: "Arşiv", value: "archived" }
 ];
 
 export function MessagesScreen() {
+  const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<MessageFilter>("all");
   const [searchValue, setSearchValue] = useState("");
 
   const filteredConversations = useMemo(() => {
-    const normalizedSearch = searchValue.trim().toLowerCase();
-
+    const q = searchValue.trim().toLowerCase();
     return conversations.filter((item) => {
-      if (filter === "unread" && item.unreadCount === 0) {
-        return false;
-      }
-
-      if (filter === "archived" && !item.archived) {
-        return false;
-      }
-
-      if (filter === "all" && item.archived) {
-        return false;
-      }
-
-      if (!normalizedSearch) {
-        return true;
-      }
-
+      if (filter === "unread" && item.unreadCount === 0) return false;
+      if (filter === "archived" && !item.archived) return false;
+      if (filter === "all" && item.archived) return false;
+      if (!q) return true;
       return (
-        item.participantName.toLowerCase().includes(normalizedSearch) ||
-        item.listingTitle.toLowerCase().includes(normalizedSearch) ||
-        item.lastMessage.toLowerCase().includes(normalizedSearch)
+        item.participantName.toLowerCase().includes(q) ||
+        item.listingTitle.toLowerCase().includes(q) ||
+        item.lastMessage.toLowerCase().includes(q)
       );
     });
   }, [filter, searchValue]);
 
-  const unreadCount = conversations.reduce((total, item) => total + item.unreadCount, 0);
+  const totalUnread = useMemo(
+    () => conversations.filter((c) => !c.archived && c.unreadCount > 0).length,
+    []
+  );
 
   return (
-    <ScreenContainer contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mesajlar</Text>
-      </View>
+    <View style={styles.root}>
+      {/* ── Sticky header ── */}
+      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+        <View style={styles.headerTop}>
+          <View style={styles.headerTitleBlock}>
+            <Text style={styles.headerOverline}>MESAJLAR</Text>
+            <Text style={styles.headerTitle}>Konuşmalar</Text>
+          </View>
+          {totalUnread > 0 && (
+            <View style={styles.unreadBadge}>
+              <Text style={styles.unreadCount}>{totalUnread}</Text>
+              <Text style={styles.unreadLabel}>okunmamış</Text>
+            </View>
+          )}
+        </View>
 
-      <View style={styles.searchSection}>
         <SearchBar
           onChangeText={setSearchValue}
-          placeholder="Kisi, ilan veya mesaj ara..."
+          placeholder="Konuşma veya kişi ara..."
           value={searchValue}
         />
-      </View>
 
-      <View style={styles.tabSection}>
         <SegmentedTabs onChange={setFilter} options={filterOptions} value={filter} />
+
+        <View style={styles.divider} />
       </View>
 
-      <View style={styles.metaSummary}>
-        <MetaPill
-          icon="message-text-outline"
-          label={`${filteredConversations.length} Konusma`}
-          tone="primary"
-        />
-        {unreadCount > 0 && (
-          <MetaPill
-            icon="message-alert-outline"
-            label={`${unreadCount} Okunmamis`}
-            tone="warning"
-          />
-        )}
-      </View>
-
-      <View style={styles.resultsContainer}>
-        {filteredConversations.length > 0 ? (
-          <View style={styles.list}>
-            {filteredConversations.map((conversation) => (
-              <ConversationPreviewCard
-                key={conversation.id}
-                href={{
-                  params: {
-                    conversationId: conversation.id
-                  },
-                  pathname: "/(app)/messages/[conversationId]"
-                }}
-                lastMessage={conversation.lastMessage}
-                listingHref={String(getMockItemHref(conversation.listingKind, conversation.listingId))}
-                listingTitle={conversation.listingTitle}
-                listingType={conversation.listingType}
-                participantName={conversation.participantName}
-                participantRole={conversation.participantRole}
-                unreadCount={conversation.unreadCount}
-                updatedAt={conversation.updatedAt}
-              />
-            ))}
-          </View>
-        ) : (
+      {/* ── Conversation list ── */}
+      {filteredConversations.length > 0 ? (
+        <ScrollView
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {filteredConversations.map((conversation) => (
+            <ConversationPreviewCard
+              key={conversation.id}
+              href={{
+                params: { conversationId: conversation.id },
+                pathname: "/(app)/messages/[conversationId]"
+              }}
+              lastMessage={conversation.lastMessage}
+              listingHref={String(getMockItemHref(conversation.listingKind, conversation.listingId))}
+              listingTitle={conversation.listingTitle}
+              listingType={conversation.listingType}
+              participantName={conversation.participantName}
+              participantRole={conversation.participantRole}
+              unreadCount={conversation.unreadCount}
+              updatedAt={conversation.updatedAt}
+            />
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.emptyWrap}>
           <EmptyState
-            description="Aradiginiz kriterlere uygun bir yazisma bulunamadi."
+            description={
+              filter === "unread"
+                ? "Tüm mesajlarınızı okudunuz."
+                : filter === "archived"
+                  ? "Arşivlenmiş konuşmanız bulunmuyor."
+                  : "Aradığınız kriterlere uygun konuşma bulunamadı."
+            }
             icon="message-text-outline"
-            title="Mesaj Yok"
+            title={filter === "unread" ? "Tamamdır!" : "Konuşma Yok"}
           />
-        )}
-      </View>
-    </ScreenContainer>
+        </View>
+      )}
+    </View>
   );
 }
 
+// ─── Styles ──────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  content: {
-    gap: spacing.section,
-    paddingBottom: spacing.large
+  divider: {
+    backgroundColor: colors.divider,
+    height: 1,
+    marginHorizontal: -spacing.comfortable,
+    marginTop: spacing.compact
+  },
+  emptyWrap: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: spacing.comfortable
   },
   header: {
-    gap: spacing.micro,
-    paddingHorizontal: spacing.micro
+    ...shadows.card,
+    backgroundColor: colors.surface,
+    gap: spacing.compact,
+    paddingBottom: spacing.standard,
+    paddingHorizontal: spacing.comfortable,
+    zIndex: 10
   },
-  headerSubtitle: {
-    color: colors.textMuted,
-    ...typography.body
+  headerOverline: {
+    ...typography.overline,
+    color: colors.primary
   },
   headerTitle: {
+    ...typography.h2,
     color: colors.text,
-    ...typography.display
+    marginTop: 2
   },
-  list: {
-    gap: spacing.compact
+  headerTitleBlock: {
+    flex: 1
   },
-  metaSummary: {
+  headerTop: {
+    alignItems: "flex-start",
     flexDirection: "row",
-    gap: spacing.tight,
-    paddingHorizontal: spacing.micro
+    justifyContent: "space-between"
   },
-  resultsContainer: {
-    marginTop: -spacing.micro
+  listContent: {
+    paddingBottom: 110
   },
-  searchSection: {
-    paddingHorizontal: spacing.micro
+  root: {
+    backgroundColor: colors.background,
+    flex: 1
   },
-  tabSection: {
-    paddingHorizontal: spacing.micro
+  unreadBadge: {
+    alignItems: "flex-end"
+  },
+  unreadCount: {
+    ...typography.h2,
+    color: colors.primary
+  },
+  unreadLabel: {
+    ...typography.caption,
+    color: colors.textMuted
   }
 });

@@ -5,7 +5,7 @@ import { colors } from "../../core/theme/colors";
 import { radius, shadows, spacing, typography } from "../../core/theme/tokens";
 
 type InfoCardProps = PropsWithChildren<{
-  description: string;
+  description?: string;
   rightSlot?: ReactNode;
   title: string;
   variant?: "default" | "accent";
@@ -23,7 +23,7 @@ export function InfoCard({
       <View style={styles.header}>
         <View style={styles.texts}>
           <Text style={styles.title}>{title}</Text>
-          <Text style={styles.description}>{description}</Text>
+          {description ? <Text style={styles.description}>{description}</Text> : null}
         </View>
         {rightSlot}
       </View>
@@ -36,15 +36,14 @@ const styles = StyleSheet.create({
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.large,
-    borderWidth: 1,
+    borderRadius: radius.xlarge,
     gap: spacing.standard,
     padding: spacing.comfortable
   },
   accentCard: {
-    backgroundColor: colors.backgroundAccent,
-    borderColor: colors.primaryBorder
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primaryBorder,
+    borderWidth: 1
   },
   header: {
     alignItems: "flex-start",
@@ -54,7 +53,7 @@ const styles = StyleSheet.create({
   },
   texts: {
     flex: 1,
-    gap: 6
+    gap: spacing.tight
   },
   title: {
     color: colors.text,
@@ -68,4 +67,3 @@ const styles = StyleSheet.create({
     gap: spacing.compact
   }
 });
-

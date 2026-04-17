@@ -45,27 +45,27 @@ export const createTypeMeta: Record<
   }
 > = {
   "caregiver-listing": {
-    description: "Bakici profiline uygun, guven veren ve hizmet odakli bir ilan olustur.",
+    description: "Bakıcı profiline uygun, güven veren ve hizmet odaklı bir ilan oluştur.",
     icon: "shield-account-outline",
-    label: "Bakici ilani paylas",
-    shortLabel: "Bakici Ilani"
+    label: "Bakıcı ilanı paylaş",
+    shortLabel: "Bakıcı İlanı"
   },
   "community-post": {
-    description: "Topluluga daha sicak ama duzenli bir paylasim akisi ac.",
+    description: "Topluluğa daha sıcak ama düzenli bir paylaşım akışı aç.",
     icon: "hand-heart-outline",
-    label: "Topluluk paylasimi olustur",
+    label: "Topluluk paylaşımı oluştur",
     shortLabel: "Topluluk"
   },
   "owner-request": {
-    description: "Evcil hayvanin icin bakici aradigin net bir talep akisi hazirla.",
+    description: "Evcil hayvanın için bakıcı aradığın net bir talep akışı hazırla.",
     icon: "paw-outline",
-    label: "Bakici ariyorum ilani paylas",
-    shortLabel: "Bakici Ariyorum"
+    label: "Bakıcı arıyorum ilanı paylaş",
+    shortLabel: "Bakıcı Arıyorum"
   },
   "petshop-campaign": {
-    description: "Magazana ait kampanyayi kurumsal bir sunumla yayina hazirla.",
+    description: "Mağazana ait kampanyayı kurumsal bir sunumla yayına hazırla.",
     icon: "storefront-outline",
-    label: "Petshop kampanyasi olustur",
+    label: "Petshop kampanyası oluştur",
     shortLabel: "Petshop"
   }
 };
@@ -100,7 +100,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
   if (!values.listingType) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Devam etmek icin bir icerik tipi sec.",
+      message: "Devam etmek için bir içerik tipi seç.",
       path: ["listingType"]
     });
     return;
@@ -109,7 +109,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
   if (values.title.length < 4) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Baslik en az 4 karakter olmali.",
+      message: "Başlık en az 4 karakter olmalı.",
       path: ["title"]
     });
   }
@@ -117,7 +117,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
   if (values.city.length < 2) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Sehir gerekli.",
+      message: "Şehir gerekli.",
       path: ["city"]
     });
   }
@@ -125,7 +125,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
   if (values.district.length < 2) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Ilce gerekli.",
+      message: "İlçe gerekli.",
       path: ["district"]
     });
   }
@@ -133,7 +133,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
   if (values.description.length < 24) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "Aciklama en az 24 karakter olmali.",
+      message: "Açıklama en az 24 karakter olmalı.",
       path: ["description"]
     });
   }
@@ -141,7 +141,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
   if (values.media.length < 1) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      message: "En az bir gorsel ekle.",
+      message: "En az bir görsel ekle.",
       path: ["media"]
     });
   }
@@ -150,7 +150,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
     if (values.caregiverServiceTypes.length < 1) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "En az bir hizmet turu sec.",
+        message: "En az bir hizmet türü seç.",
         path: ["caregiverServiceTypes"]
       });
     }
@@ -158,7 +158,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
     if (values.caregiverRate.length < 2) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Ucret beklentisi gerekli.",
+        message: "Ücret beklentisi gerekli.",
         path: ["caregiverRate"]
       });
     }
@@ -166,7 +166,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
     if (values.caregiverExperience.length < 12) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Deneyim ozeti en az 12 karakter olmali.",
+        message: "Deneyim özeti en az 12 karakter olmalı.",
         path: ["caregiverExperience"]
       });
     }
@@ -176,7 +176,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
     if (values.ownerDatePlan.length < 2) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Bakim tarihini veya plani belirt.",
+        message: "Bakım tarihini veya planı belirt.",
         path: ["ownerDatePlan"]
       });
     }
@@ -184,7 +184,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
     if (values.ownerBudget.length < 2) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Butce bilgisi gerekli.",
+        message: "Bütçe bilgisi gerekli.",
         path: ["ownerBudget"]
       });
     }
@@ -192,7 +192,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
     if (values.ownerCareNeeds.length < 1) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "En az bir bakim ihtiyaci sec.",
+        message: "En az bir bakım ihtiyacı seç.",
         path: ["ownerCareNeeds"]
       });
     }
@@ -202,7 +202,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
     if (values.communitySupportWindow.length < 2) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Paylasimin ne kadar sure gecerli oldugunu belirt.",
+        message: "Paylaşımın ne kadar süre geçerli olduğunu belirt.",
         path: ["communitySupportWindow"]
       });
     }
@@ -212,7 +212,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
     if (values.petshopStoreName.length < 2) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Magaza adi gerekli.",
+        message: "Mağaza adı gerekli.",
         path: ["petshopStoreName"]
       });
     }
@@ -220,7 +220,7 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
     if (values.petshopDiscount.length < 2) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Indirim bilgisi gerekli.",
+        message: "İndirim bilgisi gerekli.",
         path: ["petshopDiscount"]
       });
     }

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { colors } from "../../core/theme/colors";
 import { radius, shadows, spacing, typography } from "../../core/theme/tokens";
@@ -44,67 +45,76 @@ export function CommunityCard({
           <Image source={{ uri: imageUri }} style={styles.image} />
         ) : (
           <View style={styles.visualFallback}>
-            <AppIcon name="hand-heart-outline" size={28} tone="success" />
+            <AppIcon name="hand-heart-outline" size={36} tone="success" />
           </View>
         )}
-        <View style={styles.visualOverlay}>
+        <LinearGradient
+          colors={["transparent", "rgba(15,23,42,0.6)"]}
+          style={styles.visualOverlay}
+        >
           <StatusPill label={category} tone="success" />
           {visualLabel ? <Text style={styles.visualLabel}>{visualLabel}</Text> : null}
-        </View>
+        </LinearGradient>
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
-        <Text numberOfLines={3} style={styles.description}>
+        <Text numberOfLines={1} style={styles.title}>{title}</Text>
+        <Text numberOfLines={2} style={styles.description}>
           {description}
         </Text>
-        <View style={styles.metaRow}>
-          <MetaPill icon="map-marker-outline" label={location} tone="neutral" />
-          <MetaPill icon="account-outline" label={author} tone="primary" />
-          <MetaPill icon="clock-outline" label={dateLabel} tone="warning" />
-        </View>
-        <View style={styles.footerRow}>
-          {authorRole ? (
-            <MetaPill icon="account-group-outline" label={authorRole} tone="neutral" />
-          ) : null}
-          <VerificationBadge state={verificationState} />
+
+        <View style={styles.metaContainer}>
+          <View style={styles.metaRow}>
+            <MetaPill icon="map-marker-outline" label={location} tone="neutral" />
+            <MetaPill icon="clock-outline" label={dateLabel} tone="warning" />
+          </View>
+          <View style={styles.metaRow}>
+            <MetaPill
+              icon="account-outline"
+              label={authorRole ? `${author} · ${authorRole}` : author}
+              tone="primary"
+            />
+            <VerificationBadge state={verificationState} />
+          </View>
         </View>
       </View>
 
-      {actionSlot}
+      {actionSlot && <View style={styles.actionArea}>{actionSlot}</View>}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  actionArea: {
+    marginTop: spacing.tight
+  },
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.large,
-    borderWidth: 1,
-    gap: spacing.standard,
-    padding: spacing.standard
+    borderRadius: radius.xlarge,
+    overflow: "hidden",
+    padding: spacing.standard,
+    width: "100%"
   },
   content: {
-    gap: spacing.tight
+    gap: spacing.tight,
+    marginTop: spacing.standard
   },
   description: {
     color: colors.textMuted,
+    minHeight: 40,
     ...typography.body
-  },
-  footerRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.tight,
-    justifyContent: "space-between"
   },
   image: {
     height: "100%",
     width: "100%"
   },
+  metaContainer: {
+    gap: spacing.micro,
+    marginTop: spacing.micro
+  },
   metaRow: {
+    alignItems: "center",
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.tight
@@ -117,29 +127,30 @@ const styles = StyleSheet.create({
     ...typography.h3
   },
   visualArea: {
-    backgroundColor: "#FFF7ED",
-    borderRadius: radius.large,
-    minHeight: 148,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.medium,
+    height: 160,
     overflow: "hidden",
     position: "relative"
   },
   visualFallback: {
     alignItems: "center",
-    backgroundColor: "#FEF3C7",
+    backgroundColor: colors.successSoft,
     flex: 1,
     justifyContent: "center"
   },
   visualLabel: {
+    ...typography.caption,
     color: colors.textInverse,
-    ...typography.caption
+    fontWeight: "600"
   },
   visualOverlay: {
-    backgroundColor: "#0F172A55",
+    alignItems: "center",
     bottom: 0,
-    gap: spacing.tight,
+    flexDirection: "row",
+    justifyContent: "space-between",
     left: 0,
-    minHeight: 72,
-    padding: spacing.standard,
+    padding: spacing.compact,
     position: "absolute",
     right: 0
   }

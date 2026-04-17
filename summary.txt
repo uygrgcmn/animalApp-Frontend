@@ -1,0 +1,162 @@
+# TURKISH ASCII-ONLY STRING FINDINGS REPORT
+# ============================================
+# Project: animalApp-Frontend
+# Search Path: C:\Users\uygar\animalApp-Frontend\src
+
+## SUMMARY OF FINDINGS
+- Total files with Turkish ASCII-only strings: 39
+- Primary pattern matches: Sifre, Ilan, Olustur, Kullanici, Bakici, Ozellik, Iletisim, and related words
+
+## CRITICAL FILES (Most Matches) - User-Facing Strings:
+
+### 1. C:\Users\uygar\animalApp-Frontend\src\shared\mocks\listingDetails.ts (45 matches)
+   - Contains extensive test/mock data with numerous Turkish ASCII-only strings
+   - Patterns: "Ozellik", "duzenli", "konaklamali", "Bakici Ilani", "kullanicilar", "guven", etc.
+   - Impact: Mock data file - may affect testing/development displays
+
+### 2. C:\Users\uygar\animalApp-Frontend\src\features\create\screens\CreateEntryScreen.tsx (44 matches)
+   - Line 214: message: "Once hangi tur icerik olusturacagini sec." (Should be: "Öncü hangi tür içerik oluşturacağını seç.")
+   - Line 285: title="Ilan Olustur" (Should be: title="İlan Oluştur")
+   - Line 508: title="Bakici ilani detaylari" (Should be: title="Bakıcı ilanı detayları")
+   - Line 619: description="Bakici arayan kullanicinin beklentisi..." (Should be: "Bakıcı arayan kullanıcının...")
+   - Line 725: description="...duzenli kalmali; kategori ve iletisim..." (Should be: "düzenli kalmalı; kategori ve iletişim")
+   - Line 1103: <Text>ILAN OLUSTUR</Text> (Should be: İLAN OLUŞTUR)
+   - HIGH PRIORITY: Direct user-facing UI
+
+### 3. C:\Users\uygar\animalApp-Frontend\src\shared\mocks\marketplace.ts (21 matches)
+   - Similar pattern to listingDetails.ts - mock data with ASCII-only Turkish
+
+### 4. C:\Users\uygar\animalApp-Frontend\src\shared\mocks\petshop.ts (11 matches)
+   - Mock data containing ASCII-only Turkish strings
+
+### 5. C:\Users\uygar\animalApp-Frontend\src\shared\mocks\profile.ts (10 matches)
+   - Multiple instances of "Bakici Ilani" (Should be: "Bakıcı İlanı")
+   - Mock data file
+
+### 6. C:\Users\uygar\animalApp-Frontend\src\features\profile\utils\modeStatus.ts (13 matches)
+   - Line 124: label: "Hizmet bolgesi" (Should be: "Hizmet bölgesi")
+   - Line 125: label: "Ilce bilgisi" (Should be: "İlçe bilgisi")
+   - Line 139: label: "Iletisim telefonu" (Should be: "İletişim telefonu")
+   - Line 140: label: "Iletisim e-postasi" (Should be: "İletişim e-postası")
+   - Line 143: label: "Magaza gorselleri" (Should be: "Mağaza görselleri")
+   - Line 146: label: "Dogrulama belgeleri" (Should be: "Doğrulama belgeleri")
+   - Line 297: return: "Duzenle" (Should be: "Düzenle")
+   - Line 309: return: "Duzenle" (Should be: "Düzenle")
+   - Line 313: return: "Basvuruyu Guncelle" (Should be: "Başvuruyu Güncelle")
+   - HIGH PRIORITY: User profile settings labels
+
+### 7. C:\Users\uygar\animalApp-Frontend\src\core\navigation\routes.ts (1 match)
+   - Line 56: label: "Ilan Olustur" (Should be: "İlan Oluştur")
+   - HIGH PRIORITY: Main tab navigation label visible on bottom tab bar
+
+### 8. C:\Users\uygar\animalApp-Frontend\src\features\auth\schemas.ts (6 matches)
+   - Line 5: "Sifre en az 6 karakter olmali." (Should be: "Şifre en az 6 karakter olmalı.")
+   - Line 11: "Sifre en az 6 karakter olmali." (Should be: "Şifre en az 6 karakter olmalı.")
+   - HIGH PRIORITY: Password validation error messages (user-facing)
+
+### 9. C:\Users\uygar\animalApp-Frontend\src\features\auth\screens\ForgotPasswordScreen.tsx (1 match)
+   - Line 52: "Sifre yenileme talebi gonderilirken beklenmeyen bir sorun olustu." 
+     (Should be: "Şifre yenileme talebi gönderilirken beklenmeyen bir sorun oluştu.")
+   - HIGH PRIORITY: Error message displayed to user
+
+### 10. C:\Users\uygar\animalApp-Frontend\src\features\create\schemas.ts (14 matches)
+   - Line 48: description: "Bakici profiline uygun, guven veren ve hizmet odakli bir ilan olustur."
+     (Should be: "Bakıcı profiline uygun, güven veren ve hizmet odaklı bir ilan oluştur.")
+   - Line 50: label: "Bakici ilani paylas" (Should be: "Bakıcı ilanı paylaş")
+   - Line 51: shortLabel: "Bakici Ilani" (Should be: "Bakıcı İlanı")
+   - Line 56: label: "Topluluk paylasimi olustur" (Should be: "Topluluk paylaşımı oluştur")
+   - Line 68: label: "Petshop kampanyasi olustur" (Should be: "Petshop kampanyası oluştur")
+   - HIGH PRIORITY: Feature selection descriptions and labels
+
+### 11. C:\Users\uygar\animalApp-Frontend\src\features\petshop\screens\PetshopActivationScreen.tsx (12 matches)
+   - Multiple ASCII-only strings in petshop onboarding flow
+
+### 12. C:\Users\uygar\animalApp-Frontend\src\features\petshop\screens\PetshopStoreProfileScreen.tsx (11 matches)
+   - Store profile configuration strings with ASCII-only Turkish
+
+## MODERATE PRIORITY FILES (Detailed User-Facing Content):
+
+### 13. C:\Users\uygar\animalApp-Frontend\src\features\caregiver\screens\CaregiverMarketplaceScreen.tsx (10 matches)
+   - Line 142: description="Su an yayinda bakici ilani yok. Biraz sonra tekrar kontrol edebilirsin."
+     (Should be: "Şu an yayında bakıcı ilanı yok. Biraz sonra tekrar kontrol edebilirsin.")
+   - Empty state messaging to users
+
+### 14. C:\Users\uygar\animalApp-Frontend\src\features\design-system\screens\DesignSystemShowcaseScreen.tsx (9 matches)
+   - Design system test/showcase file - lower priority for user impact
+
+### 15. C:\Users\uygar\animalApp-Frontend\src\features\profile\screens\ProfileModesScreen.tsx (9 matches)
+   - Supporting text with ASCII-only strings in profile views
+
+### 16. C:\Users\uygar\animalApp-Frontend\src\features\petshop\screens\PetshopScreen.tsx (8 matches)
+   - Petshop main screen with ASCII-only strings
+
+### 17. C:\Users\uygar\animalApp-Frontend\src\features\explore\screens\ExploreScreen.tsx (7 matches)
+   - Explore feature with ASCII-only Turkish strings
+
+### 18. C:\Users\uygar\animalApp-Frontend\src\features\petshop\screens\PetshopDashboardScreen.tsx (7 matches)
+   - Dashboard labels and descriptions
+
+### 19. C:\Users\uygar\animalApp-Frontend\src\features\listings\screens\ListingDetailScreens.tsx (16 matches)
+   - Listing detail view with multiple ASCII-only strings
+
+## LOW PRIORITY FILES (Infrastructure/Less Visible):
+
+- C:\Users\uygar\animalApp-Frontend\src\features\caregiver\screens\CaregiverActivationScreen.tsx (5 matches)
+- C:\Users\uygar\animalApp-Frontend\src\features\auth\screens\ProfileSetupScreen.tsx (4 matches)
+- C:\Users\uygar\animalApp-Frontend\src\features\auth\screens\OnboardingScreen.tsx (1 match)
+- C:\Users\uygar\animalApp-Frontend\src\features\petshop\screens\PetshopCampaignManagementScreen.tsx (3 matches)
+- C:\Users\uygar\animalApp-Frontend\src\features\listings\components\ApplyModal.tsx (2 matches)
+- C:\Users\uygar\animalApp-Frontend\src\shared\ui\ModeStatusCard.tsx (2 matches)
+- And others with minimal matches
+
+## RECOMMENDED FIX ORDER:
+
+1. TIER 1 (Navigation & Auth - Most Visible):
+   - C:\Users\uygar\animalApp-Frontend\src\core\navigation\routes.ts (1 fix)
+   - C:\Users\uygar\animalApp-Frontend\src\features\auth\schemas.ts (2 fixes)
+   - C:\Users\uygar\animalApp-Frontend\src\features\auth\screens\ForgotPasswordScreen.tsx (1 fix)
+   - C:\Users\uygar\animalApp-Frontend\src\features\profile\utils\modeStatus.ts (9 fixes)
+
+2. TIER 2 (Main Features - High User Impact):
+   - C:\Users\uygar\animalApp-Frontend\src\features\create\schemas.ts (5-6 fixes)
+   - C:\Users\uygar\animalApp-Frontend\src\features\create\screens\CreateEntryScreen.tsx (6-7 fixes)
+
+3. TIER 3 (Other Features):
+   - C:\Users\uygar\animalApp-Frontend\src\features\caregiver\screens\CaregiverMarketplaceScreen.tsx
+   - C:\Users\uygar\animalApp-Frontend\src\features\listings\screens\ListingDetailScreens.tsx
+   - Petshop-related screens
+
+4. TIER 4 (Mock Data - Lower Priority):
+   - C:\Users\uygar\animalApp-Frontend\src\shared\mocks\*.ts (45+ fixes total)
+
+## KEY PATTERNS TO FIX:
+
+- Sifre → Şifre
+- sifre → şifre  
+- Ilan → İlan
+- ilan → ilan (add turk mark)
+- Olustur → Oluştur
+- olustur → oluştur
+- Bakici → Bakıcı
+- bakici → bakıcı
+- Kullanici → Kullanıcı
+- kullanici → kullanıcı
+- Iletisim → İletişim
+- iletisim → iletişim
+- Ozellik → Özellik
+- ozellik → özellik
+- Duzenli → Düzenli
+- duzenli → düzenli
+- Magaza → Mağaza
+- magaza → mağaza
+- Gonderilirken → Gönderilirken
+- Sorun olustu → Sorun oluştu
+- konaklamali → konaklama
+- Ilce → İlçe
+- ilce → ilçe
+- Bolge → Bölge
+- bolge → bölge
+- Guncelle → Güncelle
+- guncelle → güncelle
+- And many others with Turkish diacritics...
+

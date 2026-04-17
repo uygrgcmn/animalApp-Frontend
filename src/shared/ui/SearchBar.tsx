@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { colors } from "../../core/theme/colors";
-import { radius, shadows, spacing, typography } from "../../core/theme/tokens";
+import { radius, spacing, typography } from "../../core/theme/tokens";
 
 type SearchBarProps = TextInputProps & {
   onFilterPress?: () => void;
@@ -12,21 +12,26 @@ type SearchBarProps = TextInputProps & {
 
 export function SearchBar({
   onFilterPress,
-  placeholder = "Ara",
+  placeholder = "Ara...",
   showFilterButton = false,
   ...props
 }: SearchBarProps) {
   return (
     <View style={styles.wrapper}>
       <View style={styles.inputWrap}>
-        <MaterialCommunityIcons color={colors.textSubtle} name="magnify" size={20} />
+        <MaterialCommunityIcons color={colors.textTertiary} name="magnify" size={20} />
         <TextInput
           placeholder={placeholder}
-          placeholderTextColor={colors.textSubtle}
+          placeholderTextColor={colors.textTertiary}
           selectionColor={colors.primary}
           style={styles.input}
           {...props}
         />
+        {props.value ? (
+          <Pressable onPress={() => props.onChangeText?.("")} style={styles.clearButton}>
+            <MaterialCommunityIcons color={colors.textTertiary} name="close-circle" size={18} />
+          </Pressable>
+        ) : null}
       </View>
 
       {showFilterButton ? (
@@ -39,33 +44,34 @@ export function SearchBar({
 }
 
 const styles = StyleSheet.create({
+  clearButton: {
+    padding: spacing.micro
+  },
   filterButton: {
-    ...shadows.card,
     alignItems: "center",
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderRadius: radius.large,
-    borderWidth: 1,
-    height: 56,
+    borderWidth: 1.5,
+    height: 48,
     justifyContent: "center",
-    width: 56
+    width: 48
   },
   input: {
     color: colors.text,
     flex: 1,
-    ...typography.body
+    fontSize: typography.body.fontSize
   },
   inputWrap: {
-    ...shadows.card,
     alignItems: "center",
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.large,
-    borderWidth: 1,
+    borderRadius: radius.pill,
+    borderWidth: 1.5,
     flex: 1,
     flexDirection: "row",
     gap: spacing.tight,
-    minHeight: 56,
+    minHeight: 48,
     paddingHorizontal: spacing.standard
   },
   wrapper: {

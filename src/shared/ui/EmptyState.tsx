@@ -15,7 +15,9 @@ type EmptyStateProps = {
 export function EmptyState({ actionSlot, description, icon, title }: EmptyStateProps) {
   return (
     <View style={styles.card}>
-      <AppIcon name={icon} size={24} />
+      <View style={styles.iconWrap}>
+        <AppIcon name={icon} size={28} tone="neutral" />
+      </View>
       <View style={styles.texts}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.description}>{description}</Text>
@@ -28,25 +30,30 @@ export function EmptyState({ actionSlot, description, icon, title }: EmptyStateP
 const styles = StyleSheet.create({
   card: {
     alignItems: "center",
-    backgroundColor: colors.surfaceAlt,
-    borderColor: colors.border,
-    borderRadius: radius.large,
-    borderStyle: "dashed",
-    borderWidth: 1,
-    gap: spacing.standard,
-    padding: spacing.comfortable
+    gap: spacing.comfortable,
+    paddingHorizontal: spacing.comfortable,
+    paddingVertical: spacing.large
   },
   description: {
-    color: colors.textMuted,
+    color: colors.textSubtle,
     ...typography.body,
     textAlign: "center"
   },
+  iconWrap: {
+    alignItems: "center",
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radius.full,
+    height: 72,
+    justifyContent: "center",
+    width: 72
+  },
   texts: {
+    alignItems: "center",
     gap: spacing.tight
   },
   title: {
-    color: colors.text,
-    ...typography.h3,
+    color: colors.textMuted,
+    ...typography.subheading,
     textAlign: "center"
   }
 });

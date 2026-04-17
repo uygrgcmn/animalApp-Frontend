@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { colors } from "../../core/theme/colors";
-import { radius, spacing, typography } from "../../core/theme/tokens";
+import { radius, shadows, spacing, typography } from "../../core/theme/tokens";
 
 type AppHeaderProps = {
   description?: string;
@@ -30,7 +30,7 @@ export function AppHeader({
             }}
             style={styles.backButton}
           >
-            <MaterialCommunityIcons color={colors.text} name="arrow-left" size={22} />
+            <MaterialCommunityIcons color={colors.text} name="arrow-left" size={20} />
           </Pressable>
         ) : null}
 
@@ -47,14 +47,15 @@ export function AppHeader({
 
 const styles = StyleSheet.create({
   backButton: {
+    ...shadows.micro,
     alignItems: "center",
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.medium,
+    borderRadius: radius.pill,
     borderWidth: 1,
-    height: 44,
+    height: 40,
     justifyContent: "center",
-    width: 44
+    width: 40
   },
   description: {
     color: colors.textMuted,
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
     marginLeft: spacing.compact
   },
   row: {
-    alignItems: "flex-start",
+    alignItems: "center",
     flexDirection: "row",
     gap: spacing.compact
   },

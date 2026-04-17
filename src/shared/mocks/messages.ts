@@ -2,54 +2,54 @@ export const conversations = [
   {
     archived: false,
     id: "conv-1",
-    lastMessage: "Yarin sabah 09:00 gibi uygun olabilirim, dilersen detaylari netlestirelim.",
+    lastMessage: "Yarın sabah 09:00 gibi uygun olabilirim, dilersen detayları netleştirelim.",
     listingId: "cg-1",
     listingKind: "caregiver-listing",
-    listingTitle: "Deneyimli evde bakici",
-    listingType: "Bakici Ilani",
+    listingTitle: "Deneyimli evde bakıcı",
+    listingType: "Bakıcı İlanı",
     participantName: "Ece Demir",
     participantRole: "Evcil hayvan sahibi",
     unreadCount: 2,
-    updatedAt: "Bugun 14:20"
+    updatedAt: "Bugün 14:20"
   },
   {
     archived: false,
     id: "conv-2",
-    lastMessage: "Kampanya detaylarina baktim, teslimat secenekleri icin bilgi alabilir miyim?",
+    lastMessage: "Kampanya detaylarına baktım, teslimat seçenekleri için bilgi alabilir miyim?",
     listingId: "ps-1",
     listingKind: "petshop-campaign",
-    listingTitle: "Premium mama bahar kampanyasi",
-    listingType: "Petshop Kampanyasi",
+    listingTitle: "Premium mama bahar kampanyası",
+    listingType: "Petshop Kampanyası",
     participantName: "Pati Market",
-    participantRole: "Magaza hesabi",
+    participantRole: "Mağaza hesabı",
     unreadCount: 0,
-    updatedAt: "Dun 18:05"
+    updatedAt: "Dün 18:05"
   },
   {
     archived: false,
     id: "conv-3",
-    lastMessage: "Iki kedi icin 10 gunluk destek ihtiyaci halen gecerli, donusunu bekliyorum.",
+    lastMessage: "İki kedi için 10 günlük destek ihtiyacı halen geçerli, dönüşünü bekliyorum.",
     listingId: "ow-2",
     listingKind: "owner-request",
-    listingTitle: "Iki kediye gunluk kontrol",
-    listingType: "Bakici Ariyorum",
-    participantName: "Mert Aydin",
-    participantRole: "Ilan sahibi",
+    listingTitle: "İki kediye günlük kontrol",
+    listingType: "Bakıcı Arıyorum",
+    participantName: "Mert Aydın",
+    participantRole: "İlan sahibi",
     unreadCount: 1,
     updatedAt: "Pzt 11:10"
   },
   {
     archived: true,
     id: "conv-4",
-    lastMessage: "Topluluk mama destegi tamamlandi, ilgin icin tekrar tesekkur ederiz.",
+    lastMessage: "Topluluk mama desteği tamamlandı, ilgin için tekrar teşekkür ederiz.",
     listingId: "cm-1",
     listingKind: "community-post",
-    listingTitle: "Barinak icin ucretsiz mama destegi",
-    listingType: "Topluluk Paylasimi",
-    participantName: "Pati Dayanisma Agi",
-    participantRole: "Topluluk gonullusu",
+    listingTitle: "Barınak için ücretsiz mama desteği",
+    listingType: "Topluluk Paylaşımı",
+    participantName: "Pati Dayanışma Ağı",
+    participantRole: "Topluluk gönüllüsü",
     unreadCount: 0,
-    updatedAt: "Gecen hafta"
+    updatedAt: "Geçen hafta"
   }
 ] as const;
 
@@ -66,19 +66,19 @@ export const conversationMessages: Record<
     {
       id: "m-1",
       sender: "other",
-      text: "Merhaba, ilaninizla ilgileniyorum. Hafta ici yarim gun bakim icin halen musait misiniz?",
+      text: "Merhaba, ilanınızla ilgileniyorum. Hafta içi yarım gün bakım için halen müsait misiniz?",
       time: "13:40"
     },
     {
       id: "m-2",
       sender: "me",
-      text: "Merhaba, evet. Deneyim detaylarimi ve uygun gunlerimi paylasabilirim.",
+      text: "Merhaba, evet. Deneyim detaylarımı ve uygun günlerimi paylaşabilirim.",
       time: "13:48"
     },
     {
       id: "m-3",
       sender: "other",
-      text: "Yarin sabah 09:00 gibi uygun olabilirim, dilersen detaylari netlestirelim.",
+      text: "Yarın sabah 09:00 gibi uygun olabilirim, dilersen detayları netleştirelim.",
       time: "14:20"
     }
   ],
@@ -86,13 +86,13 @@ export const conversationMessages: Record<
     {
       id: "m-4",
       sender: "me",
-      text: "Kampanyaya dahil urunlerin stok durumu hakkinda bilgi alabilir miyim?",
+      text: "Kampanyaya dahil ürünlerin stok durumu hakkında bilgi alabilir miyim?",
       time: "17:40"
     },
     {
       id: "m-5",
       sender: "other",
-      text: "Tabii, stokta mevcut. Ayni gun teslimat seceneklerimiz de var.",
+      text: "Tabii, stokta mevcut. Aynı gün teslimat seçeneklerimiz de var.",
       time: "18:05"
     }
   ],
@@ -100,7 +100,7 @@ export const conversationMessages: Record<
     {
       id: "m-6",
       sender: "other",
-      text: "Iki kedi icin 10 gunluk destek ihtiyaci halen gecerli, donusunu bekliyorum.",
+      text: "İki kedi için 10 günlük destek ihtiyacı halen geçerli, dönüşünü bekliyorum.",
       time: "11:10"
     }
   ]

@@ -1,9 +1,9 @@
 export const appConfig = {
   appName: "Animal App",
   supportedModes: {
-    caregiver: "Bakici profili",
+    caregiver: "Bakıcı profili",
     petshop: "Petshop modu"
   },
-  communityCategories: ["Ucretsiz mama", "Sahiplendirme", "Destek cagrisi"]
+  communityCategories: ["Ücretsiz mama", "Sahiplendirme", "Destek çağrısı"]
 } as const;
 

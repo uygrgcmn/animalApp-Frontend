@@ -25,8 +25,7 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     color: colors.primary,
-    ...typography.caption,
-    letterSpacing: 0.8,
+    ...typography.overline,
     textTransform: "uppercase"
   },
   title: {

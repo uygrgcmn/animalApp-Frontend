@@ -72,61 +72,61 @@ export const caregiverListingDetails: Record<string, CaregiverListingDetail> = {
       { icon: "map-marker-outline", label: "Istanbul / Kadikoy", tone: "neutral" },
       { icon: "calendar-range", label: "Hafta ici yarim gun", tone: "primary" },
       { icon: "cash", label: "5.000 - 7.500 TL", tone: "success" },
-      { icon: "clock-outline", label: "Gunluk raporlama", tone: "warning" }
+      { icon: "clock-outline", label: "Günlük raporlama", tone: "warning" }
     ],
     owner: {
       description:
-        "Asili takip, ilac rutini ve gun sonu bilgilendirmesi konularinda disiplinli calisir.",
-      headline: "Dogrulanmis bakici profili",
+        "Asılı takip, ilaç rutini ve gün sonu bilgilendirmesi konularında disiplinli çalışır.",
+      headline: "Doğrulanmış bakıcı profili",
       location: "Istanbul",
       name: "Derya Acar"
     },
     similarIds: ["cg-2", "cg-3"],
-    subtitle: "Bakici Ilani",
-    title: "Deneyimli evde bakici",
+    subtitle: "Bakıcı İlanı",
+    title: "Deneyimli evde bakıcı",
     trustSignals: [
       {
-        description: "Kimlik ve temel profil bilgileri dogrulanmis.",
-        label: "Profil dogrulamasi",
+        description: "Kimlik ve temel profil bilgileri doğrulanmış.",
+        label: "Profil doğrulaması",
         state: "verified"
       },
       {
-        description: "Takvim bilgisi guncel tutuluyor.",
-        label: "Uygunluk guncelligi",
+        description: "Takvim bilgisi güncel tutuluyor.",
+        label: "Uygunluk güncelliği",
         state: "verified"
       },
       {
-        description: "Hizmet kapsami ve gunluk akis net sekilde belirtilmis.",
-        label: "Net hizmet kapsami",
+        description: "Hizmet kapsamı ve günlük akış net şekilde belirtilmiş.",
+        label: "Net hizmet kapsamı",
         state: "verified"
       }
     ]
   },
   "cg-2": {
     description: [
-      "Uzun sureli seyahatlerde yatili bakim, ilac takibi ve gece rutini sunan daha premium bir hizmet paketi vardir.",
-      "Ozellikle konaklamali destek arayan kullanicilar icin ayrintili planlama ve once gorusme onceliklidir."
+      "Uzun süreli seyahatlerde yatılı bakım, ilaç takibi ve gece rutini sunan daha premium bir hizmet paketi vardır.",
+      "Özellikle konaklamalı destek arayan kullanıcılar için ayrıntılı planlama ve önce görüşme önceliklidir."
     ],
     id: "cg-2",
     info: [
       { icon: "map-marker-outline", label: "Ankara / Cankaya", tone: "neutral" },
-      { icon: "calendar-range", label: "Haftalik plan", tone: "primary" },
+      { icon: "calendar-range", label: "Haftalık plan", tone: "primary" },
       { icon: "cash", label: "8.000 - 12.000 TL", tone: "success" },
       { icon: "clock-outline", label: "Esnek uygunluk", tone: "warning" }
     ],
     owner: {
       description:
-        "Yatili bakim, uzun sureli planlama ve once gorusme gerektiren taleplerde deneyimlidir.",
-      headline: "Yatili bakim odakli bakici",
+        "Yatılı bakım, uzun süreli planlama ve önce görüşme gerektiren taleplerde deneyimlidir.",
+      headline: "Yatılı bakım odaklı bakıcı",
       location: "Ankara",
       name: "Baris Tan"
     },
     similarIds: ["cg-1", "cg-3"],
-    subtitle: "Bakici Ilani",
-    title: "Yatili bakim destegi",
+    subtitle: "Bakıcı İlanı",
+    title: "Yatılı bakım desteği",
     trustSignals: [
       {
-        description: "Profil temel olarak hazir ancak musaitlik dogrulamasi bekleniyor.",
+        description: "Profil temel olarak hazır ancak müsaitlik doğrulaması bekleniyor.",
         label: "Profil incelemede",
         state: "pending"
       },
@@ -144,29 +144,29 @@ export const caregiverListingDetails: Record<string, CaregiverListingDetail> = {
   },
   "cg-3": {
     description: [
-      "Kediler icin gunluk ziyaret, mama-su-kum takibi ve fotograflu bilgilendirme yapan duzenli bir destek profili.",
-      "Kisa sureli ama aksatilmamasi gereken ziyaretler icin sakin ve kontrollu bir akisa sahiptir."
+      "Kediler için günlük ziyaret, mama-su-kum takibi ve fotoğraflı bilgilendirme yapan düzenli bir destek profili.",
+      "Kısa süreli ama aksatılmaması gereken ziyaretler için sakin ve kontrollü bir akışa sahiptir."
     ],
     id: "cg-3",
     info: [
       { icon: "map-marker-outline", label: "Izmir / Bornova", tone: "neutral" },
-      { icon: "calendar-range", label: "Gunluk ziyaret", tone: "primary" },
+      { icon: "calendar-range", label: "Günlük ziyaret", tone: "primary" },
       { icon: "cash", label: "2.400 - 3.200 TL", tone: "success" },
-      { icon: "paw-outline", label: "Kedi odakli", tone: "warning" }
+      { icon: "paw-outline", label: "Kedi odaklı", tone: "warning" }
     ],
     owner: {
       description:
-        "Ozellikle kediler ve kisa rutin takibi isteyen aileler icin uygun bir profil akisi sunar.",
-      headline: "Kedi odakli bakici",
+        "Özellikle kediler ve kısa rutin takibi isteyen aileler için uygun bir profil akışı sunar.",
+      headline: "Kedi odaklı bakıcı",
       location: "Izmir",
       name: "Selin Yalcin"
     },
     similarIds: ["cg-1", "cg-2"],
-    subtitle: "Bakici Ilani",
-    title: "Kedi odakli gunluk ziyaret",
+    subtitle: "Bakıcı İlanı",
+    title: "Kedi odaklı günlük ziyaret",
     trustSignals: [
       {
-        description: "Profil ve iletisim bilgileri dogrulanmis.",
+        description: "Profil ve iletişim bilgileri doğrulanmış.",
         label: "Hesap guveni",
         state: "verified"
       },
@@ -177,7 +177,7 @@ export const caregiverListingDetails: Record<string, CaregiverListingDetail> = {
       },
       {
         description: "Hizmet kapsami sade ve net tanimlanmis.",
-        label: "Acik hizmet kapsamı",
+        label: "Açık hizmet kapsamı",
         state: "verified"
       }
     ]
@@ -187,39 +187,39 @@ export const caregiverListingDetails: Record<string, CaregiverListingDetail> = {
 export const ownerRequestDetails: Record<string, OwnerRequestDetail> = {
   "ow-1": {
     description: [
-      "Hafta sonu iki gun boyunca Golden icin gezdirme, beslenme ve temel oyun rutini destegi araniyor.",
-      "Kullanici duzenli iletisim ve seans sonu kisa bilgilendirme bekliyor."
+      "Hafta sonu iki gün boyunca Golden için gezdirme, beslenme ve temel oyun rutini desteği aranıyor.",
+      "Kullanıcı düzenli iletişim ve seans sonu kısa bilgilendirme bekliyor."
     ],
     id: "ow-1",
     info: [
-      { icon: "paw-outline", label: "Kopek", tone: "primary" },
+      { icon: "paw-outline", label: "Köpek", tone: "primary" },
       { icon: "calendar-range", label: "26-27 Nisan", tone: "warning" },
       { icon: "map-marker-outline", label: "Izmir / 2,4 km", tone: "neutral" },
       { icon: "cash", label: "3.500 TL", tone: "success" }
     ],
     owner: {
       description:
-        "Daha once de bakici destegi kullanan, beklentilerini net yazan bir evcil hayvan sahibi.",
-      headline: "Planli bakim talebi",
+        "Daha önce de bakıcı desteği kullanan, beklentilerini net yazan bir evcil hayvan sahibi.",
+      headline: "Planlı bakım talebi",
       location: "Izmir",
       name: "Cem Arin"
     },
     similarIds: ["ow-2", "ow-3"],
-    subtitle: "Bakici Ariyorum",
-    title: "Golden icin hafta sonu bakici ariyorum",
+    subtitle: "Bakıcı Arıyorum",
+    title: "Golden için hafta sonu bakıcı arıyorum",
     trustSignals: [
       {
-        description: "Tarih, butce ve temel beklentiler net sekilde paylasilmis.",
+        description: "Tarih, bütçe ve temel beklentiler net şekilde paylaşılmış.",
         label: "Net ilan bilgisi",
         state: "verified"
       },
       {
-        description: "Konum dogrulandi, plan tarihi belirli.",
-        label: "Plan dogrulandi",
+        description: "Konum doğrulandı, plan tarihi belirli.",
+        label: "Plan doğrulandı",
         state: "verified"
       },
       {
-        description: "Ilk kez yeni bir bakici ariyor.",
+        description: "İlk kez yeni bir bakıcı arıyor.",
         label: "Yeni eslesme",
         state: "pending"
       }
@@ -227,48 +227,48 @@ export const ownerRequestDetails: Record<string, OwnerRequestDetail> = {
   },
   "ow-2": {
     description: [
-      "Iki kedi icin 10 gun boyunca gunluk kontrol, mama-su takibi ve kisa oyun rutini isteniyor.",
-      "Ozellikle duzenli fotograf guncellemesi ve sessiz bir hizmet akisi bekleniyor."
+      "İki kedi için 10 gün boyunca günlük kontrol, mama-su takibi ve kısa oyun rutini isteniyor.",
+      "Özellikle düzenli fotoğraf güncellemesi ve sessiz bir hizmet akışı bekleniyor."
     ],
     id: "ow-2",
     info: [
       { icon: "paw-outline", label: "Kedi", tone: "primary" },
-      { icon: "calendar-range", label: "10 gunluk plan", tone: "warning" },
+      { icon: "calendar-range", label: "10 günlük plan", tone: "warning" },
       { icon: "map-marker-outline", label: "Bursa / 5,1 km", tone: "neutral" },
       { icon: "cash", label: "2.200 TL", tone: "success" }
     ],
     owner: {
       description:
-        "Yurt disi seyahatinde kedilerin rutininin bozulmamasini isteyen dikkatli bir kullanici.",
-      headline: "Fotograf guncellemesi oncelikli",
+        "Yurt dışı seyahatinde kedilerin rutininin bozulmamasını isteyen dikkatli bir kullanıcı.",
+      headline: "Fotoğraf güncellemesi öncelikli",
       location: "Bursa",
       name: "Mert Aydin"
     },
     similarIds: ["ow-1", "ow-3"],
-    subtitle: "Bakici Ariyorum",
-    title: "Iki kediye gunluk kontrol",
+    subtitle: "Bakıcı Arıyorum",
+    title: "İki kediye günlük kontrol",
     trustSignals: [
       {
-        description: "Ilan beklentileri net tanimlanmis.",
+        description: "İlan beklentileri net tanımlanmış.",
         label: "Net beklenti",
         state: "verified"
       },
       {
-        description: "Takvim ve butce hazir.",
-        label: "Takvim hazir",
+        description: "Takvim ve bütçe hazır.",
+        label: "Takvim hazır",
         state: "verified"
       },
       {
-        description: "Bakici secim sureci devam ediyor.",
-        label: "Basvuru acik",
+        description: "Bakıcı seçim süreci devam ediyor.",
+        label: "Başvuru açık",
         state: "pending"
       }
     ]
   },
   "ow-3": {
     description: [
-      "Muhabbet kusu icin 5 gunluk yem degisimi ve kisa kafes temizligi destegi isteniyor.",
-      "Gunluk ziyaret kisa sureli olacak ancak duzenli saat onemli."
+      "Muhabbet kuşu için 5 günlük yem değişimi ve kısa kafes temizliği desteği isteniyor.",
+      "Günlük ziyaret kısa süreli olacak ancak düzenli saat önemli."
     ],
     id: "ow-3",
     info: [
@@ -279,14 +279,14 @@ export const ownerRequestDetails: Record<string, OwnerRequestDetail> = {
     ],
     owner: {
       description:
-        "Kisa ama duzenli ziyaret gerektiren bir talep. Dakik ve sakin calisma bekleniyor.",
-      headline: "Rutin odakli talep",
+        "Kısa ama düzenli ziyaret gerektiren bir talep. Dakik ve sakin çalışma bekleniyor.",
+      headline: "Rutin odaklı talep",
       location: "Istanbul",
       name: "Seda Onur"
     },
     similarIds: ["ow-1", "ow-2"],
-    subtitle: "Bakici Ariyorum",
-    title: "Muhabbet kusu icin gunluk ziyaret",
+    subtitle: "Bakıcı Arıyorum",
+    title: "Muhabbet kuşu için günlük ziyaret",
     trustSignals: [
       {
         description: "Tarih ve beklentiler belirgin.",
@@ -299,8 +299,8 @@ export const ownerRequestDetails: Record<string, OwnerRequestDetail> = {
         state: "verified"
       },
       {
-        description: "Eslesme icin gorusme bekleniyor.",
-        label: "Gorusme asamasi",
+        description: "Eşleşme için görüşme bekleniyor.",
+        label: "Görüşme aşaması",
         state: "pending"
       }
     ]
@@ -311,41 +311,41 @@ export const petshopCampaignDetails: Record<string, PetshopCampaignDetail> = {
   "ps-1": {
     description: [
       "Premium mama serisinde sezon kampanyasi sunuluyor. Ayni gun teslimat ve belirli paketlerde ek indirim var.",
-      "Kampanya stoğa bagli ilerliyor, detayli urun bilgisi ve teslimat secenekleri magaza tarafindan hizli donuluyor."
+      "Kampanya stoğa bağlı ilerliyor, detaylı ürün bilgisi ve teslimat seçenekleri mağaza tarafından hızlı dönülüyor."
     ],
     id: "ps-1",
     info: [
       { icon: "storefront-outline", label: "Pati Market", tone: "primary" },
       { icon: "sale-outline", label: "%20 indirim", tone: "warning" },
       { icon: "cash", label: "799 TL", tone: "success" },
-      { icon: "clock-outline", label: "3 gun kaldi", tone: "neutral" }
+      { icon: "clock-outline", label: "3 gün kaldı", tone: "neutral" }
     ],
     managementNote:
-      "Kampanya yonetimi, dogrulanmis petshop moduna sahip hesaplar icin acilir.",
+      "Kampanya yönetimi, doğrulanmış petshop moduna sahip hesaplar için açılır.",
     owner: {
       description:
-        "Hizli teslimat ve guvenli stok bilgisini one cikan, aktif kampanya yoneten petshop profili.",
-      headline: "Dogrulanmis magaza profili",
+        "Hızlı teslimat ve güvenli stok bilgisini öne çıkaran, aktif kampanya yöneten petshop profili.",
+      headline: "Doğrulanmış mağaza profili",
       location: "Istanbul",
       name: "Pati Market"
     },
     similarIds: ["ps-2", "ps-3"],
     storeId: "store-1",
-    subtitle: "Petshop Kampanyasi",
-    title: "Premium mama bahar kampanyasi",
+    subtitle: "Petshop Kampanyası",
+    title: "Premium mama bahar kampanyası",
     trustSignals: [
       {
-        description: "Magaza profili ve kampanya bilgisi dogrulanmis.",
-        label: "Magaza dogrulamasi",
+        description: "Mağaza profili ve kampanya bilgisi doğrulanmış.",
+        label: "Mağaza doğrulaması",
         state: "verified"
       },
       {
-        description: "Teslimat ve stok bilgisi guncel.",
-        label: "Stok guncelligi",
+        description: "Teslimat ve stok bilgisi güncel.",
+        label: "Stok güncelliği",
         state: "verified"
       },
       {
-        description: "Kampanya suresi sinirli.",
+        description: "Kampanya süresi sınırlı.",
         label: "Son tarih aktif",
         state: "pending"
       }
@@ -353,8 +353,8 @@ export const petshopCampaignDetails: Record<string, PetshopCampaignDetail> = {
   },
   "ps-2": {
     description: [
-      "Tasma ve oyuncak setinde sezon indirimi var. Kampanya stoklarla sinirli ve paket bazli ilerliyor.",
-      "Magaza, paket icerigini ve teslimat kosullarini mesaj uzerinden hizli paylasiyor."
+      "Tasma ve oyuncak setinde sezon indirimi var. Kampanya stoklarla sınırlı ve paket bazlı ilerliyor.",
+      "Mağaza, paket içeriğini ve teslimat koşullarını mesaj üzerinden hızlı paylaşıyor."
     ],
     id: "ps-2",
     info: [
@@ -364,31 +364,31 @@ export const petshopCampaignDetails: Record<string, PetshopCampaignDetail> = {
       { icon: "clock-outline", label: "Hafta sonuna kadar", tone: "neutral" }
     ],
     managementNote:
-      "Bu kampanyayi guncellemek veya yonetmek icin dogrulanmis petshop modu gerekir.",
+      "Bu kampanyayı güncellemek veya yönetmek için doğrulanmış petshop modu gerekir.",
     owner: {
       description:
-        "Aksesuar kategorisinde guclu kampanyalar acan, gorsel sunumu duzenli bir magaza.",
-      headline: "Aksesuar odakli kampanya profili",
+        "Aksesuar kategorisinde güçlü kampanyalar açan, görsel sunumu düzenli bir mağaza.",
+      headline: "Aksesuar odaklı kampanya profili",
       location: "Ankara",
       name: "Miyav Store"
     },
     similarIds: ["ps-1", "ps-3"],
     storeId: "store-2",
-    subtitle: "Petshop Kampanyasi",
+    subtitle: "Petshop Kampanyası",
     title: "Tasma ve oyuncak seti",
     trustSignals: [
       {
-        description: "Magaza profili aktif.",
-        label: "Magaza guveni",
+        description: "Mağaza profili aktif.",
+        label: "Mağaza güveni",
         state: "verified"
       },
       {
-        description: "Kampanya son tarihi tanimli.",
-        label: "Sure siniri",
+        description: "Kampanya son tarihi tanımlı.",
+        label: "Süre sınırı",
         state: "pending"
       },
       {
-        description: "Gorsel ve fiyat bilgisi acik.",
+        description: "Görsel ve fiyat bilgisi açık.",
         label: "Net fiyat bilgisi",
         state: "verified"
       }
@@ -396,8 +396,8 @@ export const petshopCampaignDetails: Record<string, PetshopCampaignDetail> = {
   },
   "ps-3": {
     description: [
-      "Mini irk kopek mamasi icin kisa sureli stok temizleme kampanyasi acik. Stok durumu gunluk guncelleniyor.",
-      "Kampanya daha uygun fiyat ve hizli teslimat beklentisi olan kullanicilar icin hazirlandi."
+      "Mini ırk köpek maması için kısa süreli stok temizleme kampanyası açık. Stok durumu günlük güncelleniyor.",
+      "Kampanya daha uygun fiyat ve hızlı teslimat beklentisi olan kullanıcılar için hazırlandı."
     ],
     id: "ps-3",
     info: [
@@ -407,32 +407,32 @@ export const petshopCampaignDetails: Record<string, PetshopCampaignDetail> = {
       { icon: "clock-outline", label: "Son 48 saat", tone: "neutral" }
     ],
     managementNote:
-      "Kampanya uzerinde yonetici islemleri yalnizca yetkili petshop modunda acilir.",
+      "Kampanya üzerinde yönetici işlemleri yalnızca yetkili petshop modunda açılır.",
     owner: {
       description:
-        "Mini irk urun gaminda hizli kampanya acan ve kullanici sorularina hizli donen bir magaza profili.",
-      headline: "Mini irk urun kampanyasi",
+        "Mini ırk ürün gamında hızlı kampanya açan ve kullanıcı sorularına hızlı dönen bir mağaza profili.",
+      headline: "Mini ırk ürün kampanyası",
       location: "Izmir",
       name: "Dost Petshop"
     },
     similarIds: ["ps-1", "ps-2"],
     storeId: "store-3",
-    subtitle: "Petshop Kampanyasi",
-    title: "Mini irk kuru mama paketi",
+    subtitle: "Petshop Kampanyası",
+    title: "Mini ırk kuru mama paketi",
     trustSignals: [
       {
-        description: "Magaza dogrulanmis.",
-        label: "Profil dogrulamasi",
+        description: "Mağaza doğrulanmış.",
+        label: "Profil doğrulaması",
         state: "verified"
       },
       {
-        description: "Kampanya kisa sureli oldugu icin stok degisimi hizli olabilir.",
+        description: "Kampanya kısa süreli olduğu için stok değişimi hızlı olabilir.",
         label: "Dinamik stok",
         state: "pending"
       },
       {
-        description: "Fiyat ve son tarih belirtilmis.",
-        label: "Net kampanya kosulu",
+        description: "Fiyat ve son tarih belirtilmiş.",
+        label: "Net kampanya koşulu",
         state: "verified"
       }
     ]

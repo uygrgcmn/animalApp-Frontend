@@ -8,8 +8,8 @@ export const applicationItems = [
     owner: "Ece Demir",
     priceLabel: "5.000 - 7.500 TL",
     status: "pending",
-    title: "Deneyimli evde bakici",
-    type: "Bakici Ilani",
+    title: "Deneyimli evde bakıcı",
+    type: "Bakıcı İlanı",
     updatedAt: "Bugun"
   },
   {
@@ -22,7 +22,7 @@ export const applicationItems = [
     priceLabel: "8.000 - 12.000 TL",
     status: "accepted",
     title: "Yatili bakim destegi",
-    type: "Bakici Ilani",
+    type: "Bakıcı İlanı",
     updatedAt: "2 gun once"
   },
   {
@@ -35,7 +35,7 @@ export const applicationItems = [
     priceLabel: "2.200 TL",
     status: "rejected",
     title: "Iki kediye gunluk kontrol",
-    type: "Bakici Ariyorum",
+    type: "Bakıcı Arıyorum",
     updatedAt: "Gecen hafta"
   }
 ] as const;
@@ -47,8 +47,8 @@ export const listingItems = [
     kind: "caregiver-listing",
     listingId: "cg-1",
     status: "active",
-    title: "Deneyimli evde bakici",
-    type: "Bakici Ilani",
+    title: "Deneyimli evde bakıcı",
+    type: "Bakıcı İlanı",
     updatedAt: "Bugun",
     views: 24
   },
@@ -59,7 +59,7 @@ export const listingItems = [
     listingId: "cg-2",
     status: "passive",
     title: "Hafta sonu kopek gezdirme destegi",
-    type: "Bakici Ilani",
+    type: "Bakıcı İlanı",
     updatedAt: "3 gun once",
     views: 11
   },
@@ -81,9 +81,9 @@ export const savedItems = [
     id: "sv-1",
     kind: "caregiver-listing",
     listingId: "cg-1",
-    statusLabel: "Bakici Ilani",
+    statusLabel: "Bakıcı İlanı",
     subtitle: "Istanbul - 5.000 / 7.500 TL",
-    title: "Deneyimli evde bakici"
+    title: "Deneyimli evde bakıcı"
   },
   {
     id: "sv-2",

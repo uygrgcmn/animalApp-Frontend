@@ -18,7 +18,7 @@ const stateConfig: Record<
     bg: colors.warningSoft,
     color: colors.warning,
     icon: "clock-outline",
-    label: "Incelemede"
+    label: "İncelemede"
   },
   rejected: {
     bg: colors.errorSoft,
@@ -30,13 +30,13 @@ const stateConfig: Record<
     bg: colors.surfaceMuted,
     color: colors.textMuted,
     icon: "shield-outline",
-    label: "Dogrulanmadi"
+    label: "Doğrulanmadı"
   },
   verified: {
     bg: colors.successSoft,
     color: colors.success,
     icon: "check-decagram",
-    label: "Dogrulandi"
+    label: "Doğrulandı"
   }
 };
 

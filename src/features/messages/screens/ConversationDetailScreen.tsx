@@ -1,182 +1,215 @@
-import { Link, useLocalSearchParams } from "expo-router";
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Link, useLocalSearchParams, useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView, StyleSheet, Text, TextInput, View, Pressable } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import { routes } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
-import { radius, spacing, typography } from "../../../core/theme/tokens";
+import { radius, spacing, typography, shadows } from "../../../core/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
-import { AppHeader } from "../../../shared/ui/AppHeader";
-import { AppIcon } from "../../../shared/ui/AppIcon";
-import { InfoCard } from "../../../shared/ui/InfoCard";
-import { ManagementItemCard } from "../../../shared/ui/ManagementItemCard";
-import { MetaPill } from "../../../shared/ui/MetaPill";
-import { ModeBadge } from "../../../shared/ui/ModeBadge";
-import { StickyBottomActionBar } from "../../../shared/ui/StickyBottomActionBar";
 import { conversationMessages, conversations } from "../../../shared/mocks/messages";
 import { getMockItemHref } from "../../../shared/utils/mockNavigation";
 
 export function ConversationDetailScreen() {
   const params = useLocalSearchParams<{ conversationId: string }>();
+  const router = useRouter();
   const conversation = conversations.find((item) => item.id === params.conversationId);
   const messages = conversation ? conversationMessages[conversation.id] ?? [] : [];
 
   if (!conversation) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.content}>
-          <AppHeader
-            description="Mesaj bulunamadi."
-            showBackButton
-            title="Konusma"
-          />
-        </ScrollView>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Konuşma bulunamadı.</Text>
+          <AppButton label="Geri Dön" onPress={() => router.back()} />
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <AppHeader
-          description={conversation.participantRole}
-          showBackButton
-          title={conversation.participantName}
-        />
-
-        <ManagementItemCard
-          actions={
-            <Link href={getMockItemHref(conversation.listingKind, conversation.listingId)} asChild>
-              <AppButton
-                label="Bagli Ilani Gor"
-                leftSlot={<AppIcon backgrounded={false} name="open-in-new" size={18} />}
-                variant="secondary"
-              />
-            </Link>
-          }
-          description={conversation.listingType}
-          pills={
-            <>
-              <MetaPill icon="clock-outline" label={conversation.updatedAt} tone="neutral" />
-              {conversation.unreadCount > 0 ? (
-                <ModeBadge label={`${conversation.unreadCount} okunmamis`} tone="warning" />
-              ) : (
-                <ModeBadge label="Okundu" tone="success" />
-              )}
-            </>
-          }
-          supportingText="Bu sohbet ilgili ilan baglamiyla acildi. Kullanici detay, basvuru ve iletisim akislarini buradan takip edebilir."
-          title={conversation.listingTitle}
-        />
-
-        <InfoCard
-          description="Mesajlar icinde cikmadan ilani, basvuru durumunu ve kaydetme aksiyonlarini gorebilirsin."
-          title="Hizli aksiyonlar"
-        >
-          <View style={styles.quickActions}>
-            <Link href={routes.app.profileApplications} asChild>
-              <AppButton
-                label="Basvuru Durumu"
-                leftSlot={<AppIcon backgrounded={false} name="file-document-outline" size={18} />}
-                variant="secondary"
-              />
-            </Link>
-            <Link href={routes.app.profileSaved} asChild>
-              <AppButton
-                label="Kaydettiklerim"
-                leftSlot={<AppIcon backgrounded={false} name="bookmark-outline" size={18} />}
-                variant="ghost"
-              />
-            </Link>
+    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+      {/* Listing context strip */}
+      <Link href={getMockItemHref(conversation.listingKind, conversation.listingId)} asChild>
+        <Pressable style={styles.listingContext}>
+          <View style={styles.listingContextLeft}>
+            <MaterialCommunityIcons name="link-variant" size={14} color={colors.primary} />
+            <Text numberOfLines={1} style={styles.listingContextText}>
+              {conversation.listingTitle}
+            </Text>
           </View>
-        </InfoCard>
+          <View style={styles.listingTypePill}>
+            <Text style={styles.listingTypeText}>{conversation.listingType}</Text>
+          </View>
+          <MaterialCommunityIcons name="chevron-right" size={16} color={colors.textSubtle} />
+        </Pressable>
+      </Link>
 
-        <View style={styles.messageList}>
-          {messages.map((message) => (
+      {/* Messages */}
+      <ScrollView
+        contentContainerStyle={styles.messageList}
+        showsVerticalScrollIndicator={false}
+      >
+        {messages.map((message) => {
+          const isMe = message.sender === "me";
+          return (
             <View
               key={message.id}
-              style={[
-                styles.messageBubble,
-                message.sender === "me" ? styles.myBubble : styles.otherBubble
-              ]}
+              style={[styles.messageBubble, isMe ? styles.myBubble : styles.otherBubble]}
             >
-              <Text
-                style={[
-                  styles.messageText,
-                  message.sender === "me" ? styles.myText : styles.otherText
-                ]}
-              >
+              <Text style={[styles.messageText, isMe ? styles.myText : styles.otherText]}>
                 {message.text}
               </Text>
-              <Text
-                style={[
-                  styles.messageTime,
-                  message.sender === "me" ? styles.myTime : styles.otherTime
-                ]}
-              >
-                {message.time}
-              </Text>
+              <View style={styles.timeContainer}>
+                <Text style={[styles.messageTime, isMe ? styles.myTime : styles.otherTime]}>
+                  {message.time}
+                </Text>
+                {isMe && (
+                  <MaterialCommunityIcons
+                    name="check-all"
+                    size={13}
+                    color={colors.primaryBorder}
+                    style={{ marginLeft: 2 }}
+                  />
+                )}
+              </View>
             </View>
-          ))}
-        </View>
+          );
+        })}
       </ScrollView>
 
-      <StickyBottomActionBar>
-        <AppButton
-          label="Mesaj Yaz"
-          leftSlot={<AppIcon backgrounded={false} color="#FFFFFF" name="message-reply-text-outline" size={18} />}
-        />
-        <Link href={routes.app.explore} asChild>
-          <AppButton
-            label="Kesfete Don"
-            leftSlot={<AppIcon backgrounded={false} name="compass-outline" size={18} />}
-            variant="secondary"
+      {/* Input Bar */}
+      <View style={styles.inputContainer}>
+        <Pressable accessibilityLabel="Ek gönder" style={styles.attachmentButton}>
+          <MaterialCommunityIcons name="plus" size={22} color={colors.primary} />
+        </Pressable>
+        <View style={styles.textInputWrapper}>
+          <TextInput
+            multiline
+            placeholder="Mesaj yaz..."
+            placeholderTextColor={colors.textTertiary}
+            selectionColor={colors.primary}
+            style={styles.textInput}
           />
-        </Link>
-      </StickyBottomActionBar>
+          <Pressable accessibilityLabel="Emoji seç" style={styles.emojiButton}>
+            <MaterialCommunityIcons name="emoticon-outline" size={22} color={colors.textSubtle} />
+          </Pressable>
+        </View>
+        <Pressable accessibilityLabel="Gönder" style={styles.sendButton}>
+          <MaterialCommunityIcons name="send" size={20} color={colors.textInverse} />
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
-    gap: spacing.section,
-    paddingBottom: spacing.large,
+  attachmentButton: {
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.full,
+    height: 40,
+    justifyContent: "center",
+    width: 40
+  },
+  emojiButton: {
+    padding: spacing.micro
+  },
+  errorContainer: {
+    alignItems: "center",
+    flex: 1,
+    gap: spacing.standard,
+    justifyContent: "center",
+    padding: spacing.large
+  },
+  errorText: {
+    color: colors.textMuted,
+    ...typography.body
+  },
+  inputContainer: {
+    alignItems: "flex-end",
+    backgroundColor: colors.surface,
+    borderTopColor: colors.borderSubtle,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: spacing.tight,
+    paddingBottom: spacing.compact,
+    paddingHorizontal: spacing.compact,
+    paddingTop: spacing.tight
+  },
+  listingContext: {
+    alignItems: "center",
+    backgroundColor: colors.backgroundAccent,
+    borderBottomColor: colors.primaryBorder,
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    gap: spacing.tight,
     paddingHorizontal: spacing.comfortable,
-    paddingTop: spacing.standard
+    paddingVertical: spacing.tight
+  },
+  listingContextLeft: {
+    alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    gap: 5
+  },
+  listingContextText: {
+    color: colors.primary,
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "600"
+  },
+  listingTypePill: {
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primaryBorder,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 2
+  },
+  listingTypeText: {
+    color: colors.primary,
+    fontSize: 10,
+    fontWeight: "700"
   },
   messageBubble: {
     borderRadius: radius.large,
-    gap: spacing.tight,
-    maxWidth: "84%",
+    gap: 2,
+    marginBottom: spacing.compact,
+    maxWidth: "80%",
     paddingHorizontal: spacing.standard,
-    paddingVertical: spacing.compact
+    paddingVertical: spacing.compact,
+    ...shadows.micro
   },
   messageList: {
-    gap: spacing.standard
+    backgroundColor: colors.surfaceAlt,
+    flexGrow: 1,
+    paddingHorizontal: spacing.comfortable,
+    paddingVertical: spacing.standard
   },
   messageText: {
-    ...typography.body
+    fontSize: 15,
+    lineHeight: 21
   },
   messageTime: {
-    fontSize: 11,
-    fontWeight: "700"
+    fontSize: 10,
+    fontWeight: "500"
   },
   myBubble: {
     alignSelf: "flex-end",
-    backgroundColor: colors.primary
+    backgroundColor: colors.primary,
+    borderBottomRightRadius: 4
   },
   myText: {
     color: colors.textInverse
   },
   myTime: {
-    color: "#E0E7FF",
+    color: colors.primaryBorder,
     textAlign: "right"
   },
   otherBubble: {
     alignSelf: "flex-start",
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 1
+    borderBottomLeftRadius: 4
   },
   otherText: {
     color: colors.text
@@ -184,13 +217,42 @@ const styles = StyleSheet.create({
   otherTime: {
     color: colors.textSubtle
   },
-  quickActions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.compact
-  },
   safeArea: {
     backgroundColor: colors.background,
     flex: 1
+  },
+  sendButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+    ...shadows.card
+  },
+  textInput: {
+    color: colors.text,
+    flex: 1,
+    fontSize: 15,
+    maxHeight: 100,
+    paddingHorizontal: spacing.tight,
+    paddingVertical: spacing.tight
+  },
+  textInputWrapper: {
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderRadius: radius.xlarge,
+    borderWidth: 1,
+    flex: 1,
+    flexDirection: "row",
+    paddingHorizontal: spacing.micro
+  },
+  timeContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 2
   }
 });
+
