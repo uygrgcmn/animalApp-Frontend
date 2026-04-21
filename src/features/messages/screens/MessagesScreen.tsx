@@ -1,14 +1,16 @@
 import { useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import type { ListingType } from "../../../core/api/contracts";
 import { colors } from "../../../core/theme/colors";
 import { shadows, spacing, typography } from "../../../core/theme/tokens";
-import { conversations } from "../../../shared/mocks/messages";
-import { getMockItemHref } from "../../../shared/utils/mockNavigation";
+import { routeBuilders } from "../../../core/navigation/routes";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { SearchBar } from "../../../shared/ui/SearchBar";
 import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
+import { formatRelativeDate } from "../../../shared/utils/formatDate";
+import { useConversations } from "../hooks/useMessages";
 import { ConversationPreviewCard } from "../components/ConversationPreviewCard";
 
 type MessageFilter = "all" | "unread" | "archived";
@@ -19,34 +21,58 @@ const filterOptions: { label: string; value: MessageFilter }[] = [
   { label: "Arşiv", value: "archived" }
 ];
 
+const listingTypeLabels: Record<ListingType, string> = {
+  SITTING: "Bakıcı İlanı",
+  HELP_REQUEST: "Bakıcı Arıyorum",
+  FREE_ITEM: "Ücretsiz Eşya",
+  ACTIVITY: "Etkinlik",
+  COMMUNITY: "Topluluk",
+  ADOPTION: "Sahiplendirme"
+};
+
+function getListingHref(listingId: string, listingType?: ListingType): string {
+  if (listingType === "SITTING") return String(routeBuilders.caregiverListingDetail(listingId));
+  if (listingType === "HELP_REQUEST") return String(routeBuilders.ownerRequestDetail(listingId));
+  if (listingType === "ADOPTION" || listingType === "COMMUNITY" || listingType === "FREE_ITEM" || listingType === "ACTIVITY") {
+    return String(routeBuilders.communityPostDetail(listingId));
+  }
+  return String(routeBuilders.petshopCampaignDetail(listingId));
+}
+
+function getParticipantRole(participant?: { isSitter?: boolean; isPetshop?: boolean }): string {
+  if (!participant) return "";
+  if (participant.isSitter) return "Bakıcı";
+  if (participant.isPetshop) return "Mağaza hesabı";
+  return "Evcil hayvan sahibi";
+}
+
 export function MessagesScreen() {
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<MessageFilter>("all");
   const [searchValue, setSearchValue] = useState("");
+  const { data: conversations = [], isLoading } = useConversations();
 
   const filteredConversations = useMemo(() => {
     const q = searchValue.trim().toLowerCase();
     return conversations.filter((item) => {
       if (filter === "unread" && item.unreadCount === 0) return false;
-      if (filter === "archived" && !item.archived) return false;
-      if (filter === "all" && item.archived) return false;
+      if (filter === "archived" && !item.isArchived) return false;
+      if (filter === "all" && item.isArchived) return false;
       if (!q) return true;
-      return (
-        item.participantName.toLowerCase().includes(q) ||
-        item.listingTitle.toLowerCase().includes(q) ||
-        item.lastMessage.toLowerCase().includes(q)
-      );
+      const name = item.otherParticipant?.fullName?.toLowerCase() ?? "";
+      const title = item.listing?.title?.toLowerCase() ?? "";
+      const preview = item.lastMessagePreview?.toLowerCase() ?? "";
+      return name.includes(q) || title.includes(q) || preview.includes(q);
     });
-  }, [filter, searchValue]);
+  }, [conversations, filter, searchValue]);
 
   const totalUnread = useMemo(
-    () => conversations.filter((c) => !c.archived && c.unreadCount > 0).length,
-    []
+    () => conversations.filter((c) => !c.isArchived && c.unreadCount > 0).length,
+    [conversations]
   );
 
   return (
     <View style={styles.root}>
-      {/* ── Sticky header ── */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <View style={styles.headerTop}>
           <View style={styles.headerTitleBlock}>
@@ -72,8 +98,11 @@ export function MessagesScreen() {
         <View style={styles.divider} />
       </View>
 
-      {/* ── Conversation list ── */}
-      {filteredConversations.length > 0 ? (
+      {isLoading ? (
+        <View style={styles.emptyWrap}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      ) : filteredConversations.length > 0 ? (
         <ScrollView
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
@@ -85,14 +114,18 @@ export function MessagesScreen() {
                 params: { conversationId: conversation.id },
                 pathname: "/(app)/messages/[conversationId]"
               }}
-              lastMessage={conversation.lastMessage}
-              listingHref={String(getMockItemHref(conversation.listingKind, conversation.listingId))}
-              listingTitle={conversation.listingTitle}
-              listingType={conversation.listingType}
-              participantName={conversation.participantName}
-              participantRole={conversation.participantRole}
+              lastMessage={conversation.lastMessagePreview ?? ""}
+              listingHref={getListingHref(conversation.listingId, conversation.listing?.type)}
+              listingTitle={conversation.listing?.title ?? "İlan"}
+              listingType={
+                conversation.listing?.type
+                  ? (listingTypeLabels[conversation.listing.type] ?? conversation.listing.type)
+                  : "İlan"
+              }
+              participantName={conversation.otherParticipant?.fullName ?? "Kullanıcı"}
+              participantRole={getParticipantRole(conversation.otherParticipant)}
               unreadCount={conversation.unreadCount}
-              updatedAt={conversation.updatedAt}
+              updatedAt={formatRelativeDate(conversation.lastMessageAt ?? conversation.updatedAt)}
             />
           ))}
         </ScrollView>
@@ -104,7 +137,9 @@ export function MessagesScreen() {
                 ? "Tüm mesajlarınızı okudunuz."
                 : filter === "archived"
                   ? "Arşivlenmiş konuşmanız bulunmuyor."
-                  : "Aradığınız kriterlere uygun konuşma bulunamadı."
+                  : searchValue
+                    ? "Aradığınız kriterlere uygun konuşma bulunamadı."
+                    : "Henüz mesajlaşma başlatılmamış."
             }
             icon="message-text-outline"
             title={filter === "unread" ? "Tamamdır!" : "Konuşma Yok"}
@@ -114,8 +149,6 @@ export function MessagesScreen() {
     </View>
   );
 }
-
-// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   divider: {

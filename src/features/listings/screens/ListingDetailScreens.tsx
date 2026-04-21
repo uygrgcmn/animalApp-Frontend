@@ -5,12 +5,12 @@ import {
   ActivityIndicator,
   Image,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { routeBuilders, routes } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
@@ -28,6 +28,7 @@ import { MetaPill } from "../../../shared/ui/MetaPill";
 import { PetshopCampaignCard } from "../../../shared/ui/PetshopCampaignCard";
 import { StickyBottomActionBar } from "../../../shared/ui/StickyBottomActionBar";
 import { VerificationBadge } from "../../../shared/ui/VerificationBadge";
+import { useBookmarkStore, type BookmarkedItem } from "../../profile/store/bookmarkStore";
 import { useSessionStore } from "../../auth/store/sessionStore";
 import {
   getCaregiverMissingItems,
@@ -68,6 +69,8 @@ type GateState = GateConfig & {
 type SharedDetailProps = {
   actionSlot?: React.ReactNode;
   applyDone?: boolean;
+  isOwnListing?: boolean;
+  bookmarkPayload?: Omit<BookmarkedItem, "savedAt">;
   basicInfo: {
     icon: React.ComponentProps<typeof AppIcon>["name"];
     label: string;
@@ -104,6 +107,8 @@ export function CaregiverListingDetailScreen() {
   const params = useLocalSearchParams<{ listingId: string }>();
   const listingQuery = useListingDetail(params.listingId);
   const listing = listingQuery.data;
+  const currentUser = useSessionStore((state) => state.user);
+  const isOwnListing = Boolean(listing && currentUser && listing.creatorId === currentUser.id);
   const gate = useCaregiverGate({
     fallbackTitle: "Bu ilana başvurmak için bakıcı modu hazır olmalı."
   });
@@ -137,6 +142,12 @@ export function CaregiverListingDetailScreen() {
     <>
       <ListingDetailLayout
         applyDone={isApplied}
+        bookmarkPayload={{
+          id: listing.id,
+          title: listing.title,
+          type: listing.type,
+          location: creatorLocation || "Konum belirtilmemiş"
+        }}
         basicInfo={[
           {
             icon: "map-marker-outline",
@@ -194,6 +205,7 @@ export function CaregiverListingDetailScreen() {
           name: creator?.fullName ?? "Bakıcı"
         }}
         ownerTitle="İlan sahibi özeti"
+        isOwnListing={isOwnListing}
         primaryActionLabel="Başvur"
         similarListings={
           similarListings.length > 0 ? (
@@ -260,6 +272,8 @@ export function OwnerRequestDetailScreen() {
   const params = useLocalSearchParams<{ listingId: string }>();
   const listingQuery = useListingDetail(params.listingId);
   const listing = listingQuery.data;
+  const currentUser = useSessionStore((state) => state.user);
+  const isOwnListing = Boolean(listing && currentUser && listing.creatorId === currentUser.id);
   const gate = useCaregiverGate({
     fallbackTitle: "Bu talebe başvurmak için bakıcı modu hazır olmalı."
   });
@@ -296,6 +310,12 @@ export function OwnerRequestDetailScreen() {
     <>
       <ListingDetailLayout
         applyDone={isApplied}
+        bookmarkPayload={{
+          id: listing.id,
+          title: listing.title,
+          type: listing.type,
+          location: creatorLocation || "Konum belirtilmemiş"
+        }}
         basicInfo={[
           {
             icon: "paw-outline",
@@ -348,6 +368,7 @@ export function OwnerRequestDetailScreen() {
           location: creatorLocation || "Konum belirtilmemiş",
           name: creator?.fullName ?? "İlan Sahibi"
         }}
+        isOwnListing={isOwnListing}
         ownerTitle="İlan sahibi özeti"
         primaryActionLabel="Başvur"
         similarListings={
@@ -495,7 +516,9 @@ export function PetshopCampaignDetailScreen() {
 function ListingDetailLayout({
   actionSlot,
   applyDone = false,
+  isOwnListing = false,
   basicInfo,
+  bookmarkPayload,
   coverImageUri,
   description,
   emptyTitle,
@@ -511,7 +534,9 @@ function ListingDetailLayout({
   title,
   trustSignals
 }: SharedDetailProps) {
-  const [isSaved, setIsSaved] = useState(false);
+  const toggleBookmark = useBookmarkStore((s) => s.toggle);
+  const isBookmarked = useBookmarkStore((s) => s.isBookmarked);
+  const isSaved = bookmarkPayload ? isBookmarked(bookmarkPayload.id) : false;
   const [isAppliedFallback, setIsAppliedFallback] = useState(false);
   const appliedState = applyDone || isAppliedFallback;
 
@@ -589,17 +614,18 @@ function ListingDetailLayout({
 
       <StickyBottomActionBar>
         <AppButton
-          label={appliedState ? "Başvuru Yapıldı" : primaryActionLabel}
+          disabled={isOwnListing}
+          label={isOwnListing ? "Kendi İlanın" : appliedState ? "Başvuru Yapıldı" : primaryActionLabel}
           leftSlot={
             <AppIcon
               backgrounded={false}
               color={colors.textInverse}
-              name={appliedState ? "check-circle-outline" : "send-outline"}
+              name={isOwnListing ? "account-outline" : appliedState ? "check-circle-outline" : "send-outline"}
               size={18}
             />
           }
           onPress={() => {
-            if (appliedState) return;
+            if (isOwnListing || appliedState) return;
             if (stickyGate && primaryActionUsesGate) {
               stickyGate.openGate();
               return;
@@ -633,7 +659,7 @@ function ListingDetailLayout({
                 />
               }
               onPress={() => {
-                setIsSaved((current) => !current);
+                if (bookmarkPayload) toggleBookmark(bookmarkPayload);
               }}
               variant="ghost"
             />

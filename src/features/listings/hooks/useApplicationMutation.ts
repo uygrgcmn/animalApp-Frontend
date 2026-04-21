@@ -16,7 +16,7 @@ export function useCreateApplication(listingId: string) {
   });
 }
 
-export function useTransitionApplication() {
+export function useTransitionApplication(listingId?: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
@@ -28,6 +28,9 @@ export function useTransitionApplication() {
     }) => listingsApi.transitionApplicationStatus(applicationId, { status }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.listings.myApplications });
+      if (listingId) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.listings.applications(listingId) });
+      }
     }
   });
 }

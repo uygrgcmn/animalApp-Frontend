@@ -92,7 +92,7 @@ export function PetshopActivationScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: kind === "storeImages" ? [4, 3] : [3, 4],
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType.Images,
       quality: 0.8
     });
 

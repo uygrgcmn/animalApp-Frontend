@@ -38,61 +38,61 @@ export function useProfileSettings() {
       {
         id: "notifications",
         title: "Bildirimler",
-        description: "Push, e-posta ve uygulama ici tercihleri yonet.",
+        description: "Push, e-posta ve uygulama içi tercihleri yönet.",
         pills: [
           { icon: "bell-outline", label: "Bildirimler", tone: "warning" },
           { icon: "cloud-clock-outline", label: "Backend bekleniyor", tone: "neutral" }
         ],
         supportingText:
-          "Mesajlar, basvurular ve kampanyalar icin tercih merkezi backend baglandiginda bu karttan yonetilecek.",
+          "Mesajlar, başvurular ve kampanyalar için tercih merkezi backend bağlandığında bu karttan yönetilecek.",
         actions: [
-          { href: routes.app.messages, label: "Mesajlari Ac", variant: "secondary" },
-          { disabled: true, label: "Tercihler yakinda", variant: "ghost" }
+          { href: routes.app.messages, label: "Mesajları Aç", variant: "secondary" },
+          { disabled: true, label: "Tercihler yakında", variant: "ghost" }
         ]
       },
       {
         id: "security",
-        title: "Guvenlik",
-        description: "Hesap guvenligi ve giris davranislari.",
+        title: "Güvenlik",
+        description: "Hesap güvenliği ve giriş davranışları.",
         pills: [
-          { icon: "shield-lock-outline", label: "Guvenlik", tone: "primary" },
+          { icon: "shield-lock-outline", label: "Güvenlik", tone: "primary" },
           { icon: "account-check-outline", label: "Oturum aktif", tone: "success" }
         ],
         supportingText:
-          "Sifre degistirme, cihaz listesi ve oturum yonetimi backend servisleri geldikten sonra bu bloktan acilacak.",
+          "Şifre değiştirme, cihaz listesi ve oturum yönetimi backend servisleri geldikten sonra bu bloktan açılacak.",
         actions: [
-          { href: routes.app.profileEdit, label: "Profili Duzenle", variant: "secondary" },
-          { disabled: true, label: "Guvenlik yakinda", variant: "ghost" }
+          { href: routes.app.profileEdit, label: "Profili Düzenle", variant: "secondary" },
+          { disabled: true, label: "Güvenlik yakında", variant: "ghost" }
         ]
       },
       {
         id: "privacy",
         title: "Gizlilik",
-        description: "Gizlilik ve veri kullanim ayarlari.",
+        description: "Gizlilik ve veri kullanım ayarları.",
         pills: [
           { icon: "eye-lock-outline", label: "Gizlilik", tone: "neutral" },
-          { icon: "toggle-switch-outline", label: "Mod kontrolleri hazir", tone: "primary" }
+          { icon: "toggle-switch-outline", label: "Mod kontrolleri hazır", tone: "primary" }
         ],
         supportingText:
-          "Profil gorunurlugu ve veri tercihleri backend baglandiginda bu karttan acilacak; mod ve hesap akislari simdiden hazir.",
+          "Profil görünürlüğü ve veri tercihleri backend bağlandığında bu karttan açılacak; mod ve hesap akışları şimdiden hazır.",
         actions: [
-          { href: routes.app.profileModes, label: "Modlarimi Ac", variant: "secondary" },
-          { disabled: true, label: "Gizlilik ayarlari yakinda", variant: "ghost" }
+          { href: routes.app.profileModes, label: "Modlarımı Aç", variant: "secondary" },
+          { disabled: true, label: "Gizlilik ayarları yakında", variant: "ghost" }
         ]
       },
       {
         id: "support",
         title: "Destek",
-        description: "Yardim merkezi ve destek baglantilari.",
+        description: "Yardım merkezi ve destek bağlantıları.",
         pills: [
           { icon: "lifebuoy", label: "Destek", tone: "success" },
-          { icon: "email-outline", label: "Destek kutusu hazir", tone: "primary" }
+          { icon: "email-outline", label: "Destek kutusu hazır", tone: "primary" }
         ],
         supportingText:
-          "SSS ve destek talepleri backend entegrasyonu ile bu bolumde birikmeye baslayacak; mesaj merkezi simdiden erisilebilir.",
+          "SSS ve destek talepleri backend entegrasyonu ile bu bölümde birikmeye başlayacak; mesaj merkezi şimdiden erişilebilir.",
         actions: [
           { href: routes.app.messages, label: "Mesaj Merkezine Git", variant: "secondary" },
-          { disabled: true, label: "Destek merkezi yakinda", variant: "ghost" }
+          { disabled: true, label: "Destek merkezi yakında", variant: "ghost" }
         ]
       }
     ],

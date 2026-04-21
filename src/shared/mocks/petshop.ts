@@ -20,7 +20,7 @@ export const petshopStores: PetshopStoreProfile[] = [
     city: "Istanbul",
     district: "Kadikoy",
     id: "store-1",
-    responseRate: "%96 geri donus",
+    responseRate: "%96 geri dönüş",
     responseTime: "Ortalama 18 dk",
     storeName: "Pati Market",
     tagline: "Premium mama ve hızlı teslimat odaklı mağaza",
@@ -28,8 +28,8 @@ export const petshopStores: PetshopStoreProfile[] = [
       "Mamalar, hijyen ürünleri ve aynı gün teslimat odaklı kampanyalarla güven veren bir mağaza profili. Kurumsal tonunu korurken uygulamanın genel diline uyumlu kalır.",
     trustNotes: [
       "Mağaza doğrulama belgeleri aktif.",
-      "Teslimat ve stok bilgileri gunluk guncelleniyor.",
-      "Musteri mesajlarina hizli geri donus sagliyor."
+      "Teslimat ve stok bilgileri günlük güncelleniyor.",
+      "Müşteri mesajlarına hızlı geri dönüş sağlıyor."
     ],
     verifiedState: "verified"
   },
@@ -38,16 +38,16 @@ export const petshopStores: PetshopStoreProfile[] = [
     city: "Ankara",
     district: "Cankaya",
     id: "store-2",
-    responseRate: "%91 geri donus",
+    responseRate: "%91 geri dönüş",
     responseTime: "Ortalama 24 dk",
     storeName: "Miyav Store",
-    tagline: "Aksesuar ve sezon kampanyalari odakli vitrin",
+    tagline: "Aksesuar ve sezon kampanyaları odaklı vitrin",
     summary:
       "Aksesuar kategorisinde düzenli kampanyalar açan, ürün sunumunu temiz görsellerle destekleyen mağaza. Kısa süreli kampanyalarda hızlı iletişim öne çıkıyor.",
     trustNotes: [
-      "Kampanya sartlari net yaziliyor.",
+      "Kampanya şartları net yazılıyor.",
       "Görsel ve fiyat bilgisi tutarlı.",
-      "Destek hattina hizli ulasilabiliyor."
+      "Destek hattına hızlı ulaşılabiliyor."
     ],
     verifiedState: "verified"
   },
@@ -56,16 +56,16 @@ export const petshopStores: PetshopStoreProfile[] = [
     city: "Izmir",
     district: "Bornova",
     id: "store-3",
-    responseRate: "%88 geri donus",
+    responseRate: "%88 geri dönüş",
     responseTime: "Ortalama 31 dk",
     storeName: "Dost Petshop",
-    tagline: "Kisa sureli firsatlar ve stok odakli kampanya dili",
+    tagline: "Kısa süreli fırsatlar ve stok odaklı kampanya dili",
     summary:
       "Stok bazlı kampanyaları hızlı açan ve mini ırk ürünlerinde güçlü seçenekler sunan bir mağaza profili. Açık kampanya koşulları ile güven vermeyi hedefler.",
     trustNotes: [
-      "Stok kampanyalari aktif takip ediliyor.",
-      "Kampanya kosullari acik belirtiliyor.",
-      "Mesajlasma ile teslimat detaylari hizli netlesiyor."
+      "Stok kampanyaları aktif takip ediliyor.",
+      "Kampanya koşulları açık belirtiliyor.",
+      "Mesajlaşma ile teslimat detayları hızlı netleşiyor."
     ],
     verifiedState: "pending"
   }

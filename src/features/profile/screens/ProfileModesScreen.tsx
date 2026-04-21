@@ -42,20 +42,20 @@ export function ProfileModesScreen() {
   return (
     <ScreenContainer contentContainerStyle={styles.content}>
       <InfoCard
-        description="Basvuru sirasinda eksiksen veya petshop alani icin dogrulamaya ihtiyacin varsa bu merkez yonlendirme noktasi olarak calisir."
-        title="Mod yonetim merkezi"
+        description="Başvuru sırasında eksiksen veya petshop alanı için doğrulamaya ihtiyacın varsa bu merkez yönlendirme noktası olarak çalışır."
+        title="Mod yönetim merkezi"
         variant="accent"
       >
         <View style={styles.inlineActions}>
           <Link href={routes.app.caregiverActivation} asChild>
             <AppButton
-              label="Bakici akisina git"
+              label="Bakıcı akışına git"
               leftSlot={<AppIcon backgrounded={false} color="#FFFFFF" name="shield-account-outline" size={18} />}
             />
           </Link>
           <Link href={routes.app.petshopActivation} asChild>
             <AppButton
-              label="Petshop basvurusuna git"
+              label="Petshop başvurusuna git"
               leftSlot={<AppIcon backgrounded={false} name="store-cog-outline" size={18} />}
               variant="secondary"
             />
@@ -76,7 +76,7 @@ export function ProfileModesScreen() {
         description={caregiverSummary.description}
         detailItems={[
           {
-            label: "Destekleyici belge / fotograf",
+            label: "Destekleyici belge / fotoğraf",
             statusLabel:
               normalizedCaregiver.supportingAssets.length > 0
                 ? `${normalizedCaregiver.supportingAssets.length} eklendi`
@@ -84,23 +84,23 @@ export function ProfileModesScreen() {
             tone: normalizedCaregiver.supportingAssets.length > 0 ? "success" : "neutral"
           }
         ]}
-        detailTitle="Profil guveni"
-        emptyMissingLabel="Bakici modu ilanlara basvuru icin hazir."
+        detailTitle="Profil güveni"
+        emptyMissingLabel="Bakıcı modu ilanlara başvuru için hazır."
         icon="shield-account-outline"
         metaItems={[
           {
             icon: "briefcase-outline",
             label:
               normalizedCaregiver.serviceTypes.length > 0
-                ? `${normalizedCaregiver.serviceTypes.length} hizmet secildi`
-                : "Hizmet secilmedi",
+                ? `${normalizedCaregiver.serviceTypes.length} hizmet seçildi`
+                : "Hizmet seçilmedi",
             tone: normalizedCaregiver.serviceTypes.length > 0 ? "primary" : "neutral"
           },
           {
             icon: "calendar-check-outline",
             label:
               normalizedCaregiver.availability === "hafta-ici"
-                ? "Hafta ici uygun"
+                ? "Hafta içi uygun"
                 : normalizedCaregiver.availability === "hafta-sonu"
                   ? "Hafta sonu uygun"
                   : "Esnek uygunluk",
@@ -111,15 +111,15 @@ export function ProfileModesScreen() {
             label:
               normalizedCaregiver.rateExpectation.trim().length > 0
                 ? normalizedCaregiver.rateExpectation
-                : "Ucret bekleniyor",
+                : "Ücret bekleniyor",
             tone: normalizedCaregiver.rateExpectation.trim().length > 0 ? "warning" : "neutral"
           }
         ]}
         missingItems={getCaregiverMissingItems(normalizedCaregiver)}
         statusLabel={caregiverSummary.label}
         statusTone={caregiverSummary.tone}
-        supportingText="Bakici ilanina basvururken eksik alan varsa kullaniciyi hata ile durdurmak yerine dogrudan bu ekrana yonlendirebilirsin."
-        title="Bakici modu"
+        supportingText="Bakıcı ilanına başvururken eksik alan varsa kullanıcıyı hata ile durdurmak yerine doğrudan bu ekrana yönlendirebilirsin."
+        title="Bakıcı modu"
       />
 
       <ModeStatusCard
@@ -135,28 +135,28 @@ export function ProfileModesScreen() {
         description={petshopSummary.description}
         detailItems={[
           {
-            label: "Vergi / isletme belgesi",
+            label: "Vergi / işletme belgesi",
             statusLabel:
-              normalizedPetshop.verificationDocuments.length > 0 ? "Yuklendi" : "Bekleniyor",
+              normalizedPetshop.verificationDocuments.length > 0 ? "Yüklendi" : "Bekleniyor",
             tone:
               normalizedPetshop.verificationDocuments.length > 0 ? "success" : "warning"
           },
           {
-            label: "Magaza gorselleri",
+            label: "Mağaza görselleri",
             statusLabel:
               normalizedPetshop.storeImages.length > 0
-                ? `${normalizedPetshop.storeImages.length} gorsel`
+                ? `${normalizedPetshop.storeImages.length} görsel`
                 : "Bekleniyor",
             tone: normalizedPetshop.storeImages.length > 0 ? "success" : "warning"
           },
           {
-            label: "Basvuru durumu",
+            label: "Başvuru durumu",
             statusLabel: petshopSummary.label,
             tone: petshopSummary.tone
           }
         ]}
-        detailTitle="Dogrulama ve basvuru"
-        emptyMissingLabel="Petshop basvurusu gonderime hazir."
+        detailTitle="Doğrulama ve başvuru"
+        emptyMissingLabel="Petshop başvurusu gönderime hazır."
         icon="storefront-outline"
         metaItems={[
           {
@@ -184,9 +184,9 @@ export function ProfileModesScreen() {
               normalizedPetshop.businessType === "veteriner"
                 ? "Veteriner"
                 : normalizedPetshop.businessType === "bakim-merkezi"
-                  ? "Bakim merkezi"
+                  ? "Bakım merkezi"
                   : normalizedPetshop.businessType === "karma-magaza"
-                    ? "Karma magaza"
+                    ? "Karma mağaza"
                     : "Petshop",
             tone: "warning"
           }
@@ -194,7 +194,7 @@ export function ProfileModesScreen() {
         missingItems={getPetshopMissingItems(normalizedPetshop)}
         statusLabel={petshopSummary.label}
         statusTone={petshopSummary.tone}
-        supportingText="Petshop kampanyasi veya ticari alan acilmadan once eksik belge ve durum bilgisi burada net gorunur."
+        supportingText="Petshop kampanyası veya ticari alan açılmadan önce eksik belge ve durum bilgisi burada net görünür."
         title="Petshop modu"
       />
     </ScreenContainer>

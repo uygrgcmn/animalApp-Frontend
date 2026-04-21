@@ -8,6 +8,7 @@ import type {
 import { uploadMediaAsset } from "../../../core/media/uploadMediaAsset";
 import { communityApi } from "../../../core/api/services/communityApi";
 import { listingsApi } from "../../../core/api/services/listingsApi";
+import { useToast } from "../../../core/providers/ToastProvider";
 import type { CreateWizardValues } from "../schemas";
 import { embedListingMetadata } from "../../listings/utils/embeddedListingMetadata";
 
@@ -92,6 +93,7 @@ async function uploadMediaList(media: string[], folder: string) {
 
 export function usePublishListing() {
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const listingMutation = useMutation({
     mutationFn: (payload: CreateListingRequest) => listingsApi.create(payload),
@@ -112,10 +114,16 @@ export function usePublishListing() {
       return null;
     }
 
-    const mediaUrls = await uploadMediaList(
+    const uploadedUrls = await uploadMediaList(
       values.media ?? [],
       values.listingType === "community-post" ? "community" : "listings"
     );
+    // Filter out local file:// URIs — these are upload failures that only exist on this device
+    const mediaUrls = uploadedUrls.filter((url) => !url.startsWith("file:"));
+    const hadUploadFailures = (values.media?.length ?? 0) > 0 && uploadedUrls.some((url) => url.startsWith("file:"));
+    if (hadUploadFailures) {
+      toast.error("Fotoğraf sunucuya yüklenemedi. İlan fotoğrafsız yayınlandı.");
+    }
 
     if (values.listingType === "caregiver-listing") {
       return listingMutation.mutateAsync({

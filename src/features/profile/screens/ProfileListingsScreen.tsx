@@ -9,6 +9,7 @@ import type { ListingRecord, ListingStatus as ApiListingStatus } from "../../../
 import { listingsApi } from "../../../core/api/services/listingsApi";
 import { queryKeys } from "../../../core/query/queryKeys";
 import { AppButton } from "../../../shared/ui/AppButton";
+import { AppIcon } from "../../../shared/ui/AppIcon";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { ManagementItemCard } from "../../../shared/ui/ManagementItemCard";
 import { MetaPill } from "../../../shared/ui/MetaPill";
@@ -113,6 +114,20 @@ export function ProfileListingsScreen() {
                     key={listing.id}
                     actions={
                       <>
+                        {applicationCount > 0 ? (
+                          <Link href={routeBuilders.listingApplications(listing.id)} asChild>
+                            <AppButton
+                              label={`${applicationCount} Başvuru`}
+                              leftSlot={
+                                <AppIcon
+                                  backgrounded={false}
+                                  name="account-group-outline"
+                                  size={16}
+                                />
+                              }
+                            />
+                          </Link>
+                        ) : null}
                         <Link href={getListingDetailHref(listing)} asChild>
                           <AppButton label="Önizleme" variant="secondary" />
                         </Link>

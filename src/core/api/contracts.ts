@@ -292,6 +292,8 @@ export type FindListingsQuery = {
   latitude?: number;
   longitude?: number;
   radiusKm?: number;
+  limit?: number;
+  offset?: number;
 };
 
 export type CreateApplicationRequest = {
@@ -325,6 +327,8 @@ export type FindCommunityListingsQuery = {
   status?: ListingStatus;
   category?: string;
   creatorId?: string;
+  limit?: number;
+  offset?: number;
 };
 
 export type ProximityCommunityListingsQuery = {
@@ -347,6 +351,46 @@ export type CreatePetRequest = {
 };
 
 export type UpdatePetRequest = Partial<CreatePetRequest>;
+
+export type ConversationRecord = {
+  id: string;
+  listingId: string;
+  initiatorId: string;
+  recipientId: string;
+  unreadCount: number;
+  isArchived: boolean;
+  lastMessageAt: string | null;
+  lastMessagePreview: string | null;
+  createdAt: string;
+  updatedAt: string;
+  listing?: {
+    id: string;
+    title: string;
+    type: ListingType;
+  };
+  otherParticipant?: UserSummary;
+};
+
+export type MessageRecord = {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+  sender?: UserSummary;
+};
+
+export type CreateConversationRequest = {
+  listingId: string;
+  recipientId: string;
+  initialMessage: string;
+};
+
+export type SendMessageRequest = {
+  content: string;
+};
 
 export type CreatePresignedUploadUrlRequest = {
   fileName: string;

@@ -2,6 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Link, router } from "expo-router";
 import type { ReactNode } from "react";
 import {
+  Image,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -89,19 +90,23 @@ export function HomeDashboardScreen() {
         <View style={styles.heroTopRow}>
           <View style={styles.heroAvatarRow}>
             <View style={styles.avatarRing}>
-              <LinearGradient
-                colors={["rgba(255,255,255,0.3)", "rgba(255,255,255,0.1)"]}
-                style={styles.avatar}
-              >
-                <Text style={styles.avatarText}>
-                  {(user?.fullName ?? "U")
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()
-                    .slice(0, 2)}
-                </Text>
-              </LinearGradient>
+              {user?.avatar ? (
+                <Image source={{ uri: user.avatar }} style={styles.avatar} />
+              ) : (
+                <LinearGradient
+                  colors={["rgba(255,255,255,0.3)", "rgba(255,255,255,0.1)"]}
+                  style={styles.avatar}
+                >
+                  <Text style={styles.avatarText}>
+                    {(user?.fullName ?? "U")
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </Text>
+                </LinearGradient>
+              )}
             </View>
             <View>
               <Text style={styles.heroGreeting}>{timeGreeting()}</Text>
@@ -145,7 +150,9 @@ export function HomeDashboardScreen() {
             icon="account-search"
             label="Talepler"
             color="#F97316"
-            onPress={() => router.push(routes.app.explore)}
+            onPress={() =>
+              router.push({ pathname: "/(app)/(tabs)/explore", params: { tab: "owner-requests" } })
+            }
           />
           <QuickAction
             icon="hand-heart"
@@ -380,7 +387,7 @@ function CaregiverCard({
       {/* Image */}
       <View style={styles.cardImageArea}>
         {imageUri ? (
-          <View style={[styles.cardImageBg, { backgroundColor: colors.primarySoft }]} />
+          <Image source={{ uri: imageUri }} style={styles.cardImageBg} resizeMode="cover" />
         ) : (
           <LinearGradient
             colors={[colors.primarySoft, colors.backgroundAccent]}
@@ -441,12 +448,16 @@ function RequestCard({
       onPress={onPress}
     >
       <View style={styles.cardImageArea}>
-        <LinearGradient
-          colors={["#FFF7ED", "#FFFBEB"]}
-          style={styles.cardImageBg}
-        >
-          <MaterialCommunityIcons name="paw" size={40} color={colors.warning} />
-        </LinearGradient>
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.cardImageBg} resizeMode="cover" />
+        ) : (
+          <LinearGradient
+            colors={["#FFF7ED", "#FFFBEB"]}
+            style={styles.cardImageBg}
+          >
+            <MaterialCommunityIcons name="paw" size={40} color={colors.warning} />
+          </LinearGradient>
+        )}
         <View style={[styles.priceBadge, { backgroundColor: colors.warningSoft }]}>
           <Text style={[styles.priceBadgeText, { color: colors.warning }]}>{petType}</Text>
         </View>
@@ -495,12 +506,16 @@ function CommunityCard({
       onPress={onPress}
     >
       <View style={styles.cardImageArea}>
-        <LinearGradient
-          colors={["#F0FDF4", "#ECFDF5"]}
-          style={styles.cardImageBg}
-        >
-          <MaterialCommunityIcons name="hand-heart" size={40} color={colors.success} />
-        </LinearGradient>
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.cardImageBg} resizeMode="cover" />
+        ) : (
+          <LinearGradient
+            colors={["#F0FDF4", "#ECFDF5"]}
+            style={styles.cardImageBg}
+          >
+            <MaterialCommunityIcons name="hand-heart" size={40} color={colors.success} />
+          </LinearGradient>
+        )}
         <View style={[styles.priceBadge, { backgroundColor: colors.successSoft }]}>
           <Text style={[styles.priceBadgeText, { color: colors.success }]}>{category}</Text>
         </View>

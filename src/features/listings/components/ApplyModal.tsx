@@ -1,8 +1,11 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -51,9 +54,18 @@ export function ApplyModal({ listingId, onClose, onSuccess, visible }: ApplyModa
 
   return (
     <Modal animationType="slide" onRequestClose={handleClose} transparent visible={visible}>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.overlay}
+      >
         <Pressable onPress={handleClose} style={StyleSheet.absoluteFillObject} />
         <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.comfortable) }]}>
+          <ScrollView
+            bounces={false}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
           <View style={styles.handle} />
 
           <View style={styles.header}>
@@ -126,8 +138,9 @@ export function ApplyModal({ listingId, onClose, onSuccess, visible }: ApplyModa
               variant="ghost"
             />
           </View>
+          </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -135,6 +148,10 @@ export function ApplyModal({ listingId, onClose, onSuccess, visible }: ApplyModa
 const styles = StyleSheet.create({
   actions: {
     gap: spacing.compact
+  },
+  scrollContent: {
+    gap: spacing.standard,
+    paddingBottom: spacing.compact
   },
   charCount: {
     color: colors.textTertiary,
@@ -226,7 +243,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     borderTopLeftRadius: radius.xlarge,
     borderTopRightRadius: radius.xlarge,
-    gap: spacing.standard,
     paddingHorizontal: spacing.comfortable,
     paddingTop: spacing.comfortable
   },

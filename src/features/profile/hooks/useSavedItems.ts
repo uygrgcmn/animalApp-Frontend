@@ -1,25 +1,32 @@
-import type { Href } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { routeBuilders } from "../../../core/navigation/routes";
+import type { ListingType } from "../../../core/api/contracts";
+import { useBookmarkStore } from "../store/bookmarkStore";
 
-import { queryKeys } from "../../../core/query/queryKeys";
-import { savedItems } from "../../../shared/mocks/profile";
-import { getMockItemHref } from "../../../shared/utils/mockNavigation";
-import { useSessionStore } from "../../auth/store/sessionStore";
-
-export type SavedItemViewModel = (typeof savedItems)[number] & {
-  href: Href;
+const listingTypeLabels: Record<ListingType, string> = {
+  SITTING: "Bakıcı İlanı",
+  HELP_REQUEST: "Bakıcı Talebi",
+  FREE_ITEM: "Ücretsiz Eşya",
+  ACTIVITY: "Etkinlik",
+  COMMUNITY: "Topluluk",
+  ADOPTION: "Sahiplendirme"
 };
 
-export function useSavedItems() {
-  const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
+function getDetailHref(id: string, type: ListingType) {
+  if (type === "SITTING") return routeBuilders.caregiverListingDetail(id);
+  if (type === "HELP_REQUEST") return routeBuilders.ownerRequestDetail(id);
+  return routeBuilders.communityPostDetail(id);
+}
 
-  return useQuery({
-    queryKey: queryKeys.profile.saved,
-    queryFn: async (): Promise<SavedItemViewModel[]> =>
-      savedItems.map((item) => ({
-        ...item,
-        href: getMockItemHref(item.kind, item.listingId)
-      })),
-    enabled: isAuthenticated
-  });
+export function useSavedItems() {
+  const getAll = useBookmarkStore((s) => s.getAll);
+  const items = getAll();
+
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    subtitle: `${listingTypeLabels[item.type] ?? item.type} · ${item.location}`,
+    typeLabel: listingTypeLabels[item.type] ?? item.type,
+    savedAt: item.savedAt,
+    href: getDetailHref(item.id, item.type)
+  }));
 }

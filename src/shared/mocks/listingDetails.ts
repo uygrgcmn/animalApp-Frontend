@@ -64,13 +64,13 @@ export type PetshopCampaignDetail = {
 export const caregiverListingDetails: Record<string, CaregiverListingDetail> = {
   "cg-1": {
     description: [
-      "Evde bakim, gunluk raporlama ve ilac takibi ayni akista ilerler. Rutin bozulmadan ilerlemek isteyen aileler icin net bir hizmet cizgisi sunar.",
-      "Ozellikle duzenli geri bildirim bekleyen kullanicilar icin guven veren, sakin ve programli bir profil yapisi vardir."
+      "Evde bakım, günlük raporlama ve ilaç takibi aynı akışta ilerler. Rutin bozulmadan ilerlemek isteyen aileler için net bir hizmet çizgisi sunar.",
+      "Özellikle düzenli geri bildirim bekleyen kullanıcılar için güven veren, sakin ve programlı bir profil yapısı vardır."
     ],
     id: "cg-1",
     info: [
-      { icon: "map-marker-outline", label: "Istanbul / Kadikoy", tone: "neutral" },
-      { icon: "calendar-range", label: "Hafta ici yarim gun", tone: "primary" },
+      { icon: "map-marker-outline", label: "İstanbul / Kadıköy", tone: "neutral" },
+      { icon: "calendar-range", label: "Hafta içi yarım gün", tone: "primary" },
       { icon: "cash", label: "5.000 - 7.500 TL", tone: "success" },
       { icon: "clock-outline", label: "Günlük raporlama", tone: "warning" }
     ],
@@ -131,12 +131,12 @@ export const caregiverListingDetails: Record<string, CaregiverListingDetail> = {
         state: "pending"
       },
       {
-        description: "Hizmet kapsami net girilmis.",
-        label: "Hizmet netligi",
+        description: "Hizmet kapsamı net girilmiş.",
+        label: "Hizmet netliği",
         state: "verified"
       },
       {
-        description: "Konaklamali bakim deneyimi belirtilmis.",
+        description: "Konaklamalı bakım deneyimi belirtilmiş.",
         label: "Deneyim bilgisi",
         state: "verified"
       }
@@ -167,16 +167,16 @@ export const caregiverListingDetails: Record<string, CaregiverListingDetail> = {
     trustSignals: [
       {
         description: "Profil ve iletişim bilgileri doğrulanmış.",
-        label: "Hesap guveni",
+        label: "Hesap güveni",
         state: "verified"
       },
       {
-        description: "Ayni gun donus beklentisine uygun hizli yanit veriyor.",
-        label: "Hizli geri donus",
+        description: "Aynı gün dönüş beklentisine uygun hızlı yanıt veriyor.",
+        label: "Hızlı geri dönüş",
         state: "verified"
       },
       {
-        description: "Hizmet kapsami sade ve net tanimlanmis.",
+        description: "Hizmet kapsamı sade ve net tanımlanmış.",
         label: "Açık hizmet kapsamı",
         state: "verified"
       }
@@ -220,7 +220,7 @@ export const ownerRequestDetails: Record<string, OwnerRequestDetail> = {
       },
       {
         description: "İlk kez yeni bir bakıcı arıyor.",
-        label: "Yeni eslesme",
+        label: "Yeni eşleşme",
         state: "pending"
       }
     ]
@@ -272,9 +272,9 @@ export const ownerRequestDetails: Record<string, OwnerRequestDetail> = {
     ],
     id: "ow-3",
     info: [
-      { icon: "paw-outline", label: "Kus", tone: "primary" },
+      { icon: "paw-outline", label: "Kuş", tone: "primary" },
       { icon: "calendar-range", label: "Bu hafta", tone: "warning" },
-      { icon: "map-marker-outline", label: "Istanbul / 1,1 km", tone: "neutral" },
+      { icon: "map-marker-outline", label: "İstanbul / 1,1 km", tone: "neutral" },
       { icon: "cash", label: "1.200 TL", tone: "success" }
     ],
     owner: {
@@ -290,12 +290,12 @@ export const ownerRequestDetails: Record<string, OwnerRequestDetail> = {
     trustSignals: [
       {
         description: "Tarih ve beklentiler belirgin.",
-        label: "Talep netligi",
+        label: "Talep netliği",
         state: "verified"
       },
       {
         description: "Konum bilgisi eklendi.",
-        label: "Konum acik",
+        label: "Konum açık",
         state: "verified"
       },
       {
@@ -310,7 +310,7 @@ export const ownerRequestDetails: Record<string, OwnerRequestDetail> = {
 export const petshopCampaignDetails: Record<string, PetshopCampaignDetail> = {
   "ps-1": {
     description: [
-      "Premium mama serisinde sezon kampanyasi sunuluyor. Ayni gun teslimat ve belirli paketlerde ek indirim var.",
+      "Premium mama serisinde sezon kampanyası sunuluyor. Aynı gün teslimat ve belirli paketlerde ek indirim var.",
       "Kampanya stoğa bağlı ilerliyor, detaylı ürün bilgisi ve teslimat seçenekleri mağaza tarafından hızlı dönülüyor."
     ],
     id: "ps-1",

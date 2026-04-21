@@ -16,6 +16,8 @@ export const queryKeys = {
   },
   listings: {
     all: (query?: FindListingsQuery) => ["listings", "all", query] as const,
+    infinite: (query?: Omit<FindListingsQuery, "limit" | "offset">) =>
+      ["listings", "infinite", query] as const,
     detail: (listingId: string) => ["listings", "detail", listingId] as const,
     myApplications: ["listings", "applications", "me"] as const,
     applications: (listingId: string) => ["listings", "applications", listingId] as const,
@@ -24,6 +26,8 @@ export const queryKeys = {
   },
   community: {
     all: (query?: FindCommunityListingsQuery) => ["community", "all", query] as const,
+    infinite: (query?: Omit<FindCommunityListingsQuery, "limit" | "offset">) =>
+      ["community", "infinite", query] as const,
     proximity: (query: ProximityCommunityListingsQuery) =>
       ["community", "proximity", query] as const,
     detail: (listingId: string) => ["community", "detail", listingId] as const
@@ -33,6 +37,11 @@ export const queryKeys = {
     dashboard: ["petshop", "dashboard"] as const,
     campaigns: ["petshop", "campaigns"] as const,
     store: (storeId: string) => ["petshop", "store", storeId] as const
+  },
+  conversations: {
+    all: ["conversations", "all"] as const,
+    detail: (conversationId: string) => ["conversations", "detail", conversationId] as const,
+    messages: (conversationId: string) => ["conversations", "messages", conversationId] as const
   },
   profile: {
     saved: ["profile", "saved"] as const,

@@ -10,7 +10,8 @@ import {
   type FieldErrors,
   type SubmitHandler
 } from "react-hook-form";
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { routeBuilders } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
@@ -199,7 +200,7 @@ export function CreateEntryScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType.Images,
       quality: 0.85
     });
 

@@ -32,7 +32,14 @@ export const routes = {
     caregiverActivation: "/(app)/caregiver-activation" as Href,
     petshopActivation: "/(app)/petshop-activation" as Href,
     petshopDashboard: "/(app)/petshop/dashboard" as Href,
-    petshopCampaignManagement: "/(app)/petshop/campaigns" as Href
+    petshopCampaignManagement: "/(app)/petshop/campaigns" as Href,
+    profilePets: "/(app)/profile/pets" as Href,
+    petNew: "/(app)/profile/pets/new" as Href,
+    petEdit: (petId: string) =>
+      ({
+        pathname: "/(app)/profile/pets/[petId]",
+        params: { petId }
+      }) as const
   }
 } as const;
 
@@ -112,6 +119,11 @@ export const routeBuilders = {
     ({
       pathname: "/(app)/petshop/store/[storeId]",
       params: { storeId }
+    }) as const,
+  listingApplications: (listingId: string) =>
+    ({
+      pathname: "/(app)/listings/[listingId]/applications",
+      params: { listingId }
     }) as const
 };
 

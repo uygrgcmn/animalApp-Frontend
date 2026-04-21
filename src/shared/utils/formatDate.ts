@@ -20,6 +20,17 @@ export function formatRelativeDate(isoDate: string | null | undefined): string {
   return `${Math.floor(diffDays / 30)} ay önce`;
 }
 
+export function formatMessageTime(isoDate: string): string {
+  const date = new Date(isoDate);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  if (diffDays === 0) return `${hh}:${mm}`;
+  if (diffDays === 1) return `Dün ${hh}:${mm}`;
+  return formatRelativeDate(isoDate);
+}
+
 /**
  * Bir bitiş tarihini "3 gün kaldı", "Süresi doldu" gibi
  * okunabilir bir Türkçe metne çevirir.

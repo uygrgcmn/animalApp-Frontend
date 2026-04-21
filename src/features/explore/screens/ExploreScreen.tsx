@@ -1,6 +1,9 @@
-import { useMemo, useState } from "react";
-import { Link, router } from "expo-router";
+import { useCallback, useMemo, useState } from "react";
+import { Link, router, useLocalSearchParams } from "expo-router";
 import {
+  ActivityIndicator,
+  FlatList,
+  type ListRenderItemInfo,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -12,23 +15,25 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { routeBuilders } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
 import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
-import { useListings } from "../../listings/hooks/useListings";
-import { toCaregiverDisplay, toOwnerRequestDisplay } from "../../listings/utils/adapters";
-import { petshopCampaigns } from "../../../shared/mocks/marketplace";
+import { useInfiniteListings } from "../../listings/hooks/useListings";
+import {
+  toCaregiverDisplay,
+  toOwnerRequestDisplay,
+  type CaregiverDisplay,
+  type OwnerRequestDisplay
+} from "../../listings/utils/adapters";
 import { AppButton } from "../../../shared/ui/AppButton";
 import type { AppIcon } from "../../../shared/ui/AppIcon";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { FilterChip } from "../../../shared/ui/FilterChip";
 import { ListingCard } from "../../../shared/ui/ListingCard";
 import { OwnerRequestCard } from "../../../shared/ui/OwnerRequestCard";
-import { PetshopCampaignCard } from "../../../shared/ui/PetshopCampaignCard";
 import { SearchBar } from "../../../shared/ui/SearchBar";
 import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
 
-type ExploreTab = "caregiver-listings" | "owner-requests" | "petshop-campaigns";
+type ExploreTab = "caregiver-listings" | "owner-requests";
 type CaregiverFilter = "all" | "verified" | "weekend";
 type OwnerFilter = "all" | "dog" | "cat";
-type CampaignFilter = "all" | "discount" | "nearby";
 
 type FilterItem<T extends string> = {
   icon: React.ComponentProps<typeof AppIcon>["name"];
@@ -38,8 +43,7 @@ type FilterItem<T extends string> = {
 
 const exploreTabs: { label: string; value: ExploreTab }[] = [
   { label: "Bakıcı İlanları", value: "caregiver-listings" },
-  { label: "Bakıcı Arayanlar", value: "owner-requests" },
-  { label: "Petshop", value: "petshop-campaigns" }
+  { label: "Bakıcı Arayanlar", value: "owner-requests" }
 ];
 
 const caregiverFilters: FilterItem<CaregiverFilter>[] = [
@@ -54,12 +58,6 @@ const ownerFilters: FilterItem<OwnerFilter>[] = [
   { icon: "cat", label: "Kedi", value: "cat" }
 ];
 
-const campaignFilters: FilterItem<CampaignFilter>[] = [
-  { icon: "view-grid-outline", label: "Tümü", value: "all" },
-  { icon: "sale-outline", label: "İndirimli", value: "discount" },
-  { icon: "map-marker-outline", label: "Yakında", value: "nearby" }
-];
-
 const emptyMeta = {
   "caregiver-listings": {
     description: "Aradığınız kriterlere uygun bakıcı ilanı bulunamadı.",
@@ -68,39 +66,37 @@ const emptyMeta = {
   "owner-requests": {
     description: "Kriterlere uygun bakıcı arayan bulunamadı.",
     icon: "file-search-outline" as const
-  },
-  "petshop-campaigns": {
-    description: "Şu an aktif bir kampanya bulunmuyor.",
-    icon: "store-search-outline" as const
   }
 };
 
 const searchPlaceholders = {
   "caregiver-listings": "Bakıcı, şehir veya hizmet ara...",
-  "owner-requests": "İlan, tür veya şehir ara...",
-  "petshop-campaigns": "Mağaza veya kampanya ara..."
+  "owner-requests": "İlan, tür veya şehir ara..."
 };
 
 export function ExploreScreen() {
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ tab?: string }>();
+  const initialTab: ExploreTab =
+    params.tab === "owner-requests" ? "owner-requests" : "caregiver-listings";
 
-  const [activeTab, setActiveTab] = useState<ExploreTab>("caregiver-listings");
+  const [activeTab, setActiveTab] = useState<ExploreTab>(initialTab);
   const [searchValue, setSearchValue] = useState("");
   const [caregiverFilter, setCaregiverFilter] = useState<CaregiverFilter>("all");
   const [ownerFilter, setOwnerFilter] = useState<OwnerFilter>("all");
-  const [campaignFilter, setCampaignFilter] = useState<CampaignFilter>("all");
 
-  const caregiverQuery = useListings({ type: "SITTING" });
+  const caregiverQuery = useInfiniteListings({ type: "SITTING" });
+  const ownerQuery = useInfiniteListings({ type: "HELP_REQUEST" });
+
   const allCaregivers = useMemo(
-    () => (caregiverQuery.data ?? []).map(toCaregiverDisplay),
+    () => (caregiverQuery.data?.pages.flat() ?? []).map(toCaregiverDisplay),
     [caregiverQuery.data]
   );
-
-  const ownerQuery = useListings({ type: "HELP_REQUEST" });
   const allOwnerRequests = useMemo(
-    () => (ownerQuery.data ?? []).map(toOwnerRequestDisplay),
+    () => (ownerQuery.data?.pages.flat() ?? []).map(toOwnerRequestDisplay),
     [ownerQuery.data]
   );
+
 
   const caregiverResults = useMemo(() => {
     const q = searchValue.trim().toLowerCase();
@@ -133,87 +129,121 @@ export function ExploreScreen() {
     if (ownerFilter === "dog") {
       results = results.filter(
         (item) =>
-          item.petType.toLowerCase().includes("köpek") ||
-          item.petType.toLowerCase().includes("dog")
+          item.petType.toLowerCase().includes("köpek") || item.petType.toLowerCase().includes("dog")
       );
     }
     if (ownerFilter === "cat") {
       results = results.filter(
         (item) =>
-          item.petType.toLowerCase().includes("kedi") ||
-          item.petType.toLowerCase().includes("cat")
+          item.petType.toLowerCase().includes("kedi") || item.petType.toLowerCase().includes("cat")
       );
     }
     return results;
   }, [allOwnerRequests, ownerFilter, searchValue]);
 
-  const campaignResults = useMemo(() => {
-    const q = searchValue.trim().toLowerCase();
-    let results = petshopCampaigns.filter((item) => {
-      if (!q) return true;
-      return (
-        item.title.toLowerCase().includes(q) ||
-        item.storeName.toLowerCase().includes(q) ||
-        item.city.toLowerCase().includes(q) ||
-        item.summary.toLowerCase().includes(q)
-      );
-    });
-    if (campaignFilter === "discount") {
-      results = results.filter((item) => item.discount.includes("%"));
-    }
-    return results;
-  }, [campaignFilter, searchValue]);
+  const activeData = useMemo((): Array<{ id: string }> => {
+    if (activeTab === "caregiver-listings") return caregiverResults;
+    return ownerResults;
+  }, [activeTab, caregiverResults, ownerResults]);
 
-  const isLoading =
-    activeTab === "caregiver-listings"
-      ? caregiverQuery.isLoading
-      : activeTab === "owner-requests"
-        ? ownerQuery.isLoading
-        : false;
+  const isInitialLoading =
+    (activeTab === "caregiver-listings" && caregiverQuery.isLoading) ||
+    (activeTab === "owner-requests" && ownerQuery.isLoading);
 
-  const activeCount =
-    activeTab === "caregiver-listings"
-      ? caregiverResults.length
-      : activeTab === "owner-requests"
-        ? ownerResults.length
-        : campaignResults.length;
+  const isFetchingNextPage =
+    (activeTab === "caregiver-listings" && caregiverQuery.isFetchingNextPage) ||
+    (activeTab === "owner-requests" && ownerQuery.isFetchingNextPage);
 
   const refreshing =
-    (caregiverQuery.isFetching || ownerQuery.isFetching) &&
-    !caregiverQuery.isLoading &&
-    !ownerQuery.isLoading;
+    activeTab === "caregiver-listings"
+      ? caregiverQuery.isFetching && !caregiverQuery.isFetchingNextPage && !caregiverQuery.isLoading
+      : ownerQuery.isFetching && !ownerQuery.isFetchingNextPage && !ownerQuery.isLoading;
 
   const activeFilterItems =
-    activeTab === "caregiver-listings"
-      ? caregiverFilters
-      : activeTab === "owner-requests"
-        ? ownerFilters
-        : campaignFilters;
+    activeTab === "caregiver-listings" ? caregiverFilters : ownerFilters;
 
   const activeFilterValue =
-    activeTab === "caregiver-listings"
-      ? caregiverFilter
-      : activeTab === "owner-requests"
-        ? ownerFilter
-        : campaignFilter;
+    activeTab === "caregiver-listings" ? caregiverFilter : ownerFilter;
 
   function onFilterSelect(value: string) {
     if (activeTab === "caregiver-listings") setCaregiverFilter(value as CaregiverFilter);
-    else if (activeTab === "owner-requests") setOwnerFilter(value as OwnerFilter);
-    else setCampaignFilter(value as CampaignFilter);
+    else setOwnerFilter(value as OwnerFilter);
   }
 
   function onRefresh() {
-    void caregiverQuery.refetch();
-    void ownerQuery.refetch();
+    if (activeTab === "caregiver-listings") void caregiverQuery.refetch();
+    else void ownerQuery.refetch();
+  }
+
+  function handleEndReached() {
+    if (activeTab === "caregiver-listings" && caregiverQuery.hasNextPage) {
+      void caregiverQuery.fetchNextPage();
+    } else if (activeTab === "owner-requests" && ownerQuery.hasNextPage) {
+      void ownerQuery.fetchNextPage();
+    }
   }
 
   function clearFilters() {
     setSearchValue("");
     if (activeTab === "caregiver-listings") setCaregiverFilter("all");
-    else if (activeTab === "owner-requests") setOwnerFilter("all");
-    else setCampaignFilter("all");
+    else setOwnerFilter("all");
   }
+
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<{ id: string }>) => {
+      if (activeTab === "caregiver-listings") {
+        const listing = item as CaregiverDisplay;
+        return (
+          <ListingCard
+            actions={
+              <View style={styles.actionRow}>
+                <Link asChild href={routeBuilders.caregiverListingDetail(listing.id)}>
+                  <AppButton label="İncele" size="sm" variant="secondary" />
+                </Link>
+              </View>
+            }
+            avatarLabel={listing.avatarLabel}
+            badges={[{ icon: "map-marker-outline", label: listing.schedule, tone: "primary" }]}
+            coverImageUri={listing.coverImageUri}
+            description={listing.summary}
+            location={listing.city}
+            onPress={() => router.push(routeBuilders.caregiverListingDetail(listing.id))}
+            priceLabel={listing.budget || "Fiyat belirtilmemiş"}
+            subtitle={listing.title}
+            title={listing.caretakerName}
+            verificationState={listing.verificationState}
+          />
+        );
+      }
+
+      if (activeTab === "owner-requests") {
+        const request = item as OwnerRequestDisplay;
+        return (
+          <OwnerRequestCard
+            actions={
+              <View style={styles.actionRow}>
+                <Link asChild href={routeBuilders.ownerRequestDetail(request.id)}>
+                  <AppButton label="İncele" size="sm" variant="secondary" />
+                </Link>
+              </View>
+            }
+            budget={request.budget || "Bütçe belirtilmemiş"}
+            coverImageUri={request.coverImageUri}
+            dateLabel={request.dateLabel}
+            description={request.summary}
+            distanceLabel={request.distanceLabel}
+            location={request.city}
+            onPress={() => router.push(routeBuilders.ownerRequestDetail(request.id))}
+            petType={request.petType}
+            title={request.title}
+          />
+        );
+      }
+
+      return null;
+    },
+    [activeTab]
+  );
 
   return (
     <View style={styles.root}>
@@ -225,7 +255,7 @@ export function ExploreScreen() {
             <Text style={styles.headerTitle}>Ne arıyorsunuz?</Text>
           </View>
           <View style={styles.countBadge}>
-            <Text style={styles.countNumber}>{isLoading ? "—" : activeCount}</Text>
+            <Text style={styles.countNumber}>{isInitialLoading ? "—" : activeData.length}</Text>
             <Text style={styles.countLabel}>sonuç</Text>
           </View>
         </View>
@@ -249,9 +279,7 @@ export function ExploreScreen() {
               key={item.value}
               icon={item.icon}
               label={item.label}
-              onPress={() => {
-                onFilterSelect(item.value);
-              }}
+              onPress={() => onFilterSelect(item.value)}
               selected={item.value === activeFilterValue}
             />
           ))}
@@ -260,105 +288,56 @@ export function ExploreScreen() {
         <View style={styles.divider} />
       </View>
 
-      {/* ── Scrollable results ── */}
-      <ScrollView
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            onRefresh={onRefresh}
-            refreshing={refreshing}
-            tintColor={colors.primary}
-          />
-        }
-        showsVerticalScrollIndicator={false}
-      >
-        {isLoading ? (
+      {/* ── Content ── */}
+      {isInitialLoading ? (
+        <ScrollView contentContainerStyle={styles.listContent}>
           <SkeletonCards count={4} />
-        ) : activeCount > 0 ? (
-          <>
-            {activeTab === "caregiver-listings" &&
-              caregiverResults.map((listing) => (
-                <ListingCard
-                  key={listing.id}
-                  actions={
-                    <View style={styles.actionRow}>
-                      <Link asChild href={routeBuilders.caregiverListingDetail(listing.id)}>
-                        <AppButton label="İncele" size="sm" variant="secondary" />
-                      </Link>
-                    </View>
-                  }
-                  avatarLabel={listing.avatarLabel}
-                  badges={[
-                    { icon: "map-marker-outline", label: listing.schedule, tone: "primary" }
-                  ]}
-                  coverImageUri={listing.coverImageUri}
-                  description={listing.summary}
-                  location={listing.city}
-                  onPress={() => router.push(routeBuilders.caregiverListingDetail(listing.id))}
-                  priceLabel={listing.budget || "Fiyat belirtilmemiş"}
-                  subtitle={listing.title}
-                  title={listing.caretakerName}
-                  verificationState={listing.verificationState}
-                />
-              ))}
-
-            {activeTab === "owner-requests" &&
-              ownerResults.map((request) => (
-                <OwnerRequestCard
-                  key={request.id}
-                  actions={
-                    <View style={styles.actionRow}>
-                      <Link asChild href={routeBuilders.ownerRequestDetail(request.id)}>
-                        <AppButton label="İncele" size="sm" variant="secondary" />
-                      </Link>
-                    </View>
-                  }
-                  budget={request.budget || "Bütçe belirtilmemiş"}
-                  coverImageUri={request.coverImageUri}
-                  dateLabel={request.dateLabel}
-                  description={request.summary}
-                  distanceLabel={request.distanceLabel}
-                  location={request.city}
-                  onPress={() => router.push(routeBuilders.ownerRequestDetail(request.id))}
-                  petType={request.petType}
-                  title={request.title}
-                />
-              ))}
-
-            {activeTab === "petshop-campaigns" &&
-              campaignResults.map((campaign) => (
-                <PetshopCampaignCard
-                  key={campaign.id}
-                  actionSlot={
-                    <View style={styles.actionRow}>
-                      <Link asChild href={routeBuilders.petshopCampaignDetail(campaign.id)}>
-                        <AppButton label="İncele" size="sm" variant="secondary" />
-                      </Link>
-                    </View>
-                  }
-                  campaignLabel={campaign.campaignLabel}
-                  deadline={campaign.deadline}
-                  description={campaign.summary}
-                  priceLabel={`${campaign.discount} • ${campaign.priceLabel}`}
-                  storeName={campaign.storeName}
-                  title={campaign.title}
-                  visualLabel={campaign.visualLabel}
-                />
-              ))}
-          </>
-        ) : (
-          <View style={styles.emptyWrap}>
-            <EmptyState
-              actionSlot={
-                <AppButton label="Filtreleri Temizle" onPress={clearFilters} variant="secondary" />
-              }
-              description={emptyMeta[activeTab].description}
-              icon={emptyMeta[activeTab].icon}
-              title="Sonuç Yok"
+        </ScrollView>
+      ) : (
+        <FlatList
+          contentContainerStyle={
+            activeData.length === 0 ? styles.listContentEmpty : styles.listContent
+          }
+          data={activeData}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={
+            <View style={styles.emptyWrap}>
+              <EmptyState
+                actionSlot={
+                  <AppButton
+                    label="Filtreleri Temizle"
+                    onPress={clearFilters}
+                    variant="secondary"
+                  />
+                }
+                description={emptyMeta[activeTab].description}
+                icon={emptyMeta[activeTab].icon}
+                title="Sonuç Yok"
+              />
+            </View>
+          }
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <ActivityIndicator
+                color={colors.primary}
+                style={styles.footerLoader}
+              />
+            ) : null
+          }
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.3}
+          refreshControl={
+            <RefreshControl
+              onRefresh={onRefresh}
+              refreshing={refreshing}
+              tintColor={colors.primary}
             />
-          </View>
-        )}
-      </ScrollView>
+          }
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </View>
   );
 }
@@ -408,6 +387,8 @@ const styles = StyleSheet.create({
   },
   emptyWrap: {
     alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
     paddingTop: spacing.large
   },
   filterContent: {
@@ -416,6 +397,9 @@ const styles = StyleSheet.create({
   },
   filterScroll: {
     marginHorizontal: -spacing.comfortable
+  },
+  footerLoader: {
+    paddingVertical: spacing.section
   },
   header: {
     ...shadows.card,
@@ -443,7 +427,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   listContent: {
-    gap: spacing.standard,
+    paddingBottom: 110,
+    paddingHorizontal: spacing.comfortable,
+    paddingTop: spacing.standard
+  },
+  listContentEmpty: {
+    flexGrow: 1,
     paddingBottom: 110,
     paddingHorizontal: spacing.comfortable,
     paddingTop: spacing.standard
@@ -451,6 +440,9 @@ const styles = StyleSheet.create({
   root: {
     backgroundColor: colors.background,
     flex: 1
+  },
+  separator: {
+    height: spacing.standard
   }
 });
 

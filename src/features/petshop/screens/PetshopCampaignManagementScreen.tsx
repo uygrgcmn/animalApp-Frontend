@@ -50,7 +50,7 @@ export function PetshopCampaignManagementScreen() {
       {managedRows.length > 0 ? (
         <>
           <SectionHeader
-            eyebrow="Kampanyalarim"
+            eyebrow="Kampanyalarım"
             title={`${managedRows.length} kampanya`}
             description="Aktif, taslak ve pasif kampanyalar tek panelde izlenir."
           />
@@ -89,7 +89,7 @@ export function PetshopCampaignManagementScreen() {
                       variant="secondary"
                     />
                     <Link href={routeBuilders.createWithType("petshop-campaign")} asChild>
-                      <AppButton label="Kopyala / Yeni Ac" variant="ghost" />
+                      <AppButton label="Kopyala / Yeni Aç" variant="ghost" />
                     </Link>
                   </>
                 }
@@ -114,7 +114,7 @@ export function PetshopCampaignManagementScreen() {
         <EmptyState
           description="Henüz yönetilecek petshop kampanyası yok. İlk kampanyayı oluşturduğunda burada listelenecek."
           icon="tag-multiple-outline"
-          title="Kampanya bulunamadi"
+          title="Kampanya bulunamadı"
         />
       )}
     </ScreenContainer>

@@ -1,19 +1,96 @@
-import { Link, useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, StyleSheet, Text, TextInput, View, Pressable } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "expo-router";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
+} from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
+import type { ListingType } from "../../../core/api/contracts";
 import { colors } from "../../../core/theme/colors";
-import { radius, spacing, typography, shadows } from "../../../core/theme/tokens";
+import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
+import { routeBuilders } from "../../../core/navigation/routes";
 import { AppButton } from "../../../shared/ui/AppButton";
-import { conversationMessages, conversations } from "../../../shared/mocks/messages";
-import { getMockItemHref } from "../../../shared/utils/mockNavigation";
+import { formatMessageTime } from "../../../shared/utils/formatDate";
+import { useSessionStore } from "../../auth/store/sessionStore";
+import {
+  useConversation,
+  useConversationMessages,
+  useMarkAsRead,
+  useSendMessage
+} from "../hooks/useMessages";
+
+function getListingHref(listingId: string, listingType?: ListingType) {
+  if (listingType === "SITTING") return routeBuilders.caregiverListingDetail(listingId);
+  if (listingType === "HELP_REQUEST") return routeBuilders.ownerRequestDetail(listingId);
+  return routeBuilders.communityPostDetail(listingId);
+}
+
+const listingTypeLabels: Record<ListingType, string> = {
+  SITTING: "Bakıcı İlanı",
+  HELP_REQUEST: "Bakıcı Arıyorum",
+  FREE_ITEM: "Ücretsiz Eşya",
+  ACTIVITY: "Etkinlik",
+  COMMUNITY: "Topluluk",
+  ADOPTION: "Sahiplendirme"
+};
 
 export function ConversationDetailScreen() {
-  const params = useLocalSearchParams<{ conversationId: string }>();
+  const { conversationId } = useLocalSearchParams<{ conversationId: string }>();
   const router = useRouter();
-  const conversation = conversations.find((item) => item.id === params.conversationId);
-  const messages = conversation ? conversationMessages[conversation.id] ?? [] : [];
+  const currentUserId = useSessionStore((state) => state.user?.id);
+  const [draft, setDraft] = useState("");
+  const scrollRef = useRef<ScrollView>(null);
+
+  const conversationQuery = useConversation(conversationId);
+  const messagesQuery = useConversationMessages(conversationId);
+  const sendMessage = useSendMessage(conversationId);
+  const markAsRead = useMarkAsRead(conversationId);
+
+  const conversation = conversationQuery.data;
+  const messages = messagesQuery.data ?? [];
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollRef.current?.scrollToEnd({ animated: false });
+    }
+  }, [messages.length]);
+
+  useEffect(() => {
+    markAsRead.mutate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId]);
+
+  function handleSend() {
+    const content = draft.trim();
+    if (!content || sendMessage.isPending) return;
+    setDraft("");
+    sendMessage.mutate(
+      { content },
+      {
+        onSuccess: () => {
+          scrollRef.current?.scrollToEnd({ animated: true });
+        }
+      }
+    );
+  }
+
+  if (conversationQuery.isLoading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.errorContainer}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (!conversation) {
     return (
@@ -27,75 +104,92 @@ export function ConversationDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
+    <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
       {/* Listing context strip */}
-      <Link href={getMockItemHref(conversation.listingKind, conversation.listingId)} asChild>
-        <Pressable style={styles.listingContext}>
-          <View style={styles.listingContextLeft}>
-            <MaterialCommunityIcons name="link-variant" size={14} color={colors.primary} />
-            <Text numberOfLines={1} style={styles.listingContextText}>
-              {conversation.listingTitle}
-            </Text>
-          </View>
-          <View style={styles.listingTypePill}>
-            <Text style={styles.listingTypeText}>{conversation.listingType}</Text>
-          </View>
-          <MaterialCommunityIcons name="chevron-right" size={16} color={colors.textSubtle} />
-        </Pressable>
-      </Link>
+      {conversation.listing ? (
+        <Link
+          href={getListingHref(conversation.listingId, conversation.listing.type)}
+          asChild
+        >
+          <Pressable style={styles.listingContext}>
+            <View style={styles.listingContextLeft}>
+              <MaterialCommunityIcons name="link-variant" size={14} color={colors.primary} />
+              <Text numberOfLines={1} style={styles.listingContextText}>
+                {conversation.listing.title}
+              </Text>
+            </View>
+            <View style={styles.listingTypePill}>
+              <Text style={styles.listingTypeText}>
+                {listingTypeLabels[conversation.listing.type] ?? conversation.listing.type}
+              </Text>
+            </View>
+            <MaterialCommunityIcons name="chevron-right" size={16} color={colors.textSubtle} />
+          </Pressable>
+        </Link>
+      ) : null}
 
       {/* Messages */}
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={styles.messageList}
         showsVerticalScrollIndicator={false}
       >
-        {messages.map((message) => {
-          const isMe = message.sender === "me";
-          return (
-            <View
-              key={message.id}
-              style={[styles.messageBubble, isMe ? styles.myBubble : styles.otherBubble]}
-            >
-              <Text style={[styles.messageText, isMe ? styles.myText : styles.otherText]}>
-                {message.text}
-              </Text>
-              <View style={styles.timeContainer}>
-                <Text style={[styles.messageTime, isMe ? styles.myTime : styles.otherTime]}>
-                  {message.time}
+        {messagesQuery.isLoading ? (
+          <ActivityIndicator color={colors.primary} style={styles.loader} />
+        ) : (
+          messages.map((message) => {
+            const isMe = message.senderId === currentUserId;
+            return (
+              <View
+                key={message.id}
+                style={[styles.messageBubble, isMe ? styles.myBubble : styles.otherBubble]}
+              >
+                <Text style={[styles.messageText, isMe ? styles.myText : styles.otherText]}>
+                  {message.content}
                 </Text>
-                {isMe && (
-                  <MaterialCommunityIcons
-                    name="check-all"
-                    size={13}
-                    color={colors.primaryBorder}
-                    style={{ marginLeft: 2 }}
-                  />
-                )}
+                <View style={styles.timeContainer}>
+                  <Text style={[styles.messageTime, isMe ? styles.myTime : styles.otherTime]}>
+                    {formatMessageTime(message.createdAt)}
+                  </Text>
+                  {isMe && (
+                    <MaterialCommunityIcons
+                      color={message.isRead ? colors.primary : colors.primaryBorder}
+                      name="check-all"
+                      size={13}
+                      style={{ marginLeft: 2 }}
+                    />
+                  )}
+                </View>
               </View>
-            </View>
-          );
-        })}
+            );
+          })
+        )}
       </ScrollView>
 
       {/* Input Bar */}
       <View style={styles.inputContainer}>
-        <Pressable accessibilityLabel="Ek gönder" style={styles.attachmentButton}>
-          <MaterialCommunityIcons name="plus" size={22} color={colors.primary} />
-        </Pressable>
         <View style={styles.textInputWrapper}>
           <TextInput
             multiline
+            onChangeText={setDraft}
             placeholder="Mesaj yaz..."
             placeholderTextColor={colors.textTertiary}
             selectionColor={colors.primary}
             style={styles.textInput}
+            value={draft}
           />
-          <Pressable accessibilityLabel="Emoji seç" style={styles.emojiButton}>
-            <MaterialCommunityIcons name="emoticon-outline" size={22} color={colors.textSubtle} />
-          </Pressable>
         </View>
-        <Pressable accessibilityLabel="Gönder" style={styles.sendButton}>
-          <MaterialCommunityIcons name="send" size={20} color={colors.textInverse} />
+        <Pressable
+          accessibilityLabel="Gönder"
+          disabled={!draft.trim() || sendMessage.isPending}
+          onPress={handleSend}
+          style={[styles.sendButton, !draft.trim() && styles.sendButtonDisabled]}
+        >
+          {sendMessage.isPending ? (
+            <ActivityIndicator color={colors.textInverse} size="small" />
+          ) : (
+            <MaterialCommunityIcons color={colors.textInverse} name="send" size={20} />
+          )}
         </Pressable>
       </View>
     </SafeAreaView>
@@ -103,17 +197,6 @@ export function ConversationDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  attachmentButton: {
-    alignItems: "center",
-    backgroundColor: colors.primarySoft,
-    borderRadius: radius.full,
-    height: 40,
-    justifyContent: "center",
-    width: 40
-  },
-  emojiButton: {
-    padding: spacing.micro
-  },
   errorContainer: {
     alignItems: "center",
     flex: 1,
@@ -170,6 +253,10 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 10,
     fontWeight: "700"
+  },
+  loader: {
+    flex: 1,
+    marginTop: spacing.large
   },
   messageBubble: {
     borderRadius: radius.large,
@@ -230,6 +317,9 @@ const styles = StyleSheet.create({
     width: 44,
     ...shadows.card
   },
+  sendButtonDisabled: {
+    backgroundColor: colors.primarySoft
+  },
   textInput: {
     color: colors.text,
     flex: 1,
@@ -255,4 +345,3 @@ const styles = StyleSheet.create({
     marginTop: 2
   }
 });
-

@@ -1,40 +1,63 @@
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useMemo, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  type ListRenderItemInfo,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { routeBuilders, routes } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
 import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
-import { useCommunityListings } from "../hooks/useCommunityListings";
-import { toCommunityDisplay } from "../../listings/utils/adapters";
+import { useInfiniteCommunityListings } from "../hooks/useCommunityListings";
+import {
+  toCommunityDisplay,
+  type CommunityPostDisplay
+} from "../../listings/utils/adapters";
 import { AppButton } from "../../../shared/ui/AppButton";
 import { CommunityCard } from "../../../shared/ui/CommunityCard";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { SearchBar } from "../../../shared/ui/SearchBar";
 import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
 
-type CommunityTab = "all" | "ucretsiz-mama" | "sahiplendirme" | "diger";
+type CommunityTab = "all" | "ucretsiz" | "sahiplendirme" | "kayip-ilan";
 
 const communityTabs: { label: string; value: CommunityTab }[] = [
-  { label: "Tümü", value: "all" },
-  { label: "Ücretsiz Mama", value: "ucretsiz-mama" },
+  
+  { label: "Ücretsiz", value: "ucretsiz" },
   { label: "Sahiplendirme", value: "sahiplendirme" },
-  { label: "Diğer", value: "diger" }
+  { label: "Kayıp İlanı", value: "kayip-ilan" }
 ];
+
+const TAB_CATEGORY_MAP: Record<CommunityTab, string[]> = {
+  all: [],
+  ucretsiz: ["FREE_ITEM", "ucretsiz-mama"],
+  sahiplendirme: ["ADOPTION", "sahiplendirme"],
+  "kayip-ilan": ["HELP_REQUEST", "LOST_PET", "kayip-ilan"]
+};
 
 export function CommunityHubScreen() {
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<CommunityTab>("all");
+  const [activeTab, setActiveTab] = useState<CommunityTab>("ucretsiz");
   const [searchValue, setSearchValue] = useState("");
 
-  const { data: rawPosts = [], isLoading, isError, isFetching, refetch } = useCommunityListings();
-  const allPosts = useMemo(() => rawPosts.map(toCommunityDisplay), [rawPosts]);
+  const communityQuery = useInfiniteCommunityListings();
+
+  const allPosts = useMemo(
+    () => (communityQuery.data?.pages.flat() ?? []).map(toCommunityDisplay),
+    [communityQuery.data]
+  );
 
   const filteredPosts = useMemo(() => {
     const q = searchValue.trim().toLowerCase();
+    const allowedKeys = activeTab !== "all" ? TAB_CATEGORY_MAP[activeTab] : [];
     return allPosts.filter((post) => {
-      if (activeTab !== "all" && post.categoryKey !== activeTab) return false;
+      if (activeTab !== "all" && !allowedKeys.includes(post.categoryKey)) return false;
       if (!q) return true;
       return (
         post.title.toLowerCase().includes(q) ||
@@ -47,12 +70,53 @@ export function CommunityHubScreen() {
     });
   }, [allPosts, activeTab, searchValue]);
 
-  const refreshing = isFetching && !isLoading;
+  const refreshing =
+    communityQuery.isFetching &&
+    !communityQuery.isFetchingNextPage &&
+    !communityQuery.isLoading;
 
   function resetFilters() {
-    setActiveTab("all");
+    setActiveTab("ucretsiz");
     setSearchValue("");
   }
+
+  function handleEndReached() {
+    if (communityQuery.hasNextPage) {
+      void communityQuery.fetchNextPage();
+    }
+  }
+
+  const renderItem = useCallback(({ item }: ListRenderItemInfo<CommunityPostDisplay>) => {
+    return (
+      <CommunityCard
+        actionSlot={
+          <View style={styles.actionRow}>
+            <AppButton
+              label="Mesaj"
+              onPress={() => router.push(routes.app.messages)}
+              size="sm"
+              variant="secondary"
+            />
+            <AppButton
+              label={item.quickActionLabel}
+              onPress={() => router.push(routeBuilders.communityPostDetail(item.id))}
+              size="sm"
+            />
+          </View>
+        }
+        author={item.author}
+        category={item.category}
+        dateLabel={item.dateLabel}
+        description={item.summary}
+        imageUri={item.imageUri}
+        location={`${item.city}${item.district ? ` / ${item.district}` : ""}`}
+        onPress={() => router.push(routeBuilders.communityPostDetail(item.id))}
+        title={item.title}
+        verificationState={item.trustState}
+        visualLabel={item.visualLabel}
+      />
+    );
+  }, []);
 
   return (
     <View style={styles.root}>
@@ -64,7 +128,9 @@ export function CommunityHubScreen() {
             <Text style={styles.headerTitle}>Paylaşımlar</Text>
           </View>
           <View style={styles.countBadge}>
-            <Text style={styles.countNumber}>{isLoading ? "—" : filteredPosts.length}</Text>
+            <Text style={styles.countNumber}>
+              {communityQuery.isLoading ? "—" : filteredPosts.length}
+            </Text>
             <Text style={styles.countLabel}>paylaşım</Text>
           </View>
         </View>
@@ -80,96 +146,90 @@ export function CommunityHubScreen() {
         <View style={styles.divider} />
       </View>
 
-      {/* ── Scrollable feed ── */}
-      <ScrollView
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            onRefresh={() => void refetch()}
-            refreshing={refreshing}
-            tintColor={colors.primary}
+      {/* ── Feed ── */}
+      {communityQuery.isLoading ? (
+        <FlatList
+          contentContainerStyle={styles.listContent}
+          data={Array.from({ length: 4 }, (_, i) => ({ id: String(i) }))}
+          keyExtractor={(item) => item.id}
+          renderItem={() => <SkeletonCard />}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          scrollEnabled={false}
+        />
+      ) : communityQuery.isError ? (
+        <View style={styles.emptyWrap}>
+          <EmptyState
+            actionSlot={
+              <AppButton
+                label="Yenile"
+                onPress={() => void communityQuery.refetch()}
+                variant="secondary"
+              />
+            }
+            description="Paylaşımlar yüklenirken bir hata oluştu."
+            icon="wifi-off"
+            title="Bağlantı Hatası"
           />
-        }
-        showsVerticalScrollIndicator={false}
-      >
-        {isLoading ? (
-          <SkeletonCards count={4} />
-        ) : isError ? (
-          <View style={styles.emptyWrap}>
-            <EmptyState
-              actionSlot={
-                <AppButton label="Yenile" onPress={() => void refetch()} variant="secondary" />
-              }
-              description="Paylaşımlar yüklenirken bir hata oluştu."
-              icon="wifi-off"
-              title="Bağlantı Hatası"
-            />
-          </View>
-        ) : filteredPosts.length > 0 ? (
-          filteredPosts.map((post) => (
-            <CommunityCard
-              key={post.id}
-              actionSlot={
-                <View style={styles.actionRow}>
+        </View>
+      ) : (
+        <FlatList
+          contentContainerStyle={
+            filteredPosts.length === 0 ? styles.listContentEmpty : styles.listContent
+          }
+          data={filteredPosts}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={
+            <View style={styles.emptyWrap}>
+              <EmptyState
+                actionSlot={
                   <AppButton
-                    label="Mesaj"
-                    onPress={() => router.push(routes.app.messages)}
-                    size="sm"
+                    label="Filtreleri Temizle"
+                    onPress={resetFilters}
                     variant="secondary"
                   />
-                  <AppButton
-                    label={post.quickActionLabel}
-                    onPress={() => router.push(routeBuilders.communityPostDetail(post.id))}
-                    size="sm"
-                  />
-                </View>
-              }
-              author={post.author}
-              category={post.category}
-              dateLabel={post.dateLabel}
-              description={post.summary}
-              imageUri={post.imageUri}
-              location={`${post.city}${post.district ? ` / ${post.district}` : ""}`}
-              onPress={() => router.push(routeBuilders.communityPostDetail(post.id))}
-              title={post.title}
-              verificationState={post.trustState}
-              visualLabel={post.visualLabel}
+                }
+                description="Bu kategoride henüz paylaşım bulunmuyor."
+                icon="hand-heart-outline"
+                title="Sonuç Yok"
+              />
+            </View>
+          }
+          ListFooterComponent={
+            communityQuery.isFetchingNextPage ? (
+              <ActivityIndicator color={colors.primary} style={styles.footerLoader} />
+            ) : null
+          }
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.3}
+          refreshControl={
+            <RefreshControl
+              onRefresh={() => void communityQuery.refetch()}
+              refreshing={refreshing}
+              tintColor={colors.primary}
             />
-          ))
-        ) : (
-          <View style={styles.emptyWrap}>
-            <EmptyState
-              actionSlot={
-                <AppButton label="Filtreleri Temizle" onPress={resetFilters} variant="secondary" />
-              }
-              description="Bu kategoride henüz paylaşım bulunmuyor."
-              icon="hand-heart-outline"
-              title="Sonuç Yok"
-            />
-          </View>
-        )}
-      </ScrollView>
+          }
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </View>
   );
 }
 
 // ─── Skeleton ────────────────────────────────────────────────────────────────
 
-function SkeletonCards({ count }: { count: number }) {
+function SkeletonCard() {
   return (
-    <>
-      {Array.from({ length: count }).map((_, i) => (
-        <View key={i} style={skeletonStyles.card}>
-          <View style={skeletonStyles.image} />
-          <View style={skeletonStyles.body}>
-            <View style={[skeletonStyles.line, { width: "60%" }]} />
-            <View style={[skeletonStyles.line, { width: "90%", height: 12 }]} />
-            <View style={[skeletonStyles.line, { width: "90%", height: 12 }]} />
-            <View style={[skeletonStyles.line, { width: "40%", height: 10, marginTop: 4 }]} />
-          </View>
-        </View>
-      ))}
-    </>
+    <View style={skeletonStyles.card}>
+      <View style={skeletonStyles.image} />
+      <View style={skeletonStyles.body}>
+        <View style={[skeletonStyles.line, { width: "60%" }]} />
+        <View style={[skeletonStyles.line, { width: "90%", height: 12 }]} />
+        <View style={[skeletonStyles.line, { width: "90%", height: 12 }]} />
+        <View style={[skeletonStyles.line, { width: "40%", height: 10, marginTop: 4 }]} />
+      </View>
+    </View>
   );
 }
 
@@ -199,7 +259,12 @@ const styles = StyleSheet.create({
   },
   emptyWrap: {
     alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
     paddingTop: spacing.large
+  },
+  footerLoader: {
+    paddingVertical: spacing.section
   },
   header: {
     ...shadows.card,
@@ -227,7 +292,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   listContent: {
-    gap: spacing.standard,
+    paddingBottom: 110,
+    paddingHorizontal: spacing.comfortable,
+    paddingTop: spacing.standard
+  },
+  listContentEmpty: {
+    flexGrow: 1,
     paddingBottom: 110,
     paddingHorizontal: spacing.comfortable,
     paddingTop: spacing.standard
@@ -235,6 +305,9 @@ const styles = StyleSheet.create({
   root: {
     backgroundColor: colors.background,
     flex: 1
+  },
+  separator: {
+    height: spacing.standard
   }
 });
 

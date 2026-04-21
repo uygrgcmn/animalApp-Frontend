@@ -32,17 +32,17 @@ import {
 } from "../../profile/utils/modeStatus";
 
 const availabilityOptions = [
-  { label: "Hafta ici", value: "hafta-ici" },
+  { label: "Hafta içi", value: "hafta-ici" },
   { label: "Hafta sonu", value: "hafta-sonu" },
   { label: "Esnek", value: "esnek" }
 ] as const;
 
 const serviceTypeLabels: Record<(typeof caregiverServiceOptions)[number], string> = {
-  "evde-bakim": "Evde bakim",
-  "geceli-bakim": "Geceli bakim",
-  "gunluk-ziyaret": "Gunluk ziyaret",
-  "ilac-takibi": "Ilac takibi",
-  "kopek-gezdirme": "Kopek gezdirme"
+  "evde-bakim": "Evde bakım",
+  "geceli-bakim": "Geceli bakım",
+  "gunluk-ziyaret": "Günlük ziyaret",
+  "ilac-takibi": "İlaç takibi",
+  "kopek-gezdirme": "Köpek gezdirme"
 };
 
 export function CaregiverActivationScreen() {
@@ -79,14 +79,14 @@ export function CaregiverActivationScreen() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permission.granted) {
-      setPickerError("Belge veya fotograf eklemek icin galeri izni gerekiyor.");
+      setPickerError("Belge veya fotoğraf eklemek için galeri izni gerekiyor.");
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType.Images,
       quality: 0.8
     });
 
@@ -113,18 +113,18 @@ export function CaregiverActivationScreen() {
   return (
     <ScreenContainer contentContainerStyle={styles.content}>
       <VisualHero
-        description="Konum, deneyim ve hizmet alaniyla bakici profilini gorsel agirlikli marketplace'e hazirla."
+        description="Konum, deneyim ve hizmet alanıyla bakıcı profilini görsel ağırlıklı marketplace'e hazırla."
         icon="shield-account"
         metrics={[
           { icon: "map-marker-radius", label: "Lokasyon", tone: "primary" },
           { icon: "timer-outline", label: "Deneyim", tone: "success" }
         ]}
-        title="Bakici profilini aktive et"
+        title="Bakıcı profilini aktive et"
       />
 
       <InfoCard
         variant="accent"
-        title="Hazirlik durumu"
+        title="Hazırlık durumu"
         description={modeSummary.description}
       >
         <View style={styles.summaryRow}>
@@ -132,14 +132,14 @@ export function CaregiverActivationScreen() {
           <Text style={styles.summaryLabel}>
             {getCaregiverMissingItems(values).length > 0
               ? `${getCaregiverMissingItems(values).length} alan eksik`
-              : "Tum zorunlu alanlar hazir"}
+              : "Tüm zorunlu alanlar hazır"}
           </Text>
         </View>
       </InfoCard>
 
       <InfoCard
         title="Temel profil"
-        description="Formu parcalara bolup sadece gerekli alanlari gorunur tuttuk."
+        description="Formu parçalara bölüp sadece gerekli alanları görünür tuttuk."
       >
         <View style={styles.grid}>
           <View style={styles.gridItem}>
@@ -148,7 +148,7 @@ export function CaregiverActivationScreen() {
               name="city"
               render={({ field }) => (
                 <TextField
-                  label="Sehir"
+                  label="Şehir"
                   value={field.value}
                   onChangeText={field.onChange}
                   error={errors.city?.message}
@@ -162,7 +162,7 @@ export function CaregiverActivationScreen() {
               name="district"
               render={({ field }) => (
                 <TextField
-                  label="Ilce"
+                  label="İlçe"
                   value={field.value}
                   onChangeText={field.onChange}
                   error={errors.district?.message}
@@ -178,7 +178,7 @@ export function CaregiverActivationScreen() {
           render={({ field }) => (
             <TextField
               label="Deneyim"
-              placeholder="Orn. 3 yil aktif bakim deneyimi"
+              placeholder="Örn. 3 yıl aktif bakım deneyimi"
               value={field.value}
               onChangeText={field.onChange}
               error={errors.experienceYears?.message}
@@ -191,8 +191,8 @@ export function CaregiverActivationScreen() {
           name="rateExpectation"
           render={({ field }) => (
             <TextField
-              label="Ucret beklentisi"
-              placeholder="Orn. Gunluk 900 TL"
+              label="Ücret beklentisi"
+              placeholder="Örn. Günlük 900 TL"
               value={field.value}
               onChangeText={field.onChange}
               error={errors.rateExpectation?.message}
@@ -203,7 +203,7 @@ export function CaregiverActivationScreen() {
 
       <InfoCard
         title="Hizmet ve uygunluk"
-        description="Hangi isleri aldigini ve nasil uygun oldugunu hizli secimlerle belirt."
+        description="Hangi işleri aldığını ve nasıl uygun olduğunu hızlı seçimlerle belirt."
       >
         <Controller
           control={control}
@@ -253,9 +253,9 @@ export function CaregiverActivationScreen() {
           name="profileBio"
           render={({ field }) => (
             <TextField
-              label="Profil aciklamasi"
+              label="Profil açıklaması"
               multiline
-              placeholder="Rutin, deneyim ve nasil bir bakim sundugunu kisa ve guven veren bir dille anlat."
+              placeholder="Rutin, deneyim ve nasıl bir bakım sunduğunu kısa ve güven veren bir dille anlat."
               value={field.value}
               onChangeText={field.onChange}
               error={errors.profileBio?.message}
@@ -265,18 +265,18 @@ export function CaregiverActivationScreen() {
       </InfoCard>
 
       <InfoCard
-        title="Destekleyici belge / fotograf"
-        description="Zorunlu degil; ama ekledigin her belge guven hissini artirir."
+        title="Destekleyici belge / fotoğraf"
+        description="Zorunlu değil; ama eklediğin her belge güven hissini artırır."
       >
         <UploadBox
           description={
             values.supportingAssets.length > 0
               ? `${values.supportingAssets.length} dosya eklendi`
-              : "Referans, sertifika veya profil fotografi ekleyebilirsin."
+              : "Referans, sertifika veya profil fotoğrafı ekleyebilirsin."
           }
           error={pickerError ?? undefined}
           imageUri={values.supportingAssets[0]}
-          label="Belge veya fotograf ekle"
+          label="Belge veya fotoğraf ekle"
           onPress={handlePickAsset}
         />
         {values.supportingAssets.length > 0 ? (
@@ -302,14 +302,14 @@ export function CaregiverActivationScreen() {
         <View style={styles.actions}>
           <AppButton
             disabled={isSubmitting}
-            label="Taslagi Kaydet"
+            label="Taslağı Kaydet"
             leftSlot={<AppIcon backgrounded={false} name="content-save-outline" size={18} />}
             onPress={handleSubmit(handleSaveDraft)}
             variant="secondary"
           />
           <AppButton
             disabled={isSubmitting}
-            label={isSubmitting ? "Kaydediliyor..." : "Bakici Modunu Aktif Et"}
+            label={isSubmitting ? "Kaydediliyor..." : "Bakıcı Modunu Aktif Et"}
             leftSlot={<AppIcon backgrounded={false} color="#FFFFFF" name="check-circle-outline" size={18} />}
             onPress={handleSubmit(onSubmit)}
           />
@@ -357,4 +357,3 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   }
 });
-

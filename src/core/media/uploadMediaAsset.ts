@@ -6,6 +6,20 @@ type UploadMediaAssetInput = {
   uri: string;
 };
 
+// In dev, the backend returns MinIO URLs with "localhost" which mobile devices can't reach.
+// Replace localhost with the actual LAN host extracted from the configured API base URL.
+function rewriteLocalhostMediaUrl(url: string): string {
+  if (!url.includes("localhost") && !url.includes("127.0.0.1")) return url;
+  try {
+    const apiBase = process.env.EXPO_PUBLIC_API_BASE_URL ?? "";
+    const apiHost = new URL(apiBase).hostname;
+    if (!apiHost || apiHost === "localhost" || apiHost === "127.0.0.1") return url;
+    return url.replace(/localhost|127\.0\.0\.1/g, apiHost);
+  } catch {
+    return url;
+  }
+}
+
 function inferImageContentType(fileName: string) {
   const extension = fileName.split(".").pop()?.toLowerCase();
 
@@ -47,7 +61,7 @@ export async function uploadMediaAsset({ folder, uri }: UploadMediaAssetInput) {
       throw new Error("Gorsel yuklenemedi.");
     }
 
-    return publicUrl;
+    return rewriteLocalhostMediaUrl(publicUrl);
   } catch (error) {
     if (
       error instanceof ApiError ||
@@ -56,6 +70,7 @@ export async function uploadMediaAsset({ folder, uri }: UploadMediaAssetInput) {
           error.message.includes("presigned") ||
           error.message.includes("Sunucuya ulasilamadi")))
     ) {
+      console.warn("[uploadMediaAsset] Upload failed:", error instanceof Error ? error.message : error);
       return uri;
     }
 

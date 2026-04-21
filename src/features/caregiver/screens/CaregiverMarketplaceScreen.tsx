@@ -79,7 +79,7 @@ export function CaregiverMarketplaceScreen() {
         {caregiverStatus !== "active" ? (
           <Link href="/(app)/caregiver-activation" asChild>
             <AppButton
-              label={`Bakici Modunu ${getCaregiverActionLabel(caregiverStatus)}`}
+              label={`Bakıcı Modunu ${getCaregiverActionLabel(caregiverStatus)}`}
               leftSlot={<AppIcon backgrounded={false} color="#FFFFFF" name="shield-plus" size={18} />}
             />
           </Link>
