@@ -1,6 +1,6 @@
 import { apiConfig } from "./config";
-import { toApiError } from "./errors";
-import { getStoredAuthTokens } from "./tokenStorage";
+import { ApiError, toApiError } from "./errors";
+import { clearStoredAuthTokens, getStoredAuthTokens, setStoredAuthTokens } from "./tokenStorage";
 
 type Primitive = string | number | boolean;
 type QueryValue = Primitive | null | undefined | Primitive[];
@@ -68,17 +68,73 @@ async function buildHeaders(options: RequestOptions) {
   }
 
   if (options.auth) {
-    const tokens = await getStoredAuthTokens();
+    const accessToken = await ensureAccessToken();
 
-    if (tokens?.accessToken) {
-      headers.set("Authorization", `Bearer ${tokens.accessToken}`);
+    if (accessToken) {
+      headers.set("Authorization", `Bearer ${accessToken}`);
     }
   }
 
   return headers;
 }
 
-async function request<T>(path: string, options: RequestOptions = {}) {
+// Prevents concurrent refresh races: only one refresh runs at a time.
+let refreshPromise: Promise<string | null> | null = null;
+
+async function tryRefreshAccessToken(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    try {
+      const stored = await getStoredAuthTokens();
+      if (!stored?.refreshToken) return null;
+
+      const response = await fetch(`${apiConfig.baseUrl}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken: stored.refreshToken })
+      });
+
+      if (!response.ok) {
+        await clearStoredAuthTokens();
+        return null;
+      }
+
+      const newTokens = await response.json();
+      await setStoredAuthTokens(newTokens);
+      return newTokens.accessToken as string;
+    } catch {
+      return null;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+async function ensureAccessToken(): Promise<string | null> {
+  const stored = await getStoredAuthTokens();
+
+  if (stored?.accessToken) {
+    return stored.accessToken;
+  }
+
+  if (stored?.refreshToken) {
+    return tryRefreshAccessToken();
+  }
+
+  return null;
+}
+
+function serializeBody(body: RequestOptions["body"]) {
+  if (body === undefined || body === null || body instanceof FormData || typeof body === "string") {
+    return body;
+  }
+  return JSON.stringify(body);
+}
+
+async function executeRequest<T>(path: string, options: RequestOptions): Promise<T> {
   const controller = new AbortController();
   const timeoutId = setTimeout(
     () => controller.abort(),
@@ -90,13 +146,7 @@ async function request<T>(path: string, options: RequestOptions = {}) {
     const response = await fetch(buildUrl(path, options.query), {
       ...options,
       headers,
-      body:
-        options.body !== undefined &&
-        options.body !== null &&
-        !(options.body instanceof FormData) &&
-        typeof options.body !== "string"
-          ? JSON.stringify(options.body)
-          : options.body,
+      body: serializeBody(options.body),
       signal: controller.signal
     });
 
@@ -121,6 +171,24 @@ async function request<T>(path: string, options: RequestOptions = {}) {
     throw error;
   } finally {
     clearTimeout(timeoutId);
+  }
+}
+
+async function request<T>(path: string, options: RequestOptions = {}) {
+  try {
+    return await executeRequest<T>(path, options);
+  } catch (error) {
+    // On 401, refresh the access token once and retry
+    if (error instanceof ApiError && error.statusCode === 401 && options.auth) {
+      const newToken = await tryRefreshAccessToken();
+      if (newToken) {
+        return await executeRequest<T>(path, options);
+      }
+
+      await clearStoredAuthTokens();
+      throw new ApiError("Oturumunuzun suresi doldu. Lutfen yeniden giris yapin.", 401);
+    }
+    throw error;
   }
 }
 

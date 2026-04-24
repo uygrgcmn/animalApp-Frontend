@@ -30,6 +30,8 @@ import { StickyBottomActionBar } from "../../../shared/ui/StickyBottomActionBar"
 import { VerificationBadge } from "../../../shared/ui/VerificationBadge";
 import { useBookmarkStore, type BookmarkedItem } from "../../profile/store/bookmarkStore";
 import { useSessionStore } from "../../auth/store/sessionStore";
+import { usePetshopDiscovery } from "../../petshop/hooks/usePetshopQueries";
+import { buildLocalPetshopCampaignDetail } from "../../petshop/utils/campaigns";
 import {
   getCaregiverMissingItems,
   getCaregiverModePresentation,
@@ -42,6 +44,7 @@ import { ActionGateSheet } from "../components/ActionGateSheet";
 import { ApplyModal } from "../components/ApplyModal";
 import { useListingDetail, useListings } from "../hooks/useListings";
 import { toCaregiverDisplay, toOwnerRequestDisplay } from "../utils/adapters";
+import { isCaregiverListing, isOwnerRequestListing } from "../utils/listingGuards";
 import {
   getPrimaryMediaUrl,
   parseEmbeddedListingMetadata
@@ -131,6 +134,10 @@ export function CaregiverListingDetailScreen() {
   }
 
   if (!listing) {
+    return <MissingDetailState description="Bakıcı ilanı bulunamadı." title="İlan detayı" />;
+  }
+
+  if (!isCaregiverListing(listing)) {
     return <MissingDetailState description="Bakıcı ilanı bulunamadı." title="İlan detayı" />;
   }
 
@@ -285,6 +292,7 @@ export function OwnerRequestDetailScreen() {
   const similarRequests = useMemo(
     () =>
       (helpRequestQuery.data ?? [])
+        .filter(isOwnerRequestListing)
         .filter((l) => l.id !== params.listingId)
         .slice(0, 3)
         .map(toOwnerRequestDisplay),
@@ -296,6 +304,12 @@ export function OwnerRequestDetailScreen() {
   }
 
   if (!listing) {
+    return (
+      <MissingDetailState description="Bakıcı arayan ilanı bulunamadı." title="İlan detayı" />
+    );
+  }
+
+  if (!isOwnerRequestListing(listing)) {
     return (
       <MissingDetailState description="Bakıcı arayan ilanı bulunamadı." title="İlan detayı" />
     );
@@ -435,9 +449,34 @@ export function OwnerRequestDetailScreen() {
 
 export function PetshopCampaignDetailScreen() {
   const params = useLocalSearchParams<{ listingId: string }>();
-  const detail = petshopCampaignDetails[params.listingId];
-  const similar = detail ? getSimilarPetshopCampaigns(detail.similarIds) : [];
+  const discoveryQuery = usePetshopDiscovery();
+  const staticDetail = petshopCampaignDetails[params.listingId];
+  const campaign = useMemo(
+    () => (discoveryQuery.data ?? []).find((item) => item.id === params.listingId),
+    [discoveryQuery.data, params.listingId]
+  );
+  const detail =
+    staticDetail ??
+    (campaign ? buildLocalPetshopCampaignDetail(campaign, routes.app.petshopCampaignManagement) : null);
+  const similar = useMemo(() => {
+    if (staticDetail) {
+      return getSimilarPetshopCampaigns(staticDetail.similarIds);
+    }
+
+    if (!campaign) {
+      return [];
+    }
+
+    return (discoveryQuery.data ?? [])
+      .filter((item) => item.id !== campaign.id)
+      .filter((item) => item.storeId === campaign.storeId || item.city === campaign.city)
+      .slice(0, 3);
+  }, [campaign, discoveryQuery.data, staticDetail]);
   const gate = usePetshopGate();
+
+  if (discoveryQuery.isLoading && !detail) {
+    return <LoadingDetailState title="Petshop Kampanyası" />;
+  }
 
   if (!detail) {
     return <MissingDetailState description="Petshop kampanyası bulunamadı." title="Kampanya detayı" />;
@@ -455,7 +494,14 @@ export function PetshopCampaignDetailScreen() {
             label="Mağaza Profiline Git"
             leftSlot={<AppIcon backgrounded={false} name="storefront-outline" size={18} />}
             onPress={() => {
-              router.push(routeBuilders.petshopStoreProfile(detail.storeId));
+              if (campaign?.storeId) {
+                router.push(routeBuilders.petshopStoreProfile(campaign.storeId));
+                return;
+              }
+
+              if ("storeId" in detail) {
+                router.push(routeBuilders.petshopStoreProfile(detail.storeId));
+              }
             }}
             variant="secondary"
           />
@@ -475,6 +521,7 @@ export function PetshopCampaignDetailScreen() {
         </InfoCard>
       }
       basicInfo={detail.info}
+      coverImageUri={campaign?.coverImageUri}
       description={detail.description}
       emptyTitle="Benzer kampanya bulunmuyor"
       notFoundDescription="Petshop kampanyası bulunamadı."
@@ -484,14 +531,19 @@ export function PetshopCampaignDetailScreen() {
       similarListings={
         similar.length > 0 ? (
           <View style={styles.list}>
-            {similar.map((item) => (
-              <Link href={routeBuilders.petshopCampaignDetail(item.id)} key={item.id} asChild>
-                <Pressable>
-                  <PetshopCampaignCard
-                    campaignLabel={item.campaignLabel}
-                    deadline={item.deadline}
-                    description={item.summary}
-                    priceLabel={`${item.discount} • ${item.priceLabel}`}
+             {similar.map((item) => (
+               <Link href={routeBuilders.petshopCampaignDetail(item.id)} key={item.id} asChild>
+                 <Pressable>
+                   <PetshopCampaignCard
+                     campaignLabel={item.campaignLabel}
+                     coverImageUri={
+                       "coverImageUri" in item && typeof item.coverImageUri === "string"
+                         ? item.coverImageUri
+                         : undefined
+                     }
+                     deadline={item.deadline}
+                     description={item.summary}
+                     priceLabel={`${item.discount} • ${item.priceLabel}`}
                     storeName={item.storeName}
                     title={item.title}
                     visualLabel={item.visualLabel}

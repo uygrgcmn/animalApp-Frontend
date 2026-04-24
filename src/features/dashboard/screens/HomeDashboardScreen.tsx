@@ -24,6 +24,7 @@ import {
   toCommunityDisplay,
   toOwnerRequestDisplay
 } from "../../listings/utils/adapters";
+import { isOwnerRequestListing } from "../../listings/utils/listingGuards";
 import { SkeletonBox } from "../../../shared/ui/SkeletonBox";
 import { useSessionStore } from "../../auth/store/sessionStore";
 
@@ -47,7 +48,10 @@ export function HomeDashboardScreen() {
   const caregiverListings = (caregiverQuery.data ?? []).slice(0, 6).map(toCaregiverDisplay);
 
   const ownerQuery = useListings({ type: "HELP_REQUEST" });
-  const ownerRequests = (ownerQuery.data ?? []).slice(0, 4).map(toOwnerRequestDisplay);
+  const ownerRequests = (ownerQuery.data ?? [])
+    .filter(isOwnerRequestListing)
+    .slice(0, 4)
+    .map(toOwnerRequestDisplay);
 
   const communityQuery = useCommunityListings();
   const communityPosts = (communityQuery.data ?? []).slice(0, 4).map(toCommunityDisplay);
@@ -273,6 +277,7 @@ export function HomeDashboardScreen() {
                   discount={item.discount}
                   deadline={item.deadline}
                   campaignLabel={item.campaignLabel}
+                  imageUri={item.coverImageUri}
                   onPress={() => router.push(routeBuilders.petshopCampaignDetail(item.id))}
                 />
               ))}
@@ -538,6 +543,7 @@ function CampaignCard({
   campaignLabel,
   deadline,
   discount,
+  imageUri,
   onPress,
   storeName,
   title
@@ -545,6 +551,7 @@ function CampaignCard({
   campaignLabel: string;
   deadline: string;
   discount: string;
+  imageUri?: string;
   onPress: () => void;
   storeName: string;
   title: string;
@@ -555,12 +562,16 @@ function CampaignCard({
       onPress={onPress}
     >
       <View style={styles.cardImageArea}>
-        <LinearGradient
-          colors={["#FFF7ED", "#FFFBEB"]}
-          style={styles.cardImageBg}
-        >
-          <MaterialCommunityIcons name="tag" size={40} color={colors.accent} />
-        </LinearGradient>
+        {imageUri ? (
+          <Image source={{ uri: imageUri }} style={styles.cardImageBg} resizeMode="cover" />
+        ) : (
+          <LinearGradient
+            colors={["#FFF7ED", "#FFFBEB"]}
+            style={styles.cardImageBg}
+          >
+            <MaterialCommunityIcons name="tag" size={40} color={colors.accent} />
+          </LinearGradient>
+        )}
         <View style={[styles.discountBadge]}>
           <Text style={styles.discountText}>{discount}</Text>
         </View>

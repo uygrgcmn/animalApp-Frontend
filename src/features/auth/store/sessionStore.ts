@@ -14,6 +14,7 @@ import type {
   CreateWizardDraft,
   CreateWizardValues
 } from "../../create/schemas";
+import type { LocalPetshopCampaign } from "../../petshop/utils/campaigns";
 import type { PetshopActivationValues } from "../../petshop/schemas";
 import {
   deriveCaregiverDraftStatus,
@@ -52,6 +53,7 @@ type SessionState = {
   petshopStatus: PetshopModeStatus;
   caregiverProfile: CaregiverActivationValues | null;
   petshopProfile: PetshopActivationValues | null;
+  petshopCampaigns: LocalPetshopCampaign[];
   createDrafts: Partial<Record<CreateListingType, CreateWizardDraft>>;
   bootstrap: () => Promise<void>;
   signIn: (values: SignInValues) => Promise<void>;
@@ -69,6 +71,7 @@ type SessionState = {
     currentStep: number
   ) => void;
   clearCreateDraft: (listingType: CreateListingType) => void;
+  publishPetshopCampaign: (campaign: LocalPetshopCampaign) => void;
 };
 
 const initialState = {
@@ -83,6 +86,7 @@ const initialState = {
   petshopStatus: "inactive" as const,
   caregiverProfile: null,
   petshopProfile: null,
+  petshopCampaigns: [],
   createDrafts: {}
 };
 
@@ -288,6 +292,20 @@ async function uploadProfileAvatar(uri: string) {
   }
 }
 
+async function uploadPetshopVerificationDocument(uri: string) {
+  if (!uri.startsWith("file:")) {
+    return uri;
+  }
+
+  const uploaded = await uploadMediaAsset({ folder: "petshop-documents", uri });
+
+  if (uploaded.startsWith("file:")) {
+    throw new Error("Dogrulama belgesi yuklenemedi. Lutfen tekrar deneyin.");
+  }
+
+  return uploaded;
+}
+
 async function fetchAuthenticatedProfile() {
   try {
     return await usersApi.getMyProfile();
@@ -465,6 +483,15 @@ export const useSessionStore = create<SessionState>()(
         }),
       submitPetshopApplication: async (payload) => {
         const normalized = normalizePetshopProfile(payload);
+        const certificateUri = normalized.verificationDocuments[0];
+
+        if (!certificateUri) {
+          throw new Error("Petshop basvurusu icin en az bir dogrulama belgesi gerekli.");
+        }
+
+        const businessCertificateUrl = await uploadPetshopVerificationDocument(
+          certificateUri
+        );
 
         const updatedProfile = await usersApi.convertToPetshop({
           businessName: normalized.businessName,
@@ -472,7 +499,8 @@ export const useSessionStore = create<SessionState>()(
           address: normalized.address,
           latitude: 0,
           longitude: 0,
-          phoneNumber: normalized.contactPhone
+          phoneNumber: normalized.contactPhone,
+          businessCertificateUrl
         });
 
         set((state) => ({
@@ -500,7 +528,14 @@ export const useSessionStore = create<SessionState>()(
           return {
             createDrafts: nextDrafts
           };
-        })
+        }),
+      publishPetshopCampaign: (campaign) =>
+        set((state) => ({
+          petshopCampaigns: [
+            campaign,
+            ...state.petshopCampaigns.filter((item) => item.id !== campaign.id)
+          ]
+        }))
     }),
     {
       name: "animal-app-session",
@@ -515,6 +550,7 @@ export const useSessionStore = create<SessionState>()(
         petshopStatus: state.petshopStatus,
         caregiverProfile: state.caregiverProfile,
         petshopProfile: state.petshopProfile,
+        petshopCampaigns: state.petshopCampaigns,
         createDrafts: state.createDrafts
       })
     }

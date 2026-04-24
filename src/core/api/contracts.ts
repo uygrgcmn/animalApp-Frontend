@@ -257,6 +257,7 @@ export type RequestPetshopProfileRequest = {
   latitude: number;
   longitude: number;
   phoneNumber: string;
+  businessCertificateUrl: string;
 };
 
 export type FindPublicUsersQuery = {

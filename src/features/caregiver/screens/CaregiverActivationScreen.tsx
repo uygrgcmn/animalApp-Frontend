@@ -86,7 +86,7 @@ export function CaregiverActivationScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ["images"],
       quality: 0.8
     });
 

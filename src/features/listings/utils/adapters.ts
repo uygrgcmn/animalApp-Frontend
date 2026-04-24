@@ -101,28 +101,45 @@ export type CommunityPostDisplay = {
   visualLabel?: string;
 };
 
-const categoryLabels: Record<string, string> = {
+const communityCategoryLabels: Record<string, string> = {
   "ucretsiz-mama": "Ücretsiz Mama",
   sahiplendirme: "Sahiplendirme",
-  diger: "Diğer",
+  diger: "Destek Çağrısı",
   FREE_ITEM: "Ücretsiz Mama",
-  ADOPTION: "Sahiplendirme",
   ACTIVITY: "Etkinlik",
-  HELP_REQUEST: "Yardım Talebi",
-  COMMUNITY: "Topluluk"
+  HELP_REQUEST: "Destek Çağrısı"
 };
+
+export function getCommunityCategoryKey(listing: ListingRecord) {
+  return listing.communityItem?.category ?? listing.type;
+}
+
+export function getCommunityCategoryLabel(categoryKey: string) {
+  return communityCategoryLabels[categoryKey] ?? "Topluluk";
+}
+
+export function getCommunityQuickActionLabel(categoryKey: string) {
+  if (categoryKey === "ucretsiz-mama" || categoryKey === "FREE_ITEM") {
+    return "Destek Ol";
+  }
+
+  if (categoryKey === "sahiplendirme") {
+    return "İncele";
+  }
+
+  return "İletişime Geç";
+}
 
 export function toCommunityDisplay(listing: ListingRecord): CommunityPostDisplay {
   const creator = listing.creator;
-  const communityItem = listing.communityItem;
-  const rawCategory = communityItem?.category ?? listing.type;
+  const rawCategory = getCommunityCategoryKey(listing);
   const { description, metadata } = parseEmbeddedListingMetadata(listing.description);
 
   return {
     id: listing.id,
     title: listing.title,
     categoryKey: rawCategory,
-    category: categoryLabels[rawCategory] ?? "Diğer",
+    category: getCommunityCategoryLabel(rawCategory),
     city: creator?.city ?? metadata.city ?? "",
     district: creator?.district ?? metadata.district ?? "",
     summary: description,
@@ -135,7 +152,7 @@ export function toCommunityDisplay(listing: ListingRecord): CommunityPostDisplay
     dateLabel: formatRelativeDate(listing.createdAt),
     imageUri: getPrimaryMediaUrl(metadata),
     trustState: "pending",
-    quickActionLabel: "Başvur",
+    quickActionLabel: getCommunityQuickActionLabel(rawCategory),
     visualLabel: metadata.supportWindow
   };
 }

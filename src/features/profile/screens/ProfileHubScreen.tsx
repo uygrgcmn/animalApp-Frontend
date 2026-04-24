@@ -22,9 +22,14 @@ import { radius, shadows, spacing, typography } from "../../../core/theme/tokens
 import { NavigationCard } from "../../../shared/ui/NavigationCard";
 import { useSessionStore } from "../../auth/store/sessionStore";
 import { useMyApplications, useListings } from "../../listings/hooks/useListings";
+import { useCommunityListings } from "../../community/hooks/useCommunityListings";
 import { useBookmarkStore } from "../store/bookmarkStore";
 import { useMyProfile, useUpdateMyProfile } from "../hooks/useMyProfile";
 import { uploadMediaAsset } from "../../../core/media/uploadMediaAsset";
+import {
+  isCaregiverListing,
+  isOwnerRequestListing
+} from "../../listings/utils/listingGuards";
 import {
   getCaregiverModePresentation,
   getPetshopModePresentation
@@ -58,7 +63,13 @@ export function ProfileHubScreen() {
   const applicationsQuery = useMyApplications();
   const applicationCount = applicationsQuery.data?.length ?? 0;
   const myListingsQuery = useListings({ creatorId: user?.id });
-  const listingCount = myListingsQuery.data?.length ?? 0;
+  const myCommunityQuery = useCommunityListings({ creatorId: user?.id });
+  const localPetshopCampaigns = useSessionStore((state) => state.petshopCampaigns);
+  const standardListingCount =
+    myListingsQuery.data?.filter((item) => isCaregiverListing(item) || isOwnerRequestListing(item)).length ?? 0;
+  const communityListingCount = myCommunityQuery.data?.length ?? 0;
+  const petshopCampaignCount = localPetshopCampaigns.filter((item) => item.creatorId === user?.id).length;
+  const listingCount = standardListingCount + communityListingCount + petshopCampaignCount;
   const bookmarkCount = useBookmarkStore((s) => s.count)();
 
   const [localAvatar, setLocalAvatar] = useState<string | null>(null);
@@ -102,7 +113,7 @@ export function ProfileHubScreen() {
     if (status !== "granted") return;
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "images",
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.85
@@ -216,7 +227,7 @@ export function ProfileHubScreen() {
         <StatItem
           icon="cards-outline"
           label="İlan"
-          loading={myListingsQuery.isLoading}
+          loading={myListingsQuery.isLoading || myCommunityQuery.isLoading}
           value={listingCount}
         />
         <View style={styles.statDivider} />

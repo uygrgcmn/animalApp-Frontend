@@ -21,27 +21,18 @@ import { InfoCard } from "../../../shared/ui/InfoCard";
 import { MetaPill } from "../../../shared/ui/MetaPill";
 import { StickyBottomActionBar } from "../../../shared/ui/StickyBottomActionBar";
 import { ApplyModal } from "../../listings/components/ApplyModal";
-import { toCommunityDisplay } from "../../listings/utils/adapters";
+import {
+  getCommunityCategoryKey,
+  getCommunityCategoryLabel,
+  getCommunityQuickActionLabel,
+  toCommunityDisplay
+} from "../../listings/utils/adapters";
 import {
   getPrimaryMediaUrl,
   parseEmbeddedListingMetadata
 } from "../../listings/utils/embeddedListingMetadata";
 import { formatRelativeDate } from "../../../shared/utils/formatDate";
 import { useCommunityListingDetail, useCommunityListings } from "../hooks/useCommunityListings";
-
-const categoryLabels: Record<string, string> = {
-  FREE_ITEM: "Ücretsiz Eşya",
-  ADOPTION: "Sahiplendirme",
-  ACTIVITY: "Etkinlik",
-  HELP_REQUEST: "Yardım Talebi",
-  COMMUNITY: "Topluluk"
-};
-
-const quickActionLabel = (type: string) => {
-  if (type === "ACTIVITY") return "Katıl";
-  if (type === "ADOPTION") return "Sahiplen";
-  return "Başvur";
-};
 
 export function CommunityDetailScreen() {
   const params = useLocalSearchParams<{ postId: string }>();
@@ -89,10 +80,11 @@ export function CommunityDetailScreen() {
 
   const creator = listing.creator;
   const { description, metadata } = parseEmbeddedListingMetadata(listing.description);
-  const category = categoryLabels[listing.type] ?? "Topluluk";
+  const categoryKey = getCommunityCategoryKey(listing);
+  const category = getCommunityCategoryLabel(categoryKey);
   const location = [creator?.city ?? metadata.city, creator?.district ?? metadata.district].filter(Boolean).join(" / ");
   const authorRole = creator?.isPetshop ? "Petshop" : creator?.isSitter ? "Bakıcı" : "Kullanıcı";
-  const actionLabel = quickActionLabel(listing.type);
+  const actionLabel = getCommunityQuickActionLabel(categoryKey);
   const coverImageUri = getPrimaryMediaUrl(metadata);
 
   return (

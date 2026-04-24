@@ -13,7 +13,7 @@ import {
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { routeBuilders } from "../../../core/navigation/routes";
+import { routeBuilders, routes } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
 import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
@@ -27,6 +27,7 @@ import { useSessionStore } from "../../auth/store/sessionStore";
 import { caregiverServiceOptions } from "../../caregiver/schemas";
 import { usePublishListing } from "../hooks/usePublishListing";
 import {
+  MAX_CREATE_MEDIA_COUNT,
   communityCategoryOptions,
   communityContactPreferenceOptions,
   createListingTypeOptions,
@@ -38,6 +39,10 @@ import {
   type CreateListingType,
   type CreateWizardValues
 } from "../schemas";
+import {
+  getPetshopActionLabel,
+  getPetshopModePresentation
+} from "../../profile/utils/modeStatus";
 
 type IconName = React.ComponentProps<typeof AppIcon>["name"];
 
@@ -61,7 +66,7 @@ const TYPES: { description: string; icon: IconName; label: string; value: Create
     value: "community-post"
   },
   {
-    description: "Mağazan için sade bir kampanya taslağı hazırla.",
+    description: "Mağazan için fiyat, indirim ve görselle kampanya yayınla.",
     icon: "storefront-outline",
     label: "Petshop kampanyası",
     value: "petshop-campaign"
@@ -119,10 +124,18 @@ function errorText(message: unknown) {
   return typeof message === "string" ? message : undefined;
 }
 
+function mergeMediaUris(current: string[], incoming: string[]) {
+  return Array.from(new Set([...current, ...incoming].filter(Boolean))).slice(
+    0,
+    MAX_CREATE_MEDIA_COUNT
+  );
+}
+
 export function CreateEntryScreen() {
   const params = useLocalSearchParams<{ listingType?: string }>();
   const tabBarHeight = useBottomTabBarHeight();
   const user = useSessionStore((state) => state.user);
+  const petshopStatus = useSessionStore((state) => state.petshopStatus);
   const createDrafts = useSessionStore((state) => state.createDrafts);
   const saveCreateDraft = useSessionStore((state) => state.saveCreateDraft);
   const clearCreateDraft = useSessionStore((state) => state.clearCreateDraft);
@@ -157,6 +170,9 @@ export function CreateEntryScreen() {
   const selectedType = values.listingType;
   const media = values.media ?? [];
   const selectedMeta = TYPES.find((item) => item.value === selectedType);
+  const petshopPresentation = getPetshopModePresentation(petshopStatus);
+  const isPetshopPublishLocked =
+    selectedType === "petshop-campaign" && petshopStatus !== "active";
 
   const selectType = useCallback(
     (type: CreateListingType) => {
@@ -199,18 +215,34 @@ export function CreateEntryScreen() {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsMultipleSelection: true,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       quality: 0.85,
       selectionLimit: 10
     });
 
     if (result.canceled || !result.assets.length) return;
 
-    const newUris = result.assets.map((asset) => asset.uri);
-    setValue("media", [...media, ...newUris], {
+    const nextMedia = mergeMediaUris(
+      media,
+      result.assets.map((asset) => asset.uri)
+    );
+    const skippedMediaCount = media.length + result.assets.length - nextMedia.length;
+
+    setValue("media", nextMedia, {
       shouldDirty: true,
       shouldValidate: true
     });
+
+    if (skippedMediaCount > 0) {
+      setFeedback({
+        message: `Aynı görseller tekrar eklenmedi ve toplam en fazla ${MAX_CREATE_MEDIA_COUNT} görsel saklandı.`,
+        title: "Görseller düzenlendi",
+        tone: "info"
+      });
+      return;
+    }
+
+    setFeedback(null);
   }
 
   function saveDraft() {
@@ -234,12 +266,11 @@ export function CreateEntryScreen() {
   const onSubmit: SubmitHandler<CreateWizardValues> = async (submittedValues) => {
     if (!submittedValues.listingType) return;
 
-    if (submittedValues.listingType === "petshop-campaign") {
-      saveCreateDraft(submittedValues.listingType, submittedValues, 0);
+    if (submittedValues.listingType === "petshop-campaign" && petshopStatus !== "active") {
       setFeedback({
-        message: "Petshop kampanya yayını yakında açılacak. Kampanya taslak olarak saklandı.",
-        title: "Taslak hazır",
-        tone: "success"
+        message: "Petshop kampanyası yayınlamak için mağaza başvurunu tamamlayıp hesabını aktifleştirmen gerekiyor.",
+        title: `${petshopPresentation.label} mağaza modu`,
+        tone: "info"
       });
       return;
     }
@@ -259,6 +290,10 @@ export function CreateEntryScreen() {
         router.replace(routeBuilders.ownerRequestDetail(newListing.id));
         return;
       }
+      if (submittedValues.listingType === "petshop-campaign") {
+        router.replace(routeBuilders.petshopCampaignDetail(newListing.id));
+        return;
+      }
       router.replace(routeBuilders.communityPostDetail(newListing.id));
     } catch (error) {
       setFeedback({
@@ -269,12 +304,7 @@ export function CreateEntryScreen() {
     }
   };
 
-  const primaryLabel =
-    selectedType === "petshop-campaign"
-      ? "Taslak Olarak Sakla"
-      : publishMutation.isPending
-        ? "Yayınlanıyor..."
-        : "Yayınla";
+  const primaryLabel = publishMutation.isPending ? "Yayınlanıyor..." : "Yayınla";
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -396,7 +426,14 @@ export function CreateEntryScreen() {
               {createDrafts[selectedType] ? <MetaPill icon="content-save-outline" label="Taslak yüklü" tone="success" /> : null}
             </View>
 
-            {feedback ? <FeedbackBanner {...feedback} /> : null}
+              {feedback ? <FeedbackBanner {...feedback} /> : null}
+              {isPetshopPublishLocked ? (
+                <FeedbackBanner
+                  message="Petshop kampanyaları sadece aktif mağaza hesabı ile yayınlanır. İstersen taslak kaydedip başvuru adımını tamamlayabilirsin."
+                  title={`${petshopPresentation.label} mağaza modu`}
+                  tone="info"
+                />
+              ) : null}
 
             <CommonFields control={control} errors={errors} />
             <Details control={control} errors={errors} selectedType={selectedType} />
@@ -435,22 +472,37 @@ export function CreateEntryScreen() {
 
         {selectedType ? (
           <View style={styles.embeddedActions}>
-            {selectedType !== "petshop-campaign" ? (
-              <AppButton label="Taslak Kaydet" onPress={saveDraft} variant="secondary" />
-            ) : null}
-            <AppButton
-              disabled={publishMutation.isPending}
-              label={primaryLabel}
-              leftSlot={
-                <AppIcon
-                  backgrounded={false}
-                  color={colors.textInverse}
-                  name={selectedType === "petshop-campaign" ? "content-save-outline" : "check-bold"}
-                  size={18}
-                />
-              }
-              onPress={handleSubmit(onSubmit)}
-            />
+            <AppButton label="Taslak Kaydet" onPress={saveDraft} variant="secondary" />
+            {isPetshopPublishLocked ? (
+              <AppButton
+                label={getPetshopActionLabel(petshopStatus)}
+                leftSlot={
+                  <AppIcon
+                    backgrounded={false}
+                    color={colors.textInverse}
+                    name="store-edit-outline"
+                    size={18}
+                  />
+                }
+                onPress={() => {
+                  router.push(routes.app.petshopActivation);
+                }}
+              />
+            ) : (
+              <AppButton
+                disabled={publishMutation.isPending}
+                label={primaryLabel}
+                leftSlot={
+                  <AppIcon
+                    backgrounded={false}
+                    color={colors.textInverse}
+                    name="check-bold"
+                    size={18}
+                  />
+                }
+                onPress={handleSubmit(onSubmit)}
+              />
+            )}
           </View>
         ) : null}
       </ScrollView>
@@ -737,7 +789,10 @@ function Details({
   }
 
   return (
-    <Section description="Petshop kampanyası şimdilik taslak olarak saklanır." title="Kampanya detayı">
+    <Section
+      description="Kampanya kartında görünecek mağaza, fiyat ve indirim bilgilerini tamamla."
+      title="Kampanya detayı"
+    >
       <View style={styles.formStack}>
         <Controller
           control={control}

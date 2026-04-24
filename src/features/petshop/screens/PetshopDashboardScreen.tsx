@@ -206,6 +206,7 @@ export function PetshopDashboardScreen() {
               />
               <PetshopCampaignCard
                 campaignLabel={featuredCampaign.campaignLabel}
+                coverImageUri={featuredCampaign.coverImageUri}
                 deadline={featuredCampaign.deadline}
                 description={featuredCampaign.summary}
                 priceLabel={`${featuredCampaign.discount} • ${featuredCampaign.priceLabel}`}

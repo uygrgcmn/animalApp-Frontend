@@ -20,6 +20,7 @@ import {
   toOwnerRequestDisplay,
   type OwnerRequestDisplay
 } from "../../listings/utils/adapters";
+import { isOwnerRequestListing } from "../../listings/utils/listingGuards";
 import { AppButton } from "../../../shared/ui/AppButton";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { MetaPill } from "../../../shared/ui/MetaPill";
@@ -33,7 +34,7 @@ export function OwnerRequestsScreen() {
   const query = useInfiniteListings({ type: "HELP_REQUEST" });
 
   const allRequests = useMemo(
-    () => (query.data?.pages.flat() ?? []).map(toOwnerRequestDisplay),
+    () => (query.data?.pages.flat() ?? []).filter(isOwnerRequestListing).map(toOwnerRequestDisplay),
     [query.data]
   );
 

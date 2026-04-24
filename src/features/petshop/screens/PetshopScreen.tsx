@@ -37,6 +37,7 @@ const discoveryFilters: {
 
 export function PetshopScreen() {
   const petshopStatus = useSessionStore((state) => state.petshopStatus);
+  const currentUser = useSessionStore((state) => state.user);
   const petshopPresentation = getPetshopModePresentation(petshopStatus);
   const discoveryQuery = usePetshopDiscovery();
   const [searchValue, setSearchValue] = useState("");
@@ -46,7 +47,7 @@ export function PetshopScreen() {
     const normalizedSearch = searchValue.trim().toLowerCase();
 
     return (discoveryQuery.data ?? []).filter((campaign) => {
-      const isDiscounted = /\b(15|20)\b/.test(campaign.discount);
+      const isDiscounted = /\b(10|15|20|25|30)\b/.test(campaign.discount);
 
       if (filter === "discount" && !isDiscounted) {
         return false;
@@ -56,7 +57,11 @@ export function PetshopScreen() {
         return false;
       }
 
-      if (filter === "nearby" && campaign.city !== "Istanbul") {
+      if (
+        filter === "nearby" &&
+        currentUser?.city &&
+        campaign.city.toLowerCase() !== currentUser.city.toLowerCase()
+      ) {
         return false;
       }
 
@@ -72,7 +77,7 @@ export function PetshopScreen() {
         campaign.campaignLabel.toLowerCase().includes(normalizedSearch)
       );
     });
-  }, [discoveryQuery.data, filter, searchValue]);
+  }, [currentUser?.city, discoveryQuery.data, filter, searchValue]);
   const refreshing = discoveryQuery.isFetching && !discoveryQuery.isLoading;
 
   return (
@@ -210,6 +215,7 @@ export function PetshopScreen() {
                 </View>
               }
               campaignLabel={campaign.campaignLabel}
+              coverImageUri={campaign.coverImageUri}
               deadline={campaign.deadline}
               description={campaign.summary}
               priceLabel={`${campaign.discount} • ${campaign.priceLabel}`}

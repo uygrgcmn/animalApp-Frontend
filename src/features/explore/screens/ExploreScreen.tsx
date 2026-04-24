@@ -22,6 +22,10 @@ import {
   type CaregiverDisplay,
   type OwnerRequestDisplay
 } from "../../listings/utils/adapters";
+import {
+  isCaregiverListing,
+  isOwnerRequestListing
+} from "../../listings/utils/listingGuards";
 import { AppButton } from "../../../shared/ui/AppButton";
 import type { AppIcon } from "../../../shared/ui/AppIcon";
 import { EmptyState } from "../../../shared/ui/EmptyState";
@@ -89,11 +93,11 @@ export function ExploreScreen() {
   const ownerQuery = useInfiniteListings({ type: "HELP_REQUEST" });
 
   const allCaregivers = useMemo(
-    () => (caregiverQuery.data?.pages.flat() ?? []).map(toCaregiverDisplay),
+    () => (caregiverQuery.data?.pages.flat() ?? []).filter(isCaregiverListing).map(toCaregiverDisplay),
     [caregiverQuery.data]
   );
   const allOwnerRequests = useMemo(
-    () => (ownerQuery.data?.pages.flat() ?? []).map(toOwnerRequestDisplay),
+    () => (ownerQuery.data?.pages.flat() ?? []).filter(isOwnerRequestListing).map(toOwnerRequestDisplay),
     [ownerQuery.data]
   );
 

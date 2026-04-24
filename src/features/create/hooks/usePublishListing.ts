@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 import type {
   CreateCommunityListingRequest,
@@ -8,8 +9,16 @@ import type {
 import { uploadMediaAsset } from "../../../core/media/uploadMediaAsset";
 import { communityApi } from "../../../core/api/services/communityApi";
 import { listingsApi } from "../../../core/api/services/listingsApi";
-import type { CreateWizardValues } from "../schemas";
+import { useSessionStore } from "../../auth/store/sessionStore";
+import {
+  MAX_CREATE_MEDIA_COUNT,
+  type CreateWizardValues
+} from "../schemas";
 import { embedListingMetadata } from "../../listings/utils/embeddedListingMetadata";
+import {
+  createLocalPetshopCampaign,
+  type LocalPetshopCampaign
+} from "../../petshop/utils/campaigns";
 
 // ─── Description builders ────────────────────────────────────────────────────
 
@@ -88,33 +97,57 @@ async function uploadMediaList(media: string[], folder: string) {
   );
 }
 
+function normalizeMediaList(media: string[] | undefined) {
+  return Array.from(
+    new Set((media ?? []).map((item) => item.trim()).filter(Boolean))
+  ).slice(0, MAX_CREATE_MEDIA_COUNT);
+}
+
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export function usePublishListing() {
   const queryClient = useQueryClient();
+  const currentUser = useSessionStore((state) => state.user);
+  const petshopStatus = useSessionStore((state) => state.petshopStatus);
+  const publishPetshopCampaign = useSessionStore((state) => state.publishPetshopCampaign);
+  const [isPublishingPetshop, setIsPublishingPetshop] = useState(false);
 
   const listingMutation = useMutation({
     mutationFn: (payload: CreateListingRequest) => listingsApi.create(payload),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["listings", "all"] });
+      void queryClient.invalidateQueries({ queryKey: ["listings"] });
     }
   });
 
   const communityMutation = useMutation({
     mutationFn: (payload: CreateCommunityListingRequest) => communityApi.create(payload),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["community", "all"] });
+      void queryClient.invalidateQueries({ queryKey: ["community"] });
     }
   });
 
-  async function publish(values: CreateWizardValues): Promise<ListingRecord | null> {
-    if (!values.listingType || values.listingType === "petshop-campaign") {
+  async function publish(values: CreateWizardValues): Promise<ListingRecord | LocalPetshopCampaign | null> {
+    if (!values.listingType) {
       return null;
     }
 
+    const normalizedMedia = normalizeMediaList(values.media);
+
+    if (normalizedMedia.length < 1) {
+      throw new Error("En az bir görsel ekle.");
+    }
+
+    if (values.listingType === "petshop-campaign" && petshopStatus !== "active") {
+      throw new Error("Petshop kampanyası yayınlamak için önce mağaza başvurusunu tamamlayıp hesabını aktifleştir.");
+    }
+
     const uploadedUrls = await uploadMediaList(
-      values.media ?? [],
-      values.listingType === "community-post" ? "community" : "listings"
+      normalizedMedia,
+      values.listingType === "community-post"
+        ? "community"
+        : values.listingType === "petshop-campaign"
+          ? "petshop-campaigns"
+          : "listings"
     );
     const mediaUrls = uploadedUrls;
 
@@ -154,6 +187,28 @@ export function usePublishListing() {
       });
     }
 
+    if (values.listingType === "petshop-campaign") {
+      if (!currentUser?.id) {
+        throw new Error("Petshop kampanyası yayınlamak için aktif oturum gerekli.");
+      }
+
+      setIsPublishingPetshop(true);
+
+      try {
+        const campaign = createLocalPetshopCampaign({
+          creatorId: currentUser.id,
+          mediaUrls,
+          values
+        });
+
+        publishPetshopCampaign(campaign);
+        await queryClient.invalidateQueries({ queryKey: ["petshop"] });
+        return campaign;
+      } finally {
+        setIsPublishingPetshop(false);
+      }
+    }
+
     // community-post
     return communityMutation.mutateAsync({
       type: mapCommunityType(values.communityCategory),
@@ -176,7 +231,7 @@ export function usePublishListing() {
 
   return {
     isError: listingMutation.isError || communityMutation.isError,
-    isPending: listingMutation.isPending || communityMutation.isPending,
+    isPending: listingMutation.isPending || communityMutation.isPending || isPublishingPetshop,
     publish
   };
 }

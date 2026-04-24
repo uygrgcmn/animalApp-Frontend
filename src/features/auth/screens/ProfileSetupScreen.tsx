@@ -96,7 +96,7 @@ export function ProfileSetupScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [1, 1],
-      mediaTypes: ImagePicker.MediaType.Images,
+      mediaTypes: ["images"],
       quality: 0.8
     });
 

@@ -8,6 +8,7 @@ export const createListingTypeOptions = [
   "community-post",
   "petshop-campaign"
 ] as const;
+export const MAX_CREATE_MEDIA_COUNT = 10;
 
 export const ownerPetTypeOptions = ["Kopek", "Kedi", "Kus", "Diger"] as const;
 export const ownerCareNeedOptions = [
@@ -142,6 +143,14 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
     context.addIssue({
       code: z.ZodIssueCode.custom,
       message: "En az bir görsel ekle.",
+      path: ["media"]
+    });
+  }
+
+  if (values.media.length > MAX_CREATE_MEDIA_COUNT) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `En fazla ${MAX_CREATE_MEDIA_COUNT} görsel ekleyebilirsin.`,
       path: ["media"]
     });
   }

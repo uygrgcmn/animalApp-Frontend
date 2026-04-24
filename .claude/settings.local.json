@@ -12,7 +12,10 @@
       "Bash(docker compose *)",
       "Bash(npx ts-node *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://192.168.1.106:3000/api/health)",
-      "Bash(curl -s http://192.168.1.106:3000/api)"
+      "Bash(curl -s http://192.168.1.106:3000/api)",
+      "Bash(docker volume *)",
+      "Bash(curl *)",
+      "Bash(node -e ' *)"
     ]
   }
 }

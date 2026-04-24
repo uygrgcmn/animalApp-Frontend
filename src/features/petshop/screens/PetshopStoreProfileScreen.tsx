@@ -125,6 +125,7 @@ export function PetshopStoreProfileScreen() {
                         />
                       }
                       campaignLabel={campaign.campaignLabel}
+                      coverImageUri={"coverImageUri" in campaign ? campaign.coverImageUri : undefined}
                       deadline={campaign.deadline}
                       description={campaign.summary}
                       priceLabel={`${campaign.discount} • ${campaign.priceLabel}`}

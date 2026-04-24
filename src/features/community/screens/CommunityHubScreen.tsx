@@ -25,25 +25,25 @@ import { EmptyState } from "../../../shared/ui/EmptyState";
 import { SearchBar } from "../../../shared/ui/SearchBar";
 import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
 
-type CommunityTab = "all" | "ucretsiz" | "sahiplendirme" | "kayip-ilan";
+type CommunityTab = "all" | "ucretsiz" | "sahiplendirme" | "destek";
 
 const communityTabs: { label: string; value: CommunityTab }[] = [
-  
+  { label: "Tümü", value: "all" },
   { label: "Ücretsiz", value: "ucretsiz" },
   { label: "Sahiplendirme", value: "sahiplendirme" },
-  { label: "Kayıp İlanı", value: "kayip-ilan" }
+  { label: "Destek", value: "destek" }
 ];
 
 const TAB_CATEGORY_MAP: Record<CommunityTab, string[]> = {
   all: [],
   ucretsiz: ["FREE_ITEM", "ucretsiz-mama"],
-  sahiplendirme: ["ADOPTION", "sahiplendirme"],
-  "kayip-ilan": ["HELP_REQUEST", "LOST_PET", "kayip-ilan"]
+  sahiplendirme: ["sahiplendirme"],
+  destek: ["diger", "HELP_REQUEST", "ACTIVITY"]
 };
 
 export function CommunityHubScreen() {
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState<CommunityTab>("ucretsiz");
+  const [activeTab, setActiveTab] = useState<CommunityTab>("all");
   const [searchValue, setSearchValue] = useState("");
 
   const communityQuery = useInfiniteCommunityListings();
@@ -76,7 +76,7 @@ export function CommunityHubScreen() {
     !communityQuery.isLoading;
 
   function resetFilters() {
-    setActiveTab("ucretsiz");
+    setActiveTab("all");
     setSearchValue("");
   }
 

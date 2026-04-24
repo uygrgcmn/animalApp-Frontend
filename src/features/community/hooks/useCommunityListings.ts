@@ -4,18 +4,14 @@ import type { FindCommunityListingsQuery } from "../../../core/api/contracts";
 import { communityApi } from "../../../core/api/services/communityApi";
 import { queryKeys } from "../../../core/query/queryKeys";
 
-const PAGE_SIZE = 10;
-
 export function useInfiniteCommunityListings(
   query?: Omit<FindCommunityListingsQuery, "limit" | "offset">
 ) {
   return useInfiniteQuery({
     queryKey: queryKeys.community.infinite(query),
-    queryFn: ({ pageParam }: { pageParam: number }) =>
-      communityApi.findAll({ ...query, limit: PAGE_SIZE, offset: pageParam }),
+    queryFn: () => communityApi.findAll(query),
     initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.length === PAGE_SIZE ? allPages.flat().length : undefined
+    getNextPageParam: () => undefined
   });
 }
 

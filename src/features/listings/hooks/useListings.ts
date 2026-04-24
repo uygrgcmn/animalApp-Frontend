@@ -4,16 +4,12 @@ import type { FindListingsQuery } from "../../../core/api/contracts";
 import { listingsApi } from "../../../core/api/services/listingsApi";
 import { queryKeys } from "../../../core/query/queryKeys";
 
-const PAGE_SIZE = 10;
-
 export function useInfiniteListings(query?: Omit<FindListingsQuery, "limit" | "offset">) {
   return useInfiniteQuery({
     queryKey: queryKeys.listings.infinite(query),
-    queryFn: ({ pageParam }: { pageParam: number }) =>
-      listingsApi.findAll({ ...query, limit: PAGE_SIZE, offset: pageParam }),
+    queryFn: () => listingsApi.findAll(query),
     initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.length === PAGE_SIZE ? allPages.flat().length : undefined
+    getNextPageParam: () => undefined
   });
 }
 

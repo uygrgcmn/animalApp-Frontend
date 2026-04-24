@@ -21,15 +21,9 @@ function rewriteLocalhostMediaUrl(url: string): string {
 
 function inferImageContentType(fileName: string) {
   const extension = fileName.split(".").pop()?.toLowerCase();
-
-  if (extension === "png") {
-    return "image/png";
-  }
-
-  if (extension === "webp") {
-    return "image/webp";
-  }
-
+  if (extension === "png") return "image/png";
+  if (extension === "webp") return "image/webp";
+  if (extension === "heic" || extension === "heif") return "image/heic";
   return "image/jpeg";
 }
 
