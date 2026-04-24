@@ -198,15 +198,16 @@ export function CreateEntryScreen() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      mediaTypes: ImagePicker.MediaType.Images,
-      quality: 0.85
+      allowsMultipleSelection: true,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.85,
+      selectionLimit: 10
     });
 
-    if (result.canceled || !result.assets[0]) return;
+    if (result.canceled || !result.assets.length) return;
 
-    setValue("media", [...media, result.assets[0].uri], {
+    const newUris = result.assets.map((asset) => asset.uri);
+    setValue("media", [...media, ...newUris], {
       shouldDirty: true,
       shouldValidate: true
     });
@@ -399,12 +400,12 @@ export function CreateEntryScreen() {
 
             <CommonFields control={control} errors={errors} />
             <Details control={control} errors={errors} selectedType={selectedType} />
-            <Section description="İlk görsel kartlarda kapak olarak kullanılır." title="Görsel">
+            <Section description="İlk görsel kartlarda kapak olarak kullanılır. Birden fazla seçilebilir." title="Görsel">
               <UploadBox
-                description={media.length > 0 ? `${media.length} görsel eklendi` : "Kart ve detay ekranı için bir kapak görseli ekle."}
+                description={media.length > 0 ? `${media.length} görsel eklendi` : "Galeriden birden fazla görsel seçebilirsin."}
                 error={pickerError ?? errorText(errors.media?.message)}
                 imageUri={media[0]}
-                label="Görsel ekle"
+                label={media.length > 0 ? "Görsel ekle" : "Görsel seç"}
                 onPress={handlePickMedia}
               />
               {media.length > 0 ? (

@@ -1,4 +1,3 @@
-import { ApiError } from "../api/errors";
 import { mediaApi } from "../api/services/mediaApi";
 
 type UploadMediaAssetInput = {
@@ -39,41 +38,47 @@ export async function uploadMediaAsset({ folder, uri }: UploadMediaAssetInput) {
     return uri;
   }
 
+  const fileName = uri.split("/").pop() || `media-${Date.now()}.jpg`;
+  const contentType = inferImageContentType(fileName);
+
+  let uploadUrl: string;
+  let publicUrl: string;
+
   try {
-    const fileName = uri.split("/").pop() || `media-${Date.now()}.jpg`;
-    const contentType = inferImageContentType(fileName);
-    const { uploadUrl, publicUrl } = await mediaApi.createPresignedUploadUrl({
+    ({ uploadUrl, publicUrl } = await mediaApi.createPresignedUploadUrl({
       fileName,
       contentType,
       folder
-    });
-    const fileResponse = await fetch(uri);
-    const fileBlob = await fileResponse.blob();
-    const uploadResponse = await fetch(uploadUrl, {
-      method: "PUT",
-      headers: {
-        "Content-Type": contentType
-      },
-      body: fileBlob
-    });
-
-    if (!uploadResponse.ok) {
-      throw new Error("Gorsel yuklenemedi.");
-    }
-
-    return rewriteLocalhostMediaUrl(publicUrl);
+    }));
   } catch (error) {
-    if (
-      error instanceof ApiError ||
-      (error instanceof Error &&
-        (error.message.includes("S3") ||
-          error.message.includes("presigned") ||
-          error.message.includes("Sunucuya ulasilamadi")))
-    ) {
-      console.warn("[uploadMediaAsset] Upload failed:", error instanceof Error ? error.message : error);
-      return uri;
-    }
-
-    throw error;
+    throw new Error(
+      `Görsel için yükleme adresi alınamadı: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`
+    );
   }
+
+  // publicUrl may contain localhost in dev — rewrite to LAN host for display/storage.
+  // uploadUrl must NOT be rewritten: AWS Signature V4 embeds the host, changing it breaks the signature.
+  const resolvedPublicUrl = rewriteLocalhostMediaUrl(publicUrl);
+
+  let fileBlob: Blob;
+  try {
+    const fileResponse = await fetch(uri);
+    fileBlob = await fileResponse.blob();
+  } catch (error) {
+    throw new Error(
+      `Görsel okunamadı: ${error instanceof Error ? error.message : "Bilinmeyen hata"}`
+    );
+  }
+
+  const uploadResponse = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: { "Content-Type": contentType },
+    body: fileBlob
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Görsel sunucuya yüklenemedi (HTTP ${uploadResponse.status}).`);
+  }
+
+  return resolvedPublicUrl;
 }

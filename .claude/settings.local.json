@@ -7,7 +7,12 @@
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
       "Bash(xargs ls *)",
       "Bash(awk '{print $NF}')",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(cmd.exe *)",
+      "Bash(docker compose *)",
+      "Bash(npx ts-node *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://192.168.1.106:3000/api/health)",
+      "Bash(curl -s http://192.168.1.106:3000/api)"
     ]
   }
 }
