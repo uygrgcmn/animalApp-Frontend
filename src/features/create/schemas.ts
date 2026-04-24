@@ -218,14 +218,6 @@ export const createWizardSchema = createWizardBaseSchema.superRefine((values, co
   }
 
   if (values.listingType === "petshop-campaign") {
-    if (values.petshopStoreName.length < 2) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Mağaza adı gerekli.",
-        path: ["petshopStoreName"]
-      });
-    }
-
     if (values.petshopDiscount.length < 2) {
       context.addIssue({
         code: z.ZodIssueCode.custom,

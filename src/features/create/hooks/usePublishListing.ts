@@ -4,21 +4,19 @@ import { useState } from "react";
 import type {
   CreateCommunityListingRequest,
   CreateListingRequest,
-  ListingRecord
+  ListingRecord,
+  PetshopCampaignRecord
 } from "../../../core/api/contracts";
 import { uploadMediaAsset } from "../../../core/media/uploadMediaAsset";
 import { communityApi } from "../../../core/api/services/communityApi";
 import { listingsApi } from "../../../core/api/services/listingsApi";
+import { petshopsApi } from "../../../core/api/services/petshopsApi";
 import { useSessionStore } from "../../auth/store/sessionStore";
 import {
   MAX_CREATE_MEDIA_COUNT,
   type CreateWizardValues
 } from "../schemas";
 import { embedListingMetadata } from "../../listings/utils/embeddedListingMetadata";
-import {
-  createLocalPetshopCampaign,
-  type LocalPetshopCampaign
-} from "../../petshop/utils/campaigns";
 
 // ─── Description builders ────────────────────────────────────────────────────
 
@@ -41,6 +39,13 @@ const careNeedLabels: Record<string, string> = {
   "gece-konaklama": "Gece konaklama",
   "ilac-takibi": "İlaç takibi",
   "kopek-gezdirme": "Köpek gezdirme"
+};
+
+const petshopCampaignTypeLabels: Record<string, string> = {
+  aksesuar: "Aksesuar",
+  bakim: "Bakım",
+  mama: "Mama",
+  saglik: "Sağlık"
 };
 
 function buildCaregiverDescription(values: CreateWizardValues): string {
@@ -107,9 +112,7 @@ function normalizeMediaList(media: string[] | undefined) {
 
 export function usePublishListing() {
   const queryClient = useQueryClient();
-  const currentUser = useSessionStore((state) => state.user);
   const petshopStatus = useSessionStore((state) => state.petshopStatus);
-  const publishPetshopCampaign = useSessionStore((state) => state.publishPetshopCampaign);
   const [isPublishingPetshop, setIsPublishingPetshop] = useState(false);
 
   const listingMutation = useMutation({
@@ -126,7 +129,15 @@ export function usePublishListing() {
     }
   });
 
-  async function publish(values: CreateWizardValues): Promise<ListingRecord | LocalPetshopCampaign | null> {
+  const petshopMutation = useMutation({
+    mutationFn: (payload: Parameters<typeof petshopsApi.createCampaign>[0]) =>
+      petshopsApi.createCampaign(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["petshop"] });
+    }
+  });
+
+  async function publish(values: CreateWizardValues): Promise<ListingRecord | PetshopCampaignRecord | null> {
     if (!values.listingType) {
       return null;
     }
@@ -188,22 +199,22 @@ export function usePublishListing() {
     }
 
     if (values.listingType === "petshop-campaign") {
-      if (!currentUser?.id) {
-        throw new Error("Petshop kampanyası yayınlamak için aktif oturum gerekli.");
-      }
-
       setIsPublishingPetshop(true);
 
       try {
-        const campaign = createLocalPetshopCampaign({
-          creatorId: currentUser.id,
+        return await petshopMutation.mutateAsync({
+          campaignLabel: values.petshopCampaignBadge,
+          deadlineLabel: values.petshopDeadline,
+          description: values.description ?? "",
+          discountLabel: values.petshopDiscount,
           mediaUrls,
-          values
+          priceLabel: values.petshopPrice,
+          title: values.title ?? "",
+          visualLabel: values.petshopCampaignType
+            ? (petshopCampaignTypeLabels[values.petshopCampaignType] ??
+              values.petshopCampaignType)
+            : undefined
         });
-
-        publishPetshopCampaign(campaign);
-        await queryClient.invalidateQueries({ queryKey: ["petshop"] });
-        return campaign;
       } finally {
         setIsPublishingPetshop(false);
       }
@@ -230,8 +241,13 @@ export function usePublishListing() {
   }
 
   return {
-    isError: listingMutation.isError || communityMutation.isError,
-    isPending: listingMutation.isPending || communityMutation.isPending || isPublishingPetshop,
+    isError:
+      listingMutation.isError || communityMutation.isError || petshopMutation.isError,
+    isPending:
+      listingMutation.isPending ||
+      communityMutation.isPending ||
+      petshopMutation.isPending ||
+      isPublishingPetshop,
     publish
   };
 }

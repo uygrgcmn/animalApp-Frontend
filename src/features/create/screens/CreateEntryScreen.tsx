@@ -790,23 +790,10 @@ function Details({
 
   return (
     <Section
-      description="Kampanya kartında görünecek mağaza, fiyat ve indirim bilgilerini tamamla."
+      description="Mağaza profiline bağlı kampanya için fiyat, indirim ve görsel bilgilerini tamamla."
       title="Kampanya detayı"
     >
       <View style={styles.formStack}>
-        <Controller
-          control={control}
-          name="petshopStoreName"
-          render={({ field }) => (
-            <TextField
-              error={errorText(errors.petshopStoreName?.message)}
-              label="Mağaza adı"
-              onChangeText={field.onChange}
-              placeholder="Pati Market"
-              value={field.value}
-            />
-          )}
-        />
         <Controller
           control={control}
           name="petshopCampaignType"

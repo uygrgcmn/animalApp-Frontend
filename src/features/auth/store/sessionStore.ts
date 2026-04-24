@@ -14,7 +14,6 @@ import type {
   CreateWizardDraft,
   CreateWizardValues
 } from "../../create/schemas";
-import type { LocalPetshopCampaign } from "../../petshop/utils/campaigns";
 import type { PetshopActivationValues } from "../../petshop/schemas";
 import {
   deriveCaregiverDraftStatus,
@@ -53,7 +52,6 @@ type SessionState = {
   petshopStatus: PetshopModeStatus;
   caregiverProfile: CaregiverActivationValues | null;
   petshopProfile: PetshopActivationValues | null;
-  petshopCampaigns: LocalPetshopCampaign[];
   createDrafts: Partial<Record<CreateListingType, CreateWizardDraft>>;
   bootstrap: () => Promise<void>;
   signIn: (values: SignInValues) => Promise<void>;
@@ -71,7 +69,6 @@ type SessionState = {
     currentStep: number
   ) => void;
   clearCreateDraft: (listingType: CreateListingType) => void;
-  publishPetshopCampaign: (campaign: LocalPetshopCampaign) => void;
 };
 
 const initialState = {
@@ -86,7 +83,6 @@ const initialState = {
   petshopStatus: "inactive" as const,
   caregiverProfile: null,
   petshopProfile: null,
-  petshopCampaigns: [],
   createDrafts: {}
 };
 
@@ -503,6 +499,15 @@ export const useSessionStore = create<SessionState>()(
           businessCertificateUrl
         });
 
+        const storedTokens = await getStoredAuthTokens();
+
+        if (storedTokens?.refreshToken) {
+          const refreshedTokens = await authApi.refresh({
+            refreshToken: storedTokens.refreshToken
+          });
+          await setStoredAuthTokens(refreshedTokens);
+        }
+
         set((state) => ({
           ...toSessionState(updatedProfile, state.profileGoal, state),
           hasCompletedOnboarding: state.hasCompletedOnboarding,
@@ -528,14 +533,7 @@ export const useSessionStore = create<SessionState>()(
           return {
             createDrafts: nextDrafts
           };
-        }),
-      publishPetshopCampaign: (campaign) =>
-        set((state) => ({
-          petshopCampaigns: [
-            campaign,
-            ...state.petshopCampaigns.filter((item) => item.id !== campaign.id)
-          ]
-        }))
+        })
     }),
     {
       name: "animal-app-session",
@@ -550,7 +548,6 @@ export const useSessionStore = create<SessionState>()(
         petshopStatus: state.petshopStatus,
         caregiverProfile: state.caregiverProfile,
         petshopProfile: state.petshopProfile,
-        petshopCampaigns: state.petshopCampaigns,
         createDrafts: state.createDrafts
       })
     }

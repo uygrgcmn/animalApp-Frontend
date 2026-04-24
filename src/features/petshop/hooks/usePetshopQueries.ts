@@ -1,245 +1,249 @@
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
+import type {
+  PetshopCampaignRecord,
+  PetshopDashboardRecord,
+  PetshopVerificationStatus,
+  PetshopStoreRecord
+} from "../../../core/api/contracts";
+import { petshopsApi } from "../../../core/api/services/petshopsApi";
 import { queryKeys } from "../../../core/query/queryKeys";
-import { petshopCampaigns as mockPetshopCampaigns } from "../../../shared/mocks/marketplace";
-import {
-  getCampaignsByStore,
-  getManagedCampaignRows,
-  getStoreById,
-  getStoreByName,
-  petshopPerformanceSummary,
-  type PetshopStoreProfile
-} from "../../../shared/mocks/petshop";
 import { useSessionStore } from "../../auth/store/sessionStore";
-import type { LocalPetshopCampaign } from "../utils/campaigns";
+import {
+  getPrimaryMediaUrl,
+  parseEmbeddedListingMetadata
+} from "../../listings/utils/embeddedListingMetadata";
 
-export type PetshopDiscoveryItem = (typeof mockPetshopCampaigns)[number] & {
+type VerificationState = "verified" | "pending" | "rejected" | "unverified";
+
+export type PetshopStoreProfile = {
+  address: string;
+  campaignCount: number;
+  city: string;
+  district: string;
+  id: string;
+  phoneNumber: string;
+  storeName: string;
+  summary: string;
+  totalParticipantCount: number;
+  trustNotes: string[];
+  verifiedState: VerificationState;
+};
+
+export type PetshopDiscoveryItem = {
+  campaignLabel: string;
   city: string;
   coverImageUri?: string;
-  createdAt?: string;
-  description?: string;
-  district?: string;
-  mediaUrls?: string[];
-  store?: NonNullable<PetshopStoreProfile>;
-  updatedAt?: string;
-  verificationState?: NonNullable<PetshopStoreProfile>["verifiedState"];
+  createdAt: string;
+  deadline: string;
+  discount: string;
+  district: string;
+  id: string;
+  mediaUrls: string[];
+  participantCount: number;
+  priceLabel: string;
+  status: "aktif" | "pasif";
+  store?: PetshopStoreProfile;
+  storeId: string;
+  storeName: string;
+  summary: string;
+  targetParticipantCount: number;
+  title: string;
+  updatedAt: string;
+  verificationState: VerificationState;
+  visualLabel?: string;
 };
 
 export type PetshopManagedCampaignRow = {
   campaign: PetshopDiscoveryItem;
   campaignId: string;
-  impressions: string;
-  messageCount: number;
-  savedCount: number;
-  status: "aktif" | "taslak" | "pasif";
-  store?: NonNullable<PetshopStoreProfile>;
+  participantCount: number;
+  status: "aktif" | "pasif";
+  targetParticipantCount: number;
 };
 
-function buildCampaignSignature(localCampaigns: LocalPetshopCampaign[]) {
-  return localCampaigns.map((item) => `${item.id}:${item.updatedAt}`).join("|");
+export type PetshopDashboardData = {
+  featuredCampaign?: PetshopDiscoveryItem;
+  heroStore?: PetshopStoreProfile;
+  managedRows: PetshopManagedCampaignRow[];
+  summary: {
+    activeCampaignCount: number;
+    campaignCount: number;
+    totalParticipantCount: number;
+    unreadMessageCount: number;
+  };
+};
+
+function mapVerificationState(
+  status?: PetshopVerificationStatus
+): VerificationState {
+  if (status === "APPROVED") {
+    return "verified";
+  }
+
+  if (status === "PENDING") {
+    return "pending";
+  }
+
+  if (status === "REJECTED") {
+    return "rejected";
+  }
+
+  return "unverified";
 }
 
-function buildLocalStoreProfile(
-  campaign: LocalPetshopCampaign,
-  fallbackUser: ReturnType<typeof useSessionStore.getState>["user"]
-): PetshopStoreProfile {
+function toStoreProfile(store: PetshopStoreRecord | PetshopCampaignRecord["petshop"] | undefined): PetshopStoreProfile | undefined {
+  if (!store) {
+    return undefined;
+  }
+
+  const storeName = store.businessName?.trim() || "Petshop";
+  const address = store.businessAddress?.trim() || "Adres belirtilmemiş";
+  const phoneNumber = store.businessPhoneNumber?.trim() || "Telefon belirtilmemiş";
+  const city = store.city?.trim() || "Konum belirtilmemiş";
+  const district = store.district?.trim() || "";
+  const campaigns =
+    "campaigns" in store && Array.isArray(store.campaigns) ? store.campaigns.length : 0;
+  const totalParticipantCount =
+    "totalParticipantCount" in store && typeof store.totalParticipantCount === "number"
+      ? store.totalParticipantCount
+      : 0;
+
+  const trustNotes = [
+    mapVerificationState(store.petshopVerificationStatus) === "verified"
+      ? "Mağaza doğrulaması onaylandı."
+      : "Mağaza doğrulama süreci devam ediyor.",
+    store.businessPhoneNumber?.trim()
+      ? "İletişim telefonu mağaza profiline eklendi."
+      : "İletişim telefonu henüz eklenmemiş.",
+    campaigns > 0
+      ? `${campaigns} aktif kampanya yayında.`
+      : "Şu anda yayında aktif kampanya bulunmuyor."
+  ];
+
   return {
-    campaignIds: [campaign.id],
-    city: campaign.city || fallbackUser?.city || "Konum belirtilmemiş",
-    district: campaign.district || fallbackUser?.district || "Merkez",
-    id: campaign.storeId,
-    responseRate: "%100 geri dönüş",
-    responseTime: "Ortalama 15 dk",
-    storeName: campaign.storeName,
-    tagline: `${campaign.storeName} için yayında olan kampanyalar`,
-    summary: `${campaign.storeName} mağazası tarafından oluşturulan kampanyalar burada listelenir.`,
-    trustNotes: [
-      "Kampanya bu hesap üzerinden oluşturuldu.",
-      "Fiyat ve son tarih bilgileri kaydedildi.",
-      "İletişim petshop ekranından sürdürülebilir."
-    ],
-    verifiedState: campaign.verificationState
+    address,
+    campaignCount: campaigns,
+    city,
+    district,
+    id: store.id,
+    phoneNumber,
+    storeName,
+    summary: `${storeName} mağazasının aktif kampanyaları ve mağaza bilgileri burada listelenir.`,
+    totalParticipantCount,
+    trustNotes,
+    verifiedState: mapVerificationState(store.petshopVerificationStatus)
   };
 }
 
-function buildLocalDiscoveryItems(
-  localCampaigns: LocalPetshopCampaign[],
-  fallbackUser: ReturnType<typeof useSessionStore.getState>["user"]
-): PetshopDiscoveryItem[] {
-  return localCampaigns.map((campaign) => {
-    const matchedStore = getStoreByName(campaign.storeName);
-    const store = matchedStore ?? buildLocalStoreProfile(campaign, fallbackUser);
+function toDiscoveryItem(record: PetshopCampaignRecord): PetshopDiscoveryItem {
+  const { description, metadata } = parseEmbeddedListingMetadata(record.description);
+  const store = toStoreProfile(record.petshop);
 
-    return {
-      campaignLabel: campaign.campaignLabel,
-      city: campaign.city || store.city,
-      coverImageUri: campaign.coverImageUri,
-      createdAt: campaign.createdAt,
-      description: campaign.description,
-      discount: campaign.discount,
-      district: campaign.district || store.district,
-      id: campaign.id,
-      mediaUrls: campaign.mediaUrls,
-      priceLabel: campaign.priceLabel,
-      store: store ?? undefined,
-      storeId: matchedStore?.id ?? campaign.storeId,
-      storeName: campaign.storeName,
-      summary: campaign.description,
-      title: campaign.title,
-      updatedAt: campaign.updatedAt,
-      verificationState: matchedStore?.verifiedState ?? campaign.verificationState,
-      visualLabel: campaign.visualLabel,
-      deadline: campaign.deadline
-    };
-  });
+  return {
+    campaignLabel: metadata.campaignLabel ?? "Petshop Kampanyası",
+    city: record.petshop?.city?.trim() || "Konum belirtilmemiş",
+    coverImageUri: getPrimaryMediaUrl(metadata),
+    createdAt: record.createdAt,
+    deadline: metadata.deadlineLabel ?? "Süre belirtilmemiş",
+    discount: metadata.discountLabel ?? "İndirim belirtilmemiş",
+    district: record.petshop?.district?.trim() || "",
+    id: record.id,
+    mediaUrls: metadata.mediaUrls ?? [],
+    participantCount: record.currentParticipantCount,
+    priceLabel: metadata.priceLabel ?? "Fiyat belirtilmemiş",
+    status: record.isActive ? "aktif" : "pasif",
+    store,
+    storeId: record.petshopId,
+    storeName: record.petshop?.businessName?.trim() || "Petshop",
+    summary: description || "Kampanya açıklaması paylaşılmadı.",
+    targetParticipantCount: record.targetParticipantCount,
+    title: record.title,
+    updatedAt: record.updatedAt,
+    verificationState: mapVerificationState(record.petshop?.petshopVerificationStatus),
+    visualLabel: metadata.visualLabel
+  };
 }
 
-function buildDiscoveryItems(
-  localCampaigns: LocalPetshopCampaign[],
-  fallbackUser: ReturnType<typeof useSessionStore.getState>["user"]
-): PetshopDiscoveryItem[] {
-  const localItems = buildLocalDiscoveryItems(localCampaigns, fallbackUser);
-  const mockItems = mockPetshopCampaigns.map((campaign) => {
-    const store = getStoreById(campaign.storeId);
-
-    return {
-      ...campaign,
-      city: campaign.city,
-      store: store ?? undefined,
-      verificationState: store?.verifiedState
-    };
-  });
-
-  return [...localItems, ...mockItems];
+function toManagedRow(record: PetshopCampaignRecord): PetshopManagedCampaignRow {
+  return {
+    campaign: toDiscoveryItem(record),
+    campaignId: record.id,
+    participantCount: record.currentParticipantCount,
+    status: record.isActive ? "aktif" : "pasif",
+    targetParticipantCount: record.targetParticipantCount
+  };
 }
 
-function buildManagedRows(
-  localCampaigns: LocalPetshopCampaign[],
-  fallbackUser: ReturnType<typeof useSessionStore.getState>["user"]
-): PetshopManagedCampaignRow[] {
-  const localRows: PetshopManagedCampaignRow[] = buildLocalDiscoveryItems(
-    localCampaigns,
-    fallbackUser
-  ).map((campaign) => ({
-    campaign,
-    campaignId: campaign.id,
-    impressions: "Yeni",
-    messageCount: 0,
-    savedCount: 0,
-    status: "aktif",
-    store: campaign.store
-  }));
+function toDashboardData(record: PetshopDashboardRecord): PetshopDashboardData {
+  const managedRows = record.campaigns.map(toManagedRow);
 
-  const mockRows: PetshopManagedCampaignRow[] = getManagedCampaignRows().flatMap((row) => {
-    if (!row.campaign) {
-      return [];
+  return {
+    featuredCampaign: managedRows[0]?.campaign,
+    heroStore: toStoreProfile(record.store),
+    managedRows,
+    summary: {
+      activeCampaignCount: record.activeCampaignCount,
+      campaignCount: record.campaigns.length,
+      totalParticipantCount: record.totalParticipantCount,
+      unreadMessageCount: record.unreadMessageCount
     }
-
-    const store = getStoreById(row.campaign.storeId);
-
-    return [
-      {
-        campaign: {
-          ...row.campaign,
-          city: row.campaign.city,
-          store: store ?? undefined,
-          verificationState: store?.verifiedState
-        },
-        campaignId: row.campaignId,
-        impressions: row.impressions,
-        messageCount: row.messageCount,
-        savedCount: row.savedCount,
-        status: row.status,
-        store: store ?? undefined
-      }
-    ];
-  });
-
-  return [...localRows, ...mockRows];
+  };
 }
 
 export function usePetshopDiscovery() {
   const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
-  const localCampaigns = useSessionStore((state) => state.petshopCampaigns);
-  const user = useSessionStore((state) => state.user);
-  const signature = useMemo(() => buildCampaignSignature(localCampaigns), [localCampaigns]);
 
   return useQuery({
-    queryKey: [...queryKeys.petshop.discovery, signature, user?.id ?? null],
-    queryFn: async () => buildDiscoveryItems(localCampaigns, user),
+    queryKey: queryKeys.petshop.discovery,
+    queryFn: async () => (await petshopsApi.discoverCampaigns()).map(toDiscoveryItem),
     enabled: isAuthenticated
   });
 }
 
 export function usePetshopDashboard() {
   const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
-  const localCampaigns = useSessionStore((state) => state.petshopCampaigns);
-  const user = useSessionStore((state) => state.user);
-  const signature = useMemo(() => buildCampaignSignature(localCampaigns), [localCampaigns]);
 
   return useQuery({
-    queryKey: [...queryKeys.petshop.dashboard, signature, user?.id ?? null],
-    queryFn: async () => {
-      const discoveryItems = buildDiscoveryItems(localCampaigns, user);
-      const heroCampaign = discoveryItems[0];
-
-      return {
-        featuredCampaign: heroCampaign,
-        heroStore: heroCampaign?.store,
-        managedRows: buildManagedRows(localCampaigns, user),
-        performanceSummary: petshopPerformanceSummary
-      };
-    },
+    queryKey: queryKeys.petshop.dashboard,
+    queryFn: async () => toDashboardData(await petshopsApi.getDashboard()),
     enabled: isAuthenticated
   });
 }
 
 export function usePetshopCampaignManagement() {
   const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
-  const localCampaigns = useSessionStore((state) => state.petshopCampaigns);
-  const user = useSessionStore((state) => state.user);
-  const signature = useMemo(() => buildCampaignSignature(localCampaigns), [localCampaigns]);
 
   return useQuery({
-    queryKey: [...queryKeys.petshop.campaigns, signature, user?.id ?? null],
-    queryFn: async () => buildManagedRows(localCampaigns, user),
+    queryKey: queryKeys.petshop.campaigns,
+    queryFn: async () => (await petshopsApi.listMyCampaigns()).map(toManagedRow),
     enabled: isAuthenticated
   });
 }
 
 export function usePetshopStoreProfile(storeId: string) {
   const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
-  const localCampaigns = useSessionStore((state) => state.petshopCampaigns);
-  const user = useSessionStore((state) => state.user);
-  const signature = useMemo(() => buildCampaignSignature(localCampaigns), [localCampaigns]);
 
   return useQuery({
-    queryKey: [...queryKeys.petshop.store(storeId), signature, user?.id ?? null],
+    queryKey: queryKeys.petshop.store(storeId),
     queryFn: async () => {
-      const mockStore = getStoreById(storeId);
-
-      if (mockStore) {
-        return {
-          campaigns: getCampaignsByStore(storeId).map((campaign) => ({
-            ...campaign,
-            city: campaign.city,
-            store: mockStore,
-            verificationState: mockStore.verifiedState
-          })),
-          store: mockStore
-        };
-      }
-
-      const localStoreCampaigns = buildLocalDiscoveryItems(localCampaigns, user).filter(
-        (campaign) => campaign.storeId === storeId
-      );
+      const store = await petshopsApi.findStore(storeId);
 
       return {
-        campaigns: localStoreCampaigns,
-        store: localStoreCampaigns[0]?.store
+        campaigns: store.campaigns.map(toDiscoveryItem),
+        store: toStoreProfile(store)
       };
     },
     enabled: isAuthenticated && Boolean(storeId)
+  });
+}
+
+export function usePetshopCampaignDetail(campaignId: string) {
+  const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
+
+  return useQuery({
+    queryKey: queryKeys.petshop.detail(campaignId),
+    queryFn: async () => toDiscoveryItem(await petshopsApi.findCampaign(campaignId)),
+    enabled: isAuthenticated && Boolean(campaignId)
   });
 }

@@ -78,6 +78,10 @@ export function PetshopScreen() {
       );
     });
   }, [currentUser?.city, discoveryQuery.data, filter, searchValue]);
+  const storeCount = useMemo(
+    () => new Set((discoveryQuery.data ?? []).map((campaign) => campaign.storeId)).size,
+    [discoveryQuery.data]
+  );
   const refreshing = discoveryQuery.isFetching && !discoveryQuery.isLoading;
 
   return (
@@ -100,7 +104,7 @@ export function PetshopScreen() {
           <MetaPill icon="shield-check-outline" label={petshopPresentation.label} tone="primary" />
           <MetaPill
             icon="storefront-outline"
-            label={discoveryQuery.isLoading ? "Yüklüyor..." : `${discoveryQuery.data?.length ?? 0} mağaza`}
+            label={discoveryQuery.isLoading ? "Yüklüyor..." : `${storeCount} mağaza`}
             tone="neutral"
           />
         </View>

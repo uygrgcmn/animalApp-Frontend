@@ -4,10 +4,13 @@ const METADATA_PATTERN = /\[\[ANIMAL_APP_META\]\]([\s\S]*?)\[\[\/ANIMAL_APP_META
 
 export type EmbeddedListingMetadata = {
   availabilityLabel?: string;
+  campaignLabel?: string;
   careNeedLabels?: string[];
   city?: string;
   contactPreferenceLabel?: string;
   datePlan?: string;
+  deadlineLabel?: string;
+  discountLabel?: string;
   district?: string;
   experience?: string;
   mediaUrls?: string[];
@@ -16,6 +19,7 @@ export type EmbeddedListingMetadata = {
   serviceLabels?: string[];
   supportWindow?: string;
   version: 1;
+  visualLabel?: string;
 };
 
 function removeEmptyValues(metadata: EmbeddedListingMetadata) {

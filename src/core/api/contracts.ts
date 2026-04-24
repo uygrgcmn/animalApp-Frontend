@@ -406,3 +406,62 @@ export type PresignedUploadUrlResponse = {
   publicUrl: string;
 };
 
+export type PetshopVerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export type PetshopCampaignParticipantRecord = {
+  id: string;
+  userId: string;
+  createdAt: string;
+};
+
+export type PetshopSummary = {
+  id: string;
+  email: string;
+  businessName: string | null;
+  businessAddress: string | null;
+  businessPhoneNumber: string | null;
+  city: string | null;
+  district: string | null;
+  petshopVerificationStatus: PetshopVerificationStatus;
+};
+
+export type PetshopCampaignRecord = {
+  id: string;
+  petshopId: string;
+  title: string;
+  description: string | null;
+  targetParticipantCount: number;
+  currentParticipantCount: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  petshop?: PetshopSummary;
+  participants?: PetshopCampaignParticipantRecord[];
+};
+
+export type PetshopStoreRecord = PetshopSummary & {
+  activeCampaignCount: number;
+  totalParticipantCount: number;
+  campaigns: PetshopCampaignRecord[];
+};
+
+export type PetshopDashboardRecord = {
+  store: PetshopStoreRecord;
+  campaigns: PetshopCampaignRecord[];
+  activeCampaignCount: number;
+  totalParticipantCount: number;
+  unreadMessageCount: number;
+};
+
+export type CreatePetshopCampaignRequest = {
+  title: string;
+  description?: string;
+  targetParticipantCount?: number;
+  campaignLabel?: string;
+  discountLabel?: string;
+  priceLabel?: string;
+  deadlineLabel?: string;
+  visualLabel?: string;
+  mediaUrls?: string[];
+};
+

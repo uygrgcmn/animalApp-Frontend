@@ -68,7 +68,7 @@ export function PetshopStoreProfileScreen() {
       >
         {store ? (
           <>
-            <InfoCard description={store.tagline} title="Mağaza kimlik kartı" variant="accent">
+            <InfoCard description={store.summary} title="Mağaza kimlik kartı" variant="accent">
               <View style={styles.heroRow}>
                 <View style={styles.storeIcon}>
                   <AppIcon name="storefront-outline" size={26} color={colors.primary} />
@@ -83,8 +83,17 @@ export function PetshopStoreProfileScreen() {
                 <MetaPill icon="map-marker-outline" label={`${store.city} / ${store.district}`} tone="neutral" />
               </View>
               <View style={styles.metaRow}>
-                <MetaPill icon="clock-fast" label={store.responseTime} tone="primary" />
-                <MetaPill icon="percent-outline" label={store.responseRate} tone="success" />
+                <MetaPill icon="map-marker-radius-outline" label={store.address} tone="primary" />
+                <MetaPill
+                  icon="account-group-outline"
+                  label={`${store.totalParticipantCount} toplam katılım`}
+                  tone="success"
+                />
+                <MetaPill
+                  icon="tag-multiple-outline"
+                  label={`${store.campaignCount} aktif kampanya`}
+                  tone="neutral"
+                />
               </View>
             </InfoCard>
 
@@ -125,7 +134,7 @@ export function PetshopStoreProfileScreen() {
                         />
                       }
                       campaignLabel={campaign.campaignLabel}
-                      coverImageUri={"coverImageUri" in campaign ? campaign.coverImageUri : undefined}
+                      coverImageUri={campaign.coverImageUri}
                       deadline={campaign.deadline}
                       description={campaign.summary}
                       priceLabel={`${campaign.discount} • ${campaign.priceLabel}`}
@@ -162,11 +171,11 @@ export function PetshopStoreProfileScreen() {
           />
         </Link>
         <Link href={routeBuilders.createWithType("petshop-campaign")} asChild>
-          <AppButton
-            label="Benzer Kampanya"
-            leftSlot={<AppIcon backgrounded={false} name="plus" size={18} />}
-            variant="secondary"
-          />
+            <AppButton
+              label="Mağaza Kampanyası Oluştur"
+              leftSlot={<AppIcon backgrounded={false} name="plus" size={18} />}
+              variant="secondary"
+            />
         </Link>
       </StickyBottomActionBar>
     </SafeAreaView>

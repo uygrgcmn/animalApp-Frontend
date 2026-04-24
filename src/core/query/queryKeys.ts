@@ -36,6 +36,7 @@ export const queryKeys = {
     discovery: ["petshop", "discovery"] as const,
     dashboard: ["petshop", "dashboard"] as const,
     campaigns: ["petshop", "campaigns"] as const,
+    detail: (campaignId: string) => ["petshop", "detail", campaignId] as const,
     store: (storeId: string) => ["petshop", "store", storeId] as const
   },
   conversations: {

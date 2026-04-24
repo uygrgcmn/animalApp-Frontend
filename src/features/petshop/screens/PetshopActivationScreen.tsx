@@ -48,6 +48,7 @@ export function PetshopActivationScreen() {
   );
   const [storeImageError, setStoreImageError] = useState<string | null>(null);
   const [documentError, setDocumentError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const defaultValues = useMemo(
     () =>
       normalizePetshopProfile(petshopProfile, {
@@ -108,13 +109,24 @@ export function PetshopActivationScreen() {
   };
 
   const handleSaveDraft = (draftValues: PetshopActivationValues) => {
+    setSubmitError(null);
     savePetshopDraft(draftValues);
     router.replace(routes.app.profileModes);
   };
 
-  const onSubmit = (submittedValues: PetshopActivationValues) => {
-    submitPetshopApplication(submittedValues);
-    router.replace(routes.app.profileModes);
+  const onSubmit = async (submittedValues: PetshopActivationValues) => {
+    setSubmitError(null);
+
+    try {
+      await submitPetshopApplication(submittedValues);
+      router.replace(routes.app.profileModes);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Petshop başvurusu gönderilirken bir hata oluştu."
+      );
+    }
   };
 
   return (
@@ -343,6 +355,8 @@ export function PetshopActivationScreen() {
           </View>
         ) : null}
 
+        {submitError ? <Text style={styles.submitError}>{submitError}</Text> : null}
+
         <View style={styles.actions}>
           <AppButton
             disabled={isSubmitting}
@@ -409,6 +423,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.tight
+  },
+  submitError: {
+    color: colors.error,
+    ...typography.body
   }
 });
 

@@ -224,45 +224,4 @@ export const communityPosts = [
   }
 ];
 
-export const petshopCampaigns = [
-  {
-    id: "ps-1",
-    storeId: "store-1",
-    title: "Premium mama bahar kampanyası",
-    city: "Istanbul",
-    priceLabel: "799 TL",
-    summary: "Yetişkin kedi mamalarında kampanyalı paketler ve aynı gün teslimat.",
-    discount: "%20 indirim",
-    storeName: "Pati Market",
-    deadline: "3 gün kaldı",
-    campaignLabel: "Bahar kampanyası",
-    visualLabel: "Kedi + köpek mama serisi"
-  },
-  {
-    id: "ps-2",
-    storeId: "store-2",
-    title: "Tasma ve oyuncak seti",
-    city: "Ankara",
-    priceLabel: "549 TL",
-    summary: "Köpekler için kampanyalı aksesuar paketi, stoklarla sınırlı.",
-    discount: "%15 indirim",
-    storeName: "Miyav Store",
-    deadline: "Hafta sonuna kadar",
-    campaignLabel: "Yeni sezon",
-    visualLabel: "Aksesuar seçkisi"
-  },
-  {
-    id: "ps-3",
-    storeId: "store-3",
-    title: "Mini ırk kuru mama paketi",
-    city: "Izmir",
-    priceLabel: "459 TL",
-    summary: "Mini ırk köpekler için özel formüllü mama paketinde stok temizleme kampanyası.",
-    discount: "%10 indirim",
-    storeName: "Dost Petshop",
-    deadline: "Son 48 saat",
-    campaignLabel: "Stok fırsatı",
-    visualLabel: "Mini ırk seçimi"
-  }
-];
 

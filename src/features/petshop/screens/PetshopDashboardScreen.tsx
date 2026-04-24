@@ -33,7 +33,7 @@ export function PetshopDashboardScreen() {
   const heroStore = dashboard?.heroStore;
   const featuredCampaign = dashboard?.featuredCampaign;
   const managedRows = dashboard?.managedRows ?? [];
-  const performanceSummary = dashboard?.performanceSummary;
+  const summary = dashboard?.summary;
   const refreshing = dashboardQuery.isFetching && !dashboardQuery.isLoading;
 
   if (dashboardQuery.isError) {
@@ -75,7 +75,7 @@ export function PetshopDashboardScreen() {
         />
       }
     >
-      {heroStore && performanceSummary ? (
+      {heroStore && summary ? (
         <>
           <InfoCard
             description={petshopPresentation.description}
@@ -84,65 +84,65 @@ export function PetshopDashboardScreen() {
           >
             <View style={styles.metaRow}>
               <MetaPill icon="shield-check-outline" label={petshopPresentation.label} tone="primary" />
-              <MetaPill icon="eye-outline" label={performanceSummary.monthlyViews} tone="success" />
-              {performanceSummary.unreadMessages > 0 ? (
+              <MetaPill
+                icon="tag-multiple-outline"
+                label={`${summary.activeCampaignCount} aktif kampanya`}
+                tone="success"
+              />
+              {summary.unreadMessageCount > 0 ? (
                 <MetaPill
                   icon="message-badge-outline"
-                  label={`${performanceSummary.unreadMessages} yeni mesaj`}
+                  label={`${summary.unreadMessageCount} yeni mesaj`}
                   tone="warning"
                 />
               ) : null}
             </View>
           </InfoCard>
 
-          <SectionHeader
-            eyebrow="Performans özeti"
-            title="Bu ay"
-            description="Mağaza genelindeki etkileşim ve doğrulama metrikleri."
-          />
+            <SectionHeader
+              eyebrow="Performans özeti"
+              title="Mağaza özeti"
+              description="Gerçek kampanya ve mesaj verilerinden üretilen özet."
+            />
 
-          <View style={styles.metricGrid}>
-            <View style={styles.metricItem}>
-              <MetricCard
-                caption="Aylık görüntülenme"
-                delta="+12%"
-                deltaPositive
-                icon="eye-outline"
-                title="Görüntülenme"
-                tone="primary"
-                value={performanceSummary.monthlyViews.replace(" aylık görüntülenme", "")}
-              />
+            <View style={styles.metricGrid}>
+              <View style={styles.metricItem}>
+                <MetricCard
+                  caption="Şu an yayında"
+                  icon="tag-multiple-outline"
+                  title="Aktif kampanya"
+                  tone="primary"
+                  value={String(summary.activeCampaignCount)}
+                />
+              </View>
+              <View style={styles.metricItem}>
+                <MetricCard
+                  caption="Toplam kampanya sayısı"
+                  icon="playlist-check"
+                  title="Kampanyalar"
+                  tone="success"
+                  value={String(summary.campaignCount)}
+                />
+              </View>
+              <View style={styles.metricItem}>
+                <MetricCard
+                  caption="Katılımcı toplamı"
+                  icon="account-group-outline"
+                  title="Katılım"
+                  tone="primary"
+                  value={String(summary.totalParticipantCount)}
+                />
+              </View>
+              <View style={styles.metricItem}>
+                <MetricCard
+                  caption="Okunmamış mesajlar"
+                  icon="message-text-outline"
+                  title="Yeni mesajlar"
+                  tone={summary.unreadMessageCount > 0 ? "warning" : "neutral"}
+                  value={String(summary.unreadMessageCount)}
+                />
+              </View>
             </View>
-            <View style={styles.metricItem}>
-              <MetricCard
-                caption="Etkileşim oranı"
-                delta="+2.1pp"
-                deltaPositive
-                icon="chart-timeline-variant"
-                title="Dönüşüm"
-                tone="success"
-                value={performanceSummary.conversion.replace(" etkileşim", "")}
-              />
-            </View>
-            <View style={styles.metricItem}>
-              <MetricCard
-                caption="Kampanya kaydetme"
-                icon="bookmark-multiple-outline"
-                title="Kaydedilenler"
-                tone="primary"
-                value={String(managedRows.reduce((sum, r) => sum + r.savedCount, 0))}
-              />
-            </View>
-            <View style={styles.metricItem}>
-              <MetricCard
-                caption="Okunmamış mesajlar"
-                icon="message-text-outline"
-                title="Yeni mesajlar"
-                tone={performanceSummary.unreadMessages > 0 ? "warning" : "neutral"}
-                value={String(performanceSummary.unreadMessages)}
-              />
-            </View>
-          </View>
 
           <InfoCard
             description="Yeni kampanya aç, mevcut listeni yönet veya doğrulama bilgilerini güncelle."
@@ -186,9 +186,13 @@ export function PetshopDashboardScreen() {
                     rightSlot={<StatusPill label={row.status} tone={campaignStatusTone(row.status)} />}
                     pills={
                       <>
-                        <MetaPill icon="eye-outline" label={row.impressions} tone="primary" />
-                        <MetaPill icon="bookmark-outline" label={`${row.savedCount} kaydetme`} tone="success" />
-                        <MetaPill icon="message-text-outline" label={`${row.messageCount} mesaj`} tone="warning" />
+                        <MetaPill icon="tag-outline" label={row.campaign.campaignLabel} tone="primary" />
+                        <MetaPill
+                          icon="account-group-outline"
+                          label={`${row.participantCount}/${row.targetParticipantCount} katılım`}
+                          tone="success"
+                        />
+                        <MetaPill icon="calendar-clock-outline" label={row.campaign.deadline} tone="warning" />
                       </>
                     }
                   />

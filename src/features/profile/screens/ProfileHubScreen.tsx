@@ -30,6 +30,7 @@ import {
   isCaregiverListing,
   isOwnerRequestListing
 } from "../../listings/utils/listingGuards";
+import { usePetshopCampaignManagement } from "../../petshop/hooks/usePetshopQueries";
 import {
   getCaregiverModePresentation,
   getPetshopModePresentation
@@ -64,11 +65,11 @@ export function ProfileHubScreen() {
   const applicationCount = applicationsQuery.data?.length ?? 0;
   const myListingsQuery = useListings({ creatorId: user?.id });
   const myCommunityQuery = useCommunityListings({ creatorId: user?.id });
-  const localPetshopCampaigns = useSessionStore((state) => state.petshopCampaigns);
+  const petshopCampaignsQuery = usePetshopCampaignManagement();
   const standardListingCount =
     myListingsQuery.data?.filter((item) => isCaregiverListing(item) || isOwnerRequestListing(item)).length ?? 0;
   const communityListingCount = myCommunityQuery.data?.length ?? 0;
-  const petshopCampaignCount = localPetshopCampaigns.filter((item) => item.creatorId === user?.id).length;
+  const petshopCampaignCount = petshopCampaignsQuery.data?.length ?? 0;
   const listingCount = standardListingCount + communityListingCount + petshopCampaignCount;
   const bookmarkCount = useBookmarkStore((s) => s.count)();
 

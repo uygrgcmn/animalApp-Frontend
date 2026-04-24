@@ -15,10 +15,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { routeBuilders, routes } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
 import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
-import {
-  getSimilarPetshopCampaigns,
-  petshopCampaignDetails
-} from "../../../shared/mocks/listingDetails";
 import { AppButton } from "../../../shared/ui/AppButton";
 import { AppIcon } from "../../../shared/ui/AppIcon";
 import { EmptyState } from "../../../shared/ui/EmptyState";
@@ -30,8 +26,10 @@ import { StickyBottomActionBar } from "../../../shared/ui/StickyBottomActionBar"
 import { VerificationBadge } from "../../../shared/ui/VerificationBadge";
 import { useBookmarkStore, type BookmarkedItem } from "../../profile/store/bookmarkStore";
 import { useSessionStore } from "../../auth/store/sessionStore";
-import { usePetshopDiscovery } from "../../petshop/hooks/usePetshopQueries";
-import { buildLocalPetshopCampaignDetail } from "../../petshop/utils/campaigns";
+import {
+  usePetshopCampaignDetail,
+  usePetshopDiscovery
+} from "../../petshop/hooks/usePetshopQueries";
 import {
   getCaregiverMissingItems,
   getCaregiverModePresentation,
@@ -445,24 +443,80 @@ export function OwnerRequestDetailScreen() {
   );
 }
 
-// ─── Petshop Campaign Detail (still uses mock) ───────────────────────────────
+// ─── Petshop Campaign Detail ──────────────────────────────────────────────────
 
 export function PetshopCampaignDetailScreen() {
   const params = useLocalSearchParams<{ listingId: string }>();
   const discoveryQuery = usePetshopDiscovery();
-  const staticDetail = petshopCampaignDetails[params.listingId];
-  const campaign = useMemo(
-    () => (discoveryQuery.data ?? []).find((item) => item.id === params.listingId),
-    [discoveryQuery.data, params.listingId]
-  );
-  const detail =
-    staticDetail ??
-    (campaign ? buildLocalPetshopCampaignDetail(campaign, routes.app.petshopCampaignManagement) : null);
+  const detailQuery = usePetshopCampaignDetail(params.listingId);
+  const campaign =
+    detailQuery.data ??
+    (discoveryQuery.data ?? []).find((item) => item.id === params.listingId);
+  const detail = campaign
+    ? {
+        description: [campaign.summary],
+        info: [
+          { icon: "storefront-outline" as const, label: campaign.storeName, tone: "primary" as const },
+          { icon: "sale-outline" as const, label: campaign.discount, tone: "warning" as const },
+          { icon: "cash" as const, label: campaign.priceLabel, tone: "success" as const },
+          {
+            icon: "account-group-outline" as const,
+            label: `${campaign.participantCount}/${campaign.targetParticipantCount} katılım`,
+            tone: "neutral" as const
+          },
+          { icon: "clock-outline" as const, label: campaign.deadline, tone: "neutral" as const }
+        ],
+        managementNote:
+          campaign.status === "aktif"
+            ? "Kampanya yayında. Yönetim ekranından tüm aktif kampanyalarını takip edebilirsin."
+            : "Kampanya pasif durumda. Mağaza yönetimi ekranından güncel durumunu kontrol edebilirsin.",
+        owner: {
+          description:
+            campaign.store?.summary ??
+            `${campaign.storeName} mağazasının kampanya ve mağaza bilgileri burada yer alır.`,
+          headline:
+            campaign.verificationState === "verified"
+              ? "Doğrulanmış mağaza profili"
+              : "Petshop mağaza profili",
+          location:
+            [campaign.city, campaign.district].filter(Boolean).join(" / ") ||
+            "Konum belirtilmemiş",
+          name: campaign.storeName
+        },
+        subtitle: "Petshop Kampanyası",
+        title: campaign.title,
+        trustSignals: [
+          {
+            description:
+              campaign.verificationState === "verified"
+                ? "Mağaza doğrulaması onaylanmış durumda."
+                : "Mağaza doğrulama bilgileri henüz tamamlanmamış olabilir.",
+            label: "Mağaza doğrulaması",
+            state: campaign.verificationState === "verified" ? ("verified" as const) : ("pending" as const)
+          },
+          {
+            description:
+              campaign.coverImageUri
+                ? "Kampanya için kapak görseli eklendi."
+                : "Kampanya kapak görseli henüz eklenmemiş.",
+            label: "Görsel sunum",
+            state: campaign.coverImageUri ? ("verified" as const) : ("pending" as const)
+          },
+          {
+            description:
+              campaign.deadline !== "Süre belirtilmemiş"
+                ? "Kampanya son tarihi kullanıcılarla paylaşılmış."
+                : "Kampanya için net bir süre bilgisi girilmemiş.",
+            label: "Kampanya süresi",
+            state:
+              campaign.deadline !== "Süre belirtilmemiş"
+                ? ("verified" as const)
+                : ("pending" as const)
+          }
+        ]
+      }
+    : null;
   const similar = useMemo(() => {
-    if (staticDetail) {
-      return getSimilarPetshopCampaigns(staticDetail.similarIds);
-    }
-
     if (!campaign) {
       return [];
     }
@@ -471,14 +525,20 @@ export function PetshopCampaignDetailScreen() {
       .filter((item) => item.id !== campaign.id)
       .filter((item) => item.storeId === campaign.storeId || item.city === campaign.city)
       .slice(0, 3);
-  }, [campaign, discoveryQuery.data, staticDetail]);
+  }, [campaign, discoveryQuery.data]);
   const gate = usePetshopGate();
 
-  if (discoveryQuery.isLoading && !detail) {
+  if ((detailQuery.isLoading || discoveryQuery.isLoading) && !detail) {
     return <LoadingDetailState title="Petshop Kampanyası" />;
   }
 
   if (!detail) {
+    return <MissingDetailState description="Petshop kampanyası bulunamadı." title="Kampanya detayı" />;
+  }
+
+  const resolvedCampaign = campaign;
+
+  if (!resolvedCampaign) {
     return <MissingDetailState description="Petshop kampanyası bulunamadı." title="Kampanya detayı" />;
   }
 
@@ -494,13 +554,8 @@ export function PetshopCampaignDetailScreen() {
             label="Mağaza Profiline Git"
             leftSlot={<AppIcon backgrounded={false} name="storefront-outline" size={18} />}
             onPress={() => {
-              if (campaign?.storeId) {
-                router.push(routeBuilders.petshopStoreProfile(campaign.storeId));
-                return;
-              }
-
-              if ("storeId" in detail) {
-                router.push(routeBuilders.petshopStoreProfile(detail.storeId));
+              if (resolvedCampaign.storeId) {
+                router.push(routeBuilders.petshopStoreProfile(resolvedCampaign.storeId));
               }
             }}
             variant="secondary"
@@ -521,7 +576,7 @@ export function PetshopCampaignDetailScreen() {
         </InfoCard>
       }
       basicInfo={detail.info}
-      coverImageUri={campaign?.coverImageUri}
+      coverImageUri={resolvedCampaign.coverImageUri}
       description={detail.description}
       emptyTitle="Benzer kampanya bulunmuyor"
       notFoundDescription="Petshop kampanyası bulunamadı."
@@ -543,16 +598,17 @@ export function PetshopCampaignDetailScreen() {
                      }
                      deadline={item.deadline}
                      description={item.summary}
-                     priceLabel={`${item.discount} • ${item.priceLabel}`}
-                    storeName={item.storeName}
-                    title={item.title}
-                    visualLabel={item.visualLabel}
-                  />
-                </Pressable>
-              </Link>
-            ))}
-          </View>
-        ) : null
+                      priceLabel={`${item.discount} • ${item.priceLabel}`}
+                      storeName={item.storeName}
+                      title={item.title}
+                      verificationState={item.verificationState}
+                      visualLabel={item.visualLabel}
+                    />
+                  </Pressable>
+                </Link>
+              ))}
+            </View>
+          ) : null
       }
       primaryActionUsesGate={false}
       stickyGate={gate}

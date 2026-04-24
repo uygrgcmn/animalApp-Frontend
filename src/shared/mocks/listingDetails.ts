@@ -1,4 +1,4 @@
-import { caregiverListings, ownerRequests, petshopCampaigns } from "./marketplace";
+import { caregiverListings, ownerRequests } from "./marketplace";
 
 type DetailMeta = {
   icon:
@@ -307,146 +307,10 @@ export const ownerRequestDetails: Record<string, OwnerRequestDetail> = {
   }
 };
 
-export const petshopCampaignDetails: Record<string, PetshopCampaignDetail> = {
-  "ps-1": {
-    description: [
-      "Premium mama serisinde sezon kampanyası sunuluyor. Aynı gün teslimat ve belirli paketlerde ek indirim var.",
-      "Kampanya stoğa bağlı ilerliyor, detaylı ürün bilgisi ve teslimat seçenekleri mağaza tarafından hızlı dönülüyor."
-    ],
-    id: "ps-1",
-    info: [
-      { icon: "storefront-outline", label: "Pati Market", tone: "primary" },
-      { icon: "sale-outline", label: "%20 indirim", tone: "warning" },
-      { icon: "cash", label: "799 TL", tone: "success" },
-      { icon: "clock-outline", label: "3 gün kaldı", tone: "neutral" }
-    ],
-    managementNote:
-      "Kampanya yönetimi, doğrulanmış petshop moduna sahip hesaplar için açılır.",
-    owner: {
-      description:
-        "Hızlı teslimat ve güvenli stok bilgisini öne çıkaran, aktif kampanya yöneten petshop profili.",
-      headline: "Doğrulanmış mağaza profili",
-      location: "Istanbul",
-      name: "Pati Market"
-    },
-    similarIds: ["ps-2", "ps-3"],
-    storeId: "store-1",
-    subtitle: "Petshop Kampanyası",
-    title: "Premium mama bahar kampanyası",
-    trustSignals: [
-      {
-        description: "Mağaza profili ve kampanya bilgisi doğrulanmış.",
-        label: "Mağaza doğrulaması",
-        state: "verified"
-      },
-      {
-        description: "Teslimat ve stok bilgisi güncel.",
-        label: "Stok güncelliği",
-        state: "verified"
-      },
-      {
-        description: "Kampanya süresi sınırlı.",
-        label: "Son tarih aktif",
-        state: "pending"
-      }
-    ]
-  },
-  "ps-2": {
-    description: [
-      "Tasma ve oyuncak setinde sezon indirimi var. Kampanya stoklarla sınırlı ve paket bazlı ilerliyor.",
-      "Mağaza, paket içeriğini ve teslimat koşullarını mesaj üzerinden hızlı paylaşıyor."
-    ],
-    id: "ps-2",
-    info: [
-      { icon: "storefront-outline", label: "Miyav Store", tone: "primary" },
-      { icon: "sale-outline", label: "%15 indirim", tone: "warning" },
-      { icon: "cash", label: "549 TL", tone: "success" },
-      { icon: "clock-outline", label: "Hafta sonuna kadar", tone: "neutral" }
-    ],
-    managementNote:
-      "Bu kampanyayı güncellemek veya yönetmek için doğrulanmış petshop modu gerekir.",
-    owner: {
-      description:
-        "Aksesuar kategorisinde güçlü kampanyalar açan, görsel sunumu düzenli bir mağaza.",
-      headline: "Aksesuar odaklı kampanya profili",
-      location: "Ankara",
-      name: "Miyav Store"
-    },
-    similarIds: ["ps-1", "ps-3"],
-    storeId: "store-2",
-    subtitle: "Petshop Kampanyası",
-    title: "Tasma ve oyuncak seti",
-    trustSignals: [
-      {
-        description: "Mağaza profili aktif.",
-        label: "Mağaza güveni",
-        state: "verified"
-      },
-      {
-        description: "Kampanya son tarihi tanımlı.",
-        label: "Süre sınırı",
-        state: "pending"
-      },
-      {
-        description: "Görsel ve fiyat bilgisi açık.",
-        label: "Net fiyat bilgisi",
-        state: "verified"
-      }
-    ]
-  },
-  "ps-3": {
-    description: [
-      "Mini ırk köpek maması için kısa süreli stok temizleme kampanyası açık. Stok durumu günlük güncelleniyor.",
-      "Kampanya daha uygun fiyat ve hızlı teslimat beklentisi olan kullanıcılar için hazırlandı."
-    ],
-    id: "ps-3",
-    info: [
-      { icon: "storefront-outline", label: "Dost Petshop", tone: "primary" },
-      { icon: "sale-outline", label: "%10 indirim", tone: "warning" },
-      { icon: "cash", label: "459 TL", tone: "success" },
-      { icon: "clock-outline", label: "Son 48 saat", tone: "neutral" }
-    ],
-    managementNote:
-      "Kampanya üzerinde yönetici işlemleri yalnızca yetkili petshop modunda açılır.",
-    owner: {
-      description:
-        "Mini ırk ürün gamında hızlı kampanya açan ve kullanıcı sorularına hızlı dönen bir mağaza profili.",
-      headline: "Mini ırk ürün kampanyası",
-      location: "Izmir",
-      name: "Dost Petshop"
-    },
-    similarIds: ["ps-1", "ps-2"],
-    storeId: "store-3",
-    subtitle: "Petshop Kampanyası",
-    title: "Mini ırk kuru mama paketi",
-    trustSignals: [
-      {
-        description: "Mağaza doğrulanmış.",
-        label: "Profil doğrulaması",
-        state: "verified"
-      },
-      {
-        description: "Kampanya kısa süreli olduğu için stok değişimi hızlı olabilir.",
-        label: "Dinamik stok",
-        state: "pending"
-      },
-      {
-        description: "Fiyat ve son tarih belirtilmiş.",
-        label: "Net kampanya koşulu",
-        state: "verified"
-      }
-    ]
-  }
-};
-
 export function getSimilarCaregiverListings(ids: string[]) {
   return caregiverListings.filter((item) => ids.includes(item.id));
 }
 
 export function getSimilarOwnerRequests(ids: string[]) {
   return ownerRequests.filter((item) => ids.includes(item.id));
-}
-
-export function getSimilarPetshopCampaigns(ids: string[]) {
-  return petshopCampaigns.filter((item) => ids.includes(item.id));
 }

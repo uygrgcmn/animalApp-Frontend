@@ -24,7 +24,7 @@ export function PetshopCampaignManagementScreen() {
   const campaignsQuery = usePetshopCampaignManagement();
   const managedRows = campaignsQuery.data ?? [];
   const activeCount = managedRows.filter((r) => r.status === "aktif").length;
-  const draftCount = managedRows.filter((r) => r.status === "taslak").length;
+  const passiveCount = managedRows.filter((r) => r.status === "pasif").length;
   const refreshing = campaignsQuery.isFetching && !campaignsQuery.isLoading;
 
   return (
@@ -52,15 +52,14 @@ export function PetshopCampaignManagementScreen() {
           <SectionHeader
             eyebrow="Kampanyalarım"
             title={`${managedRows.length} kampanya`}
-            description="Aktif, taslak ve pasif kampanyalar tek panelde izlenir."
+            description="Gerçek petshop kampanyaların bu panelde listelenir."
           />
 
           <View style={styles.summaryRow}>
             <MetaPill icon="check-circle-outline" label={`${activeCount} aktif`} tone="success" />
-            <MetaPill icon="pencil-outline" label={`${draftCount} taslak`} tone="warning" />
             <MetaPill
               icon="pause-circle-outline"
-              label={`${managedRows.length - activeCount - draftCount} pasif`}
+              label={`${passiveCount} pasif`}
               tone="neutral"
             />
           </View>
@@ -74,9 +73,12 @@ export function PetshopCampaignManagementScreen() {
                 rightSlot={<StatusPill label={row.status} tone={campaignStatusTone(row.status)} />}
                 pills={
                   <>
-                    <MetaPill icon="eye-outline" label={row.impressions} tone="primary" />
-                    <MetaPill icon="bookmark-outline" label={`${row.savedCount} kaydetme`} tone="success" />
-                    <MetaPill icon="message-text-outline" label={`${row.messageCount} mesaj`} tone="warning" />
+                    <MetaPill
+                      icon="account-group-outline"
+                      label={`${row.participantCount}/${row.targetParticipantCount} katılım`}
+                      tone="success"
+                    />
+                    <MetaPill icon="calendar-clock-outline" label={row.campaign.deadline} tone="warning" />
                   </>
                 }
                 actions={

@@ -20,6 +20,7 @@ import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
 import { useSessionStore } from "../../auth/store/sessionStore";
 import { getCommunityCategoryKey, getCommunityCategoryLabel } from "../../listings/utils/adapters";
 import { isCaregiverListing, isOwnerRequestListing } from "../../listings/utils/listingGuards";
+import { usePetshopCampaignManagement } from "../../petshop/hooks/usePetshopQueries";
 import { formatRelativeDate } from "../../../shared/utils/formatDate";
 
 type DisplayStatus = "active" | "passive" | "draft";
@@ -49,7 +50,6 @@ function toDisplayStatus(status: "ACTIVE" | "DRAFT" | "PAUSED" | "CLOSED" | "ARC
 export function ProfileListingsScreen() {
   const [status, setStatus] = useState<DisplayStatus>("active");
   const user = useSessionStore((state) => state.user);
-  const localPetshopCampaigns = useSessionStore((state) => state.petshopCampaigns);
 
   const listingsQuery = useQuery({
     queryKey: queryKeys.listings.all({ creatorId: user?.id }),
@@ -65,6 +65,7 @@ export function ProfileListingsScreen() {
     queryFn: () => communityApi.findAll({ creatorId: user!.id }),
     enabled: Boolean(user?.id)
   });
+  const petshopQuery = usePetshopCampaignManagement();
 
   const allItems = useMemo<ManagedListingItem[]>(() => {
     const standardItems = (listingsQuery.data ?? []).map((listing) => ({
@@ -90,22 +91,20 @@ export function ProfileListingsScreen() {
       updatedAt: listing.updatedAt
     }));
 
-    const petshopItems = localPetshopCampaigns
-      .filter((campaign) => campaign.creatorId === user?.id)
-      .map((campaign) => ({
+    const petshopItems = (petshopQuery.data ?? []).map((row) => ({
         applicationCount: 0,
-        href: routeBuilders.petshopCampaignDetail(campaign.id),
-        id: campaign.id,
-        status: campaign.status === "DRAFT" ? ("draft" as const) : ("active" as const),
-        title: campaign.title,
+        href: routeBuilders.petshopCampaignDetail(row.campaignId),
+        id: row.campaignId,
+        status: row.status === "aktif" ? ("active" as const) : ("passive" as const),
+        title: row.campaign.title,
         typeLabel: "Petshop Kampanyası",
-        updatedAt: campaign.updatedAt
+        updatedAt: row.campaign.updatedAt
       }));
 
-    return [...petshopItems, ...communityItems, ...standardItems].sort((left, right) =>
-      right.updatedAt.localeCompare(left.updatedAt)
-    );
-  }, [communityQuery.data, listingsQuery.data, localPetshopCampaigns, user?.id]);
+      return [...petshopItems, ...communityItems, ...standardItems].sort((left, right) =>
+        right.updatedAt.localeCompare(left.updatedAt)
+      );
+  }, [communityQuery.data, listingsQuery.data, petshopQuery.data]);
 
   const activeCount = useMemo(
     () => allItems.filter((item) => item.status === "active").length,
@@ -125,7 +124,7 @@ export function ProfileListingsScreen() {
     [allItems, status]
   );
 
-  if (listingsQuery.isLoading || communityQuery.isLoading) {
+  if (listingsQuery.isLoading || communityQuery.isLoading || petshopQuery.isLoading) {
     return (
       <ScreenContainer contentContainerStyle={styles.loading}>
         <ActivityIndicator color={colors.primary} />
@@ -133,17 +132,18 @@ export function ProfileListingsScreen() {
     );
   }
 
-  if (listingsQuery.isError || communityQuery.isError) {
+  if (listingsQuery.isError || communityQuery.isError || petshopQuery.isError) {
     return (
       <ScreenContainer contentContainerStyle={styles.content}>
         <EmptyState
           actionSlot={
             <AppButton
               label="Tekrar dene"
-              onPress={() => {
-                void listingsQuery.refetch();
-                void communityQuery.refetch();
-              }}
+                onPress={() => {
+                  void listingsQuery.refetch();
+                  void communityQuery.refetch();
+                  void petshopQuery.refetch();
+                }}
               variant="secondary"
             />
           }
