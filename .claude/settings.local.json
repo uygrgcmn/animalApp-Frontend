@@ -15,7 +15,13 @@
       "Bash(curl -s http://192.168.1.106:3000/api)",
       "Bash(docker volume *)",
       "Bash(curl *)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(git rm *)",
+      "Bash(git add *)",
+      "Bash(git rebase *)",
+      "Bash(GIT_EDITOR=true git rebase --continue)",
+      "Bash(git stash *)",
+      "Bash(git push *)"
     ]
   }
 }

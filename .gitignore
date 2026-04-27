@@ -1,4 +1,5 @@
 .env
+LINKEDIN_POST.md
 node_modules
 .expo
 .expo-shared
