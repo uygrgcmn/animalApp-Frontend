@@ -11,43 +11,30 @@ export function useConversations() {
   });
 }
 
-export function useConversation(conversationId: string) {
+export function useConversationMessages(peerId: string) {
   return useQuery({
-    queryKey: queryKeys.conversations.detail(conversationId),
-    queryFn: () => messagesApi.getConversation(conversationId),
-    enabled: Boolean(conversationId)
-  });
-}
-
-export function useConversationMessages(conversationId: string) {
-  return useQuery({
-    queryKey: queryKeys.conversations.messages(conversationId),
-    queryFn: () => messagesApi.getMessages(conversationId),
-    enabled: Boolean(conversationId),
+    queryKey: queryKeys.conversations.messages(peerId),
+    queryFn: () => messagesApi.getMessages(peerId),
+    enabled: Boolean(peerId),
     refetchInterval: 10_000
   });
 }
 
-export function useSendMessage(conversationId: string) {
+export function useSendMessage() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: SendMessageRequest) =>
-      messagesApi.sendMessage(conversationId, payload),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.conversations.messages(conversationId)
-      });
+    mutationFn: (payload: SendMessageRequest) => messagesApi.sendMessage(payload),
+    onSuccess: (data) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.conversations.messages(data.receiverId)
+      });
     }
   });
 }
 
-export function useMarkAsRead(conversationId: string) {
-  const queryClient = useQueryClient();
+export function useMarkAsRead() {
   return useMutation({
-    mutationFn: () => messagesApi.markAsRead(conversationId),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
-    }
+    mutationFn: (messageId: string) => messagesApi.markAsRead(messageId)
   });
 }

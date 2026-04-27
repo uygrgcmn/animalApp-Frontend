@@ -124,6 +124,11 @@ export const routeBuilders = {
     ({
       pathname: "/(app)/listings/[listingId]/applications",
       params: { listingId }
+    }) as const,
+  conversationDetail: (conversationId: string) =>
+    ({
+      pathname: "/(app)/messages/[conversationId]",
+      params: { conversationId }
     }) as const
 };
 

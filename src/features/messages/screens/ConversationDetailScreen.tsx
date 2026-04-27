@@ -1,6 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import { Link } from "expo-router";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -13,49 +12,39 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import type { ListingType } from "../../../core/api/contracts";
 import { colors } from "../../../core/theme/colors";
 import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
-import { routeBuilders } from "../../../core/navigation/routes";
 import { AppButton } from "../../../shared/ui/AppButton";
 import { formatMessageTime } from "../../../shared/utils/formatDate";
 import { useSessionStore } from "../../auth/store/sessionStore";
-import {
-  useConversation,
-  useConversationMessages,
-  useMarkAsRead,
-  useSendMessage
-} from "../hooks/useMessages";
-
-function getListingHref(listingId: string, listingType?: ListingType) {
-  if (listingType === "SITTING") return routeBuilders.caregiverListingDetail(listingId);
-  if (listingType === "HELP_REQUEST") return routeBuilders.ownerRequestDetail(listingId);
-  return routeBuilders.communityPostDetail(listingId);
-}
-
-const listingTypeLabels: Record<ListingType, string> = {
-  SITTING: "Bakıcı İlanı",
-  HELP_REQUEST: "Bakıcı Arıyorum",
-  FREE_ITEM: "Ücretsiz Eşya",
-  ACTIVITY: "Etkinlik",
-  COMMUNITY: "Topluluk",
-  ADOPTION: "Sahiplendirme"
-};
+import { useConversationMessages, useSendMessage } from "../hooks/useMessages";
 
 export function ConversationDetailScreen() {
-  const { conversationId } = useLocalSearchParams<{ conversationId: string }>();
+  const { conversationId: peerId } = useLocalSearchParams<{ conversationId: string }>();
   const router = useRouter();
   const currentUserId = useSessionStore((state) => state.user?.id);
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<ScrollView>(null);
 
-  const conversationQuery = useConversation(conversationId);
-  const messagesQuery = useConversationMessages(conversationId);
-  const sendMessage = useSendMessage(conversationId);
-  const markAsRead = useMarkAsRead(conversationId);
-
-  const conversation = conversationQuery.data;
+  const messagesQuery = useConversationMessages(peerId);
+  const sendMessage = useSendMessage();
   const messages = messagesQuery.data ?? [];
+
+  const peerName = useMemo(() => {
+    const msg = messages.find(
+      (m) => m.senderId !== currentUserId || m.receiverId !== currentUserId
+    );
+    if (!msg) return "Kullanıcı";
+    const peer = msg.senderId === currentUserId ? msg.receiver : msg.sender;
+    return peer?.fullName ?? "Kullanıcı";
+  }, [messages, currentUserId]);
+
+  const initials = peerName
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -63,17 +52,12 @@ export function ConversationDetailScreen() {
     }
   }, [messages.length]);
 
-  useEffect(() => {
-    markAsRead.mutate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationId]);
-
   function handleSend() {
     const content = draft.trim();
     if (!content || sendMessage.isPending) return;
     setDraft("");
     sendMessage.mutate(
-      { content },
+      { receiverId: peerId, content },
       {
         onSuccess: () => {
           scrollRef.current?.scrollToEnd({ animated: true });
@@ -82,51 +66,46 @@ export function ConversationDetailScreen() {
     );
   }
 
-  if (conversationQuery.isLoading) {
+  if (messagesQuery.isLoading && messages.length === 0) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.errorContainer}>
-          <ActivityIndicator color={colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (!conversation) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Konuşma bulunamadı.</Text>
-          <AppButton label="Geri Dön" onPress={() => router.back()} />
-        </View>
-      </SafeAreaView>
+      <View style={[styles.safeArea, styles.centered]}>
+        <ActivityIndicator color={colors.primary} />
+      </View>
     );
   }
 
   return (
-    <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
-      {/* Listing context strip */}
-      {conversation.listing ? (
-        <Link
-          href={getListingHref(conversation.listingId, conversation.listing.type)}
-          asChild
-        >
-          <Pressable style={styles.listingContext}>
-            <View style={styles.listingContextLeft}>
-              <MaterialCommunityIcons name="link-variant" size={14} color={colors.primary} />
-              <Text numberOfLines={1} style={styles.listingContextText}>
-                {conversation.listing.title}
-              </Text>
-            </View>
-            <View style={styles.listingTypePill}>
-              <Text style={styles.listingTypeText}>
-                {listingTypeLabels[conversation.listing.type] ?? conversation.listing.type}
-              </Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-right" size={16} color={colors.textSubtle} />
+    <View style={styles.safeArea}>
+      {/* WhatsApp style Header */}
+      <SafeAreaView edges={["top"]} style={styles.header}>
+        <View style={styles.headerContent}>
+          <Pressable hitSlop={10} onPress={() => router.back()} style={styles.backBtn}>
+            <MaterialCommunityIcons color={colors.text} name="arrow-left" size={24} />
           </Pressable>
-        </Link>
-      ) : null}
+          
+          <Pressable style={styles.headerInfo}>
+            <View style={styles.headerAvatar}>
+              <Text style={styles.headerAvatarText}>{initials}</Text>
+            </View>
+            <View style={styles.headerNameWrapper}>
+              <Text numberOfLines={1} style={styles.headerName}>{peerName}</Text>
+              <Text style={styles.headerStatus}>çevrimiçi</Text>
+            </View>
+          </Pressable>
+
+          <View style={styles.headerActions}>
+            <Pressable style={styles.headerActionBtn}>
+              <MaterialCommunityIcons name="video-outline" size={24} color={colors.text} />
+            </Pressable>
+            <Pressable style={styles.headerActionBtn}>
+              <MaterialCommunityIcons name="phone-outline" size={22} color={colors.text} />
+            </Pressable>
+            <Pressable style={styles.headerActionBtn}>
+              <MaterialCommunityIcons name="dots-vertical" size={24} color={colors.text} />
+            </Pressable>
+          </View>
+        </View>
+      </SafeAreaView>
 
       {/* Messages */}
       <ScrollView
@@ -134,31 +113,39 @@ export function ConversationDetailScreen() {
         contentContainerStyle={styles.messageList}
         showsVerticalScrollIndicator={false}
       >
-        {messagesQuery.isLoading ? (
-          <ActivityIndicator color={colors.primary} style={styles.loader} />
+        <View style={styles.dateLabel}>
+          <Text style={styles.dateLabelText}>BUGÜN</Text>
+        </View>
+
+        {messages.length === 0 ? (
+          <View style={styles.emptyWrap}>
+            <Text style={styles.emptyText}>Henüz mesaj yok. İlk mesajı sen gönder.</Text>
+          </View>
         ) : (
           messages.map((message) => {
             const isMe = message.senderId === currentUserId;
             return (
               <View
                 key={message.id}
-                style={[styles.messageBubble, isMe ? styles.myBubble : styles.otherBubble]}
+                style={[styles.bubbleWrapper, isMe ? styles.myBubbleWrapper : styles.otherBubbleWrapper]}
               >
-                <Text style={[styles.messageText, isMe ? styles.myText : styles.otherText]}>
-                  {message.content}
-                </Text>
-                <View style={styles.timeContainer}>
-                  <Text style={[styles.messageTime, isMe ? styles.myTime : styles.otherTime]}>
-                    {formatMessageTime(message.createdAt)}
+                <View style={[styles.bubble, isMe ? styles.myBubble : styles.otherBubble]}>
+                  <Text style={[styles.bubbleText, isMe ? styles.myText : styles.otherText]}>
+                    {message.content}
                   </Text>
-                  {isMe && (
-                    <MaterialCommunityIcons
-                      color={message.isRead ? colors.primary : colors.primaryBorder}
-                      name="check-all"
-                      size={13}
-                      style={{ marginLeft: 2 }}
-                    />
-                  )}
+                  <View style={styles.timeRow}>
+                    <Text style={[styles.timeText, isMe ? styles.myTime : styles.otherTime]}>
+                      {formatMessageTime(message.createdAt)}
+                    </Text>
+                    {isMe && (
+                      <MaterialCommunityIcons
+                        color={message.readAt ? "#34B7F1" : colors.textTertiary}
+                        name={message.readAt ? "check-all" : "check"}
+                        size={15}
+                        style={{ marginLeft: 4 }}
+                      />
+                    )}
+                  </View>
                 </View>
               </View>
             );
@@ -166,182 +153,229 @@ export function ConversationDetailScreen() {
         )}
       </ScrollView>
 
-      {/* Input Bar */}
-      <View style={styles.inputContainer}>
-        <View style={styles.textInputWrapper}>
-          <TextInput
-            multiline
-            onChangeText={setDraft}
-            placeholder="Mesaj yaz..."
-            placeholderTextColor={colors.textTertiary}
-            selectionColor={colors.primary}
-            style={styles.textInput}
-            value={draft}
-          />
+      {/* WhatsApp style Input Bar */}
+      <SafeAreaView edges={["bottom"]}>
+        <View style={styles.inputBar}>
+          <View style={styles.inputContainer}>
+            <Pressable style={styles.inputIcon}>
+              <MaterialCommunityIcons name="emoticon-outline" size={24} color={colors.textTertiary} />
+            </Pressable>
+            
+            <TextInput
+              multiline
+              onChangeText={setDraft}
+              placeholder="Mesaj"
+              placeholderTextColor={colors.textTertiary}
+              selectionColor={colors.primary}
+              style={styles.input}
+              value={draft}
+            />
+
+            <Pressable style={styles.inputIcon}>
+              <MaterialCommunityIcons name="paperclip" size={24} color={colors.textTertiary} />
+            </Pressable>
+
+            {!draft.trim() && (
+              <Pressable style={styles.inputIcon}>
+                <MaterialCommunityIcons name="camera" size={24} color={colors.textTertiary} />
+              </Pressable>
+            )}
+          </View>
+
+          <Pressable
+            disabled={sendMessage.isPending}
+            onPress={handleSend}
+            style={styles.sendBtn}
+          >
+            {sendMessage.isPending ? (
+              <ActivityIndicator color={colors.textInverse} size="small" />
+            ) : (
+              <MaterialCommunityIcons 
+                color={colors.textInverse} 
+                name={draft.trim() ? "send" : "microphone"} 
+                size={24} 
+              />
+            )}
+          </Pressable>
         </View>
-        <Pressable
-          accessibilityLabel="Gönder"
-          disabled={!draft.trim() || sendMessage.isPending}
-          onPress={handleSend}
-          style={[styles.sendButton, !draft.trim() && styles.sendButtonDisabled]}
-        >
-          {sendMessage.isPending ? (
-            <ActivityIndicator color={colors.textInverse} size="small" />
-          ) : (
-            <MaterialCommunityIcons color={colors.textInverse} name="send" size={20} />
-          )}
-        </Pressable>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  errorContainer: {
-    alignItems: "center",
-    flex: 1,
-    gap: spacing.standard,
-    justifyContent: "center",
-    padding: spacing.large
-  },
-  errorText: {
-    color: colors.textMuted,
-    ...typography.body
-  },
-  inputContainer: {
-    alignItems: "flex-end",
-    backgroundColor: colors.surface,
-    borderTopColor: colors.borderSubtle,
-    borderTopWidth: 1,
-    flexDirection: "row",
-    gap: spacing.tight,
-    paddingBottom: spacing.compact,
-    paddingHorizontal: spacing.compact,
-    paddingTop: spacing.tight
-  },
-  listingContext: {
-    alignItems: "center",
-    backgroundColor: colors.backgroundAccent,
-    borderBottomColor: colors.primaryBorder,
-    borderBottomWidth: 1,
-    flexDirection: "row",
-    gap: spacing.tight,
-    paddingHorizontal: spacing.comfortable,
-    paddingVertical: spacing.tight
-  },
-  listingContextLeft: {
-    alignItems: "center",
-    flex: 1,
-    flexDirection: "row",
-    gap: 5
-  },
-  listingContextText: {
-    color: colors.primary,
-    flex: 1,
-    fontSize: 13,
-    fontWeight: "600"
-  },
-  listingTypePill: {
-    backgroundColor: colors.primarySoft,
-    borderColor: colors.primaryBorder,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 2
-  },
-  listingTypeText: {
-    color: colors.primary,
-    fontSize: 10,
-    fontWeight: "700"
-  },
-  loader: {
-    flex: 1,
-    marginTop: spacing.large
-  },
-  messageBubble: {
-    borderRadius: radius.large,
-    gap: 2,
-    marginBottom: spacing.compact,
-    maxWidth: "80%",
-    paddingHorizontal: spacing.standard,
-    paddingVertical: spacing.compact,
-    ...shadows.micro
-  },
-  messageList: {
-    backgroundColor: colors.surfaceAlt,
-    flexGrow: 1,
-    paddingHorizontal: spacing.comfortable,
-    paddingVertical: spacing.standard
-  },
-  messageText: {
-    fontSize: 15,
-    lineHeight: 21
-  },
-  messageTime: {
-    fontSize: 10,
-    fontWeight: "500"
-  },
-  myBubble: {
-    alignSelf: "flex-end",
-    backgroundColor: colors.primary,
-    borderBottomRightRadius: 4
-  },
-  myText: {
-    color: colors.textInverse
-  },
-  myTime: {
-    color: colors.primaryBorder,
-    textAlign: "right"
-  },
-  otherBubble: {
-    alignSelf: "flex-start",
-    backgroundColor: colors.surface,
-    borderBottomLeftRadius: 4
-  },
-  otherText: {
-    color: colors.text
-  },
-  otherTime: {
-    color: colors.textSubtle
-  },
   safeArea: {
-    backgroundColor: colors.background,
+    backgroundColor: "#E4DDD6", // WhatsApp background color
     flex: 1
   },
-  sendButton: {
+  centered: {
     alignItems: "center",
-    backgroundColor: colors.primary,
-    borderRadius: radius.full,
-    height: 44,
     justifyContent: "center",
-    width: 44,
-    ...shadows.card
   },
-  sendButtonDisabled: {
-    backgroundColor: colors.primarySoft
-  },
-  textInput: {
-    color: colors.text,
-    flex: 1,
-    fontSize: 15,
-    maxHeight: 100,
-    paddingHorizontal: spacing.tight,
-    paddingVertical: spacing.tight
-  },
-  textInputWrapper: {
-    alignItems: "center",
+  header: {
     backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderRadius: radius.xlarge,
-    borderWidth: 1,
+    ...shadows.card,
+    zIndex: 10,
+  },
+  headerContent: {
+    height: 56,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+  },
+  backBtn: {
+    padding: 4,
+  },
+  headerInfo: {
     flex: 1,
     flexDirection: "row",
-    paddingHorizontal: spacing.micro
-  },
-  timeContainer: {
     alignItems: "center",
+    marginLeft: 4,
+  },
+  headerAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.surfaceMuted,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerAvatarText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.textSubtle,
+  },
+  headerNameWrapper: {
+    marginLeft: 10,
+    flex: 1,
+  },
+  headerName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.text,
+  },
+  headerStatus: {
+    fontSize: 11,
+    color: colors.textSubtle,
+  },
+  headerActions: {
     flexDirection: "row",
+    alignItems: "center",
+  },
+  headerActionBtn: {
+    padding: 8,
+  },
+  messageList: {
+    flexGrow: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  dateLabel: {
+    alignSelf: "center",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginVertical: 16,
+    ...shadows.micro,
+  },
+  dateLabelText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: colors.textSubtle,
+  },
+  bubbleWrapper: {
+    marginBottom: 4,
+    width: "100%",
+  },
+  myBubbleWrapper: {
+    alignItems: "flex-end",
+  },
+  otherBubbleWrapper: {
+    alignItems: "flex-start",
+  },
+  bubble: {
+    maxWidth: "85%",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    ...shadows.micro,
+  },
+  myBubble: {
+    backgroundColor: "#E7FFDB", // WhatsApp self bubble color
+    borderTopRightRadius: 2,
+  },
+  otherBubble: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 2,
+  },
+  bubbleText: {
+    fontSize: 15,
+    lineHeight: 20,
+    color: colors.text,
+  },
+  myText: {},
+  otherText: {},
+  timeRow: {
+    flexDirection: "row",
+    alignItems: "center",
     justifyContent: "flex-end",
-    marginTop: 2
+    alignSelf: "flex-end",
+    marginTop: 2,
+    marginLeft: 8,
+  },
+  timeText: {
+    fontSize: 10,
+    color: colors.textTertiary,
+  },
+  myTime: {},
+  otherTime: {},
+  inputBar: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    padding: 8,
+    gap: 6,
+  },
+  inputContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "flex-end",
+    backgroundColor: colors.surface,
+    borderRadius: 24,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    ...shadows.micro,
+  },
+  inputIcon: {
+    padding: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    maxHeight: 120,
+    paddingTop: 8,
+    paddingBottom: 8,
+    paddingHorizontal: 4,
+    color: colors.text,
+  },
+  sendBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    ...shadows.card,
+  },
+  emptyWrap: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 40,
+  },
+  emptyText: {
+    color: colors.textSubtle,
+    fontSize: 14,
+    textAlign: "center",
   }
 });

@@ -1,0 +1,256 @@
+import { router } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { routeBuilders } from "../../../core/navigation/routes";
+import { colors } from "../../../core/theme/colors";
+import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
+import { AppButton } from "../../../shared/ui/AppButton";
+import { AppIcon } from "../../../shared/ui/AppIcon";
+import { useSendMessage } from "../../messages/hooks/useMessages";
+
+type SendMessageModalProps = {
+  recipientId: string;
+  onClose: () => void;
+  visible: boolean;
+};
+
+export function SendMessageModal({ recipientId, onClose, visible }: SendMessageModalProps) {
+  const insets = useSafeAreaInsets();
+  const [message, setMessage] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
+  const mutation = useSendMessage();
+
+  function handleSubmit() {
+    if (!message.trim()) return;
+    mutation.mutate(
+      { receiverId: recipientId, content: message.trim() },
+      {
+        onSuccess: () => {
+          setMessage("");
+          onClose();
+          router.push(routeBuilders.conversationDetail(recipientId));
+        }
+      }
+    );
+  }
+
+  function handleClose() {
+    if (mutation.isPending) return;
+    setMessage("");
+    mutation.reset();
+    onClose();
+  }
+
+  return (
+    <Modal animationType="slide" onRequestClose={handleClose} transparent visible={visible}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.overlay}
+      >
+        <Pressable onPress={handleClose} style={StyleSheet.absoluteFillObject} />
+        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.comfortable) }]}>
+          <ScrollView
+            bounces={false}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.handle} />
+
+            <View style={styles.header}>
+              <View style={styles.iconContainer}>
+                <AppIcon backgrounded={false} color={colors.primary} name="message-text-outline" size={22} />
+              </View>
+              <View style={styles.headerTexts}>
+                <Text style={styles.title}>Mesaj Gönder</Text>
+                <Text style={styles.subtitle}>İlan sahibiyle doğrudan iletişime geç</Text>
+              </View>
+            </View>
+
+            <Text style={styles.description}>
+              Mesajın, ilan sahibine iletilecek ve yeni bir konuşma başlatılacak.
+            </Text>
+
+            <View>
+              <TextInput
+                editable={!mutation.isPending}
+                maxLength={500}
+                multiline
+                onBlur={() => setIsFocused(false)}
+                onChangeText={setMessage}
+                onFocus={() => setIsFocused(true)}
+                placeholder="Merhaba, bu ilan hakkında bilgi almak istiyorum..."
+                placeholderTextColor={colors.textSubtle}
+                style={[
+                  styles.input,
+                  isFocused && styles.inputFocused,
+                  mutation.isPending && styles.inputDisabled
+                ]}
+                value={message}
+              />
+              <View style={styles.charRow}>
+                <Text style={[styles.charCount, message.length > 450 && styles.charCountWarning]}>
+                  {message.length}/500
+                </Text>
+              </View>
+            </View>
+
+            {mutation.isError ? (
+              <View style={styles.errorRow}>
+                <AppIcon backgrounded={false} name="alert-circle-outline" size={16} tone="warning" />
+                <Text style={styles.errorText}>Mesaj gönderilemedi. Lütfen tekrar dene.</Text>
+              </View>
+            ) : null}
+
+            <View style={styles.divider} />
+
+            <View style={styles.actions}>
+              <AppButton
+                disabled={!message.trim() || mutation.isPending}
+                label={mutation.isPending ? "Gönderiliyor..." : "Mesaj Gönder"}
+                leftSlot={
+                  mutation.isPending ? (
+                    <ActivityIndicator color={colors.textInverse} size="small" />
+                  ) : (
+                    <AppIcon backgrounded={false} color={colors.textInverse} name="message-text-outline" size={18} />
+                  )
+                }
+                onPress={handleSubmit}
+              />
+              <AppButton
+                disabled={mutation.isPending}
+                label="İptal"
+                onPress={handleClose}
+                variant="ghost"
+              />
+            </View>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  actions: {
+    gap: spacing.compact
+  },
+  charCount: {
+    color: colors.textTertiary,
+    ...typography.caption
+  },
+  charCountWarning: {
+    color: colors.warning
+  },
+  charRow: {
+    alignItems: "flex-end",
+    marginTop: spacing.tight
+  },
+  description: {
+    color: colors.textMuted,
+    ...typography.body
+  },
+  divider: {
+    backgroundColor: colors.divider,
+    height: 1
+  },
+  errorRow: {
+    alignItems: "center",
+    backgroundColor: colors.warningSoft,
+    borderColor: colors.accentBorder,
+    borderRadius: radius.medium,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.compact,
+    paddingHorizontal: spacing.standard,
+    paddingVertical: spacing.compact
+  },
+  errorText: {
+    color: colors.textMuted,
+    flex: 1,
+    ...typography.body
+  },
+  handle: {
+    alignSelf: "center",
+    backgroundColor: colors.borderStrong,
+    borderRadius: radius.pill,
+    height: 4,
+    width: 40
+  },
+  header: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.standard
+  },
+  headerTexts: {
+    flex: 1,
+    gap: spacing.nano
+  },
+  iconContainer: {
+    ...shadows.micro,
+    alignItems: "center",
+    backgroundColor: colors.primarySoft,
+    borderColor: colors.primaryBorder,
+    borderRadius: radius.large,
+    borderWidth: 1,
+    height: 52,
+    justifyContent: "center",
+    width: 52
+  },
+  input: {
+    backgroundColor: colors.surfaceAlt,
+    borderColor: colors.border,
+    borderRadius: radius.large,
+    borderWidth: 1.5,
+    color: colors.text,
+    minHeight: 120,
+    padding: spacing.standard,
+    textAlignVertical: "top",
+    ...typography.body
+  },
+  inputDisabled: {
+    opacity: 0.6
+  },
+  inputFocused: {
+    borderColor: colors.primary,
+    borderWidth: 1.5
+  },
+  overlay: {
+    backgroundColor: "#0F172A80",
+    flex: 1,
+    justifyContent: "flex-end"
+  },
+  scrollContent: {
+    gap: spacing.standard,
+    paddingBottom: spacing.compact
+  },
+  sheet: {
+    ...shadows.floating,
+    backgroundColor: colors.background,
+    borderTopLeftRadius: radius.xlarge,
+    borderTopRightRadius: radius.xlarge,
+    paddingHorizontal: spacing.comfortable,
+    paddingTop: spacing.comfortable
+  },
+  subtitle: {
+    color: colors.textSubtle,
+    ...typography.caption
+  },
+  title: {
+    color: colors.text,
+    ...typography.h2
+  }
+});

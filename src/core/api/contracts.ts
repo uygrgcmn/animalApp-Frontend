@@ -353,43 +353,30 @@ export type CreatePetRequest = {
 
 export type UpdatePetRequest = Partial<CreatePetRequest>;
 
-export type ConversationRecord = {
-  id: string;
-  listingId: string;
-  initiatorId: string;
-  recipientId: string;
+export type ConversationSummary = {
+  peerId: string;
+  peerName: string;
+  peerAvatar: string | null;
+  peerRole: string | undefined;
+  lastMessage: string;
+  lastMessageAt: string;
   unreadCount: number;
-  isArchived: boolean;
-  lastMessageAt: string | null;
-  lastMessagePreview: string | null;
-  createdAt: string;
-  updatedAt: string;
-  listing?: {
-    id: string;
-    title: string;
-    type: ListingType;
-  };
-  otherParticipant?: UserSummary;
 };
 
 export type MessageRecord = {
   id: string;
-  conversationId: string;
   senderId: string;
+  receiverId: string;
   content: string;
-  isRead: boolean;
+  readAt: string | null;
   createdAt: string;
   updatedAt: string;
   sender?: UserSummary;
-};
-
-export type CreateConversationRequest = {
-  listingId: string;
-  recipientId: string;
-  initialMessage: string;
+  receiver?: UserSummary;
 };
 
 export type SendMessageRequest = {
+  receiverId: string;
   content: string;
 };
 

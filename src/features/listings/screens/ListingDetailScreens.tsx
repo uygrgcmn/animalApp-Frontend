@@ -40,6 +40,7 @@ import {
 } from "../../profile/utils/modeStatus";
 import { ActionGateSheet } from "../components/ActionGateSheet";
 import { ApplyModal } from "../components/ApplyModal";
+import { SendMessageModal } from "../components/SendMessageModal";
 import { useListingDetail, useListings } from "../hooks/useListings";
 import { toCaregiverDisplay, toOwnerRequestDisplay } from "../utils/adapters";
 import { isCaregiverListing, isOwnerRequestListing } from "../utils/listingGuards";
@@ -82,6 +83,7 @@ type SharedDetailProps = {
   emptyTitle: string;
   notFoundDescription: string;
   onApplyPress?: () => void;
+  onMessagePress?: () => void;
   owner: {
     description: string;
     headline: string;
@@ -115,6 +117,7 @@ export function CaregiverListingDetailScreen() {
   });
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
+  const [isSendMessageModalOpen, setIsSendMessageModalOpen] = useState(false);
 
   // Similar listings from cache
   const sittingQuery = useListings({ type: "SITTING" });
@@ -211,6 +214,7 @@ export function CaregiverListingDetailScreen() {
         }}
         ownerTitle="İlan sahibi özeti"
         isOwnListing={isOwnListing}
+        onMessagePress={!isOwnListing ? () => setIsSendMessageModalOpen(true) : undefined}
         primaryActionLabel="Başvur"
         similarListings={
           similarListings.length > 0 ? (
@@ -267,6 +271,13 @@ export function CaregiverListingDetailScreen() {
         }}
         visible={isApplyModalOpen}
       />
+      {creator?.id ? (
+        <SendMessageModal
+          recipientId={creator.id}
+          onClose={() => setIsSendMessageModalOpen(false)}
+          visible={isSendMessageModalOpen}
+        />
+      ) : null}
     </>
   );
 }
@@ -284,6 +295,7 @@ export function OwnerRequestDetailScreen() {
   });
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
+  const [isSendMessageModalOpen, setIsSendMessageModalOpen] = useState(false);
 
   // Similar listings from cache
   const helpRequestQuery = useListings({ type: "HELP_REQUEST" });
@@ -381,6 +393,7 @@ export function OwnerRequestDetailScreen() {
           name: creator?.fullName ?? "İlan Sahibi"
         }}
         isOwnListing={isOwnListing}
+        onMessagePress={!isOwnListing ? () => setIsSendMessageModalOpen(true) : undefined}
         ownerTitle="İlan sahibi özeti"
         primaryActionLabel="Başvur"
         similarListings={
@@ -439,6 +452,13 @@ export function OwnerRequestDetailScreen() {
         }}
         visible={isApplyModalOpen}
       />
+      {creator?.id ? (
+        <SendMessageModal
+          recipientId={creator.id}
+          onClose={() => setIsSendMessageModalOpen(false)}
+          visible={isSendMessageModalOpen}
+        />
+      ) : null}
     </>
   );
 }
@@ -632,6 +652,7 @@ function ListingDetailLayout({
   emptyTitle,
   notFoundDescription,
   onApplyPress,
+  onMessagePress,
   owner,
   ownerTitle,
   primaryActionLabel,
@@ -747,13 +768,12 @@ function ListingDetailLayout({
         />
         <View style={styles.ctaSecondaryRow}>
           <View style={styles.ctaSecondaryItem}>
-            <Link href={routes.app.messages} asChild>
-              <AppButton
-                label="Mesaj Gönder"
-                leftSlot={<AppIcon backgrounded={false} name="message-text-outline" size={18} />}
-                variant="secondary"
-              />
-            </Link>
+            <AppButton
+              label="Mesaj Gönder"
+              leftSlot={<AppIcon backgrounded={false} name="message-text-outline" size={18} />}
+              onPress={onMessagePress}
+              variant="secondary"
+            />
           </View>
           <View style={styles.ctaGhostItem}>
             <AppButton

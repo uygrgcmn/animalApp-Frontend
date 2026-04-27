@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import type { ListingType } from "../../../core/api/contracts";
+import type { ConversationSummary } from "../../../core/api/contracts";
 import { colors } from "../../../core/theme/colors";
 import { shadows, spacing, typography } from "../../../core/theme/tokens";
 import { routeBuilders } from "../../../core/navigation/routes";
@@ -13,37 +14,33 @@ import { formatRelativeDate } from "../../../shared/utils/formatDate";
 import { useConversations } from "../hooks/useMessages";
 import { ConversationPreviewCard } from "../components/ConversationPreviewCard";
 
-type MessageFilter = "all" | "unread" | "archived";
+type MessageFilter = "all" | "unread";
 
 const filterOptions: { label: string; value: MessageFilter }[] = [
   { label: "Tüm Konuşmalar", value: "all" },
-  { label: "Okunmamış", value: "unread" },
-  { label: "Arşiv", value: "archived" }
+  { label: "Okunmamış", value: "unread" }
 ];
 
-const listingTypeLabels: Record<ListingType, string> = {
-  SITTING: "Bakıcı İlanı",
-  HELP_REQUEST: "Bakıcı Arıyorum",
-  FREE_ITEM: "Ücretsiz Eşya",
-  ACTIVITY: "Etkinlik",
-  COMMUNITY: "Topluluk",
-  ADOPTION: "Sahiplendirme"
-};
-
-function getListingHref(listingId: string, listingType?: ListingType): string {
-  if (listingType === "SITTING") return String(routeBuilders.caregiverListingDetail(listingId));
-  if (listingType === "HELP_REQUEST") return String(routeBuilders.ownerRequestDetail(listingId));
-  if (listingType === "ADOPTION" || listingType === "COMMUNITY" || listingType === "FREE_ITEM" || listingType === "ACTIVITY") {
-    return String(routeBuilders.communityPostDetail(listingId));
-  }
-  return String(routeBuilders.petshopCampaignDetail(listingId));
+function getPeerRole(peerRole?: string): string {
+  if (!peerRole) return "";
+  if (peerRole === "ADMIN") return "Yönetici";
+  return "Kullanıcı";
 }
 
-function getParticipantRole(participant?: { isSitter?: boolean; isPetshop?: boolean }): string {
-  if (!participant) return "";
-  if (participant.isSitter) return "Bakıcı";
-  if (participant.isPetshop) return "Mağaza hesabı";
-  return "Evcil hayvan sahibi";
+function filterConversations(
+  list: ConversationSummary[],
+  filter: MessageFilter,
+  query: string
+): ConversationSummary[] {
+  const q = query.trim().toLowerCase();
+  return list.filter((item) => {
+    if (filter === "unread" && item.unreadCount === 0) return false;
+    if (!q) return true;
+    return (
+      item.peerName.toLowerCase().includes(q) ||
+      item.lastMessage.toLowerCase().includes(q)
+    );
+  });
 }
 
 export function MessagesScreen() {
@@ -52,55 +49,42 @@ export function MessagesScreen() {
   const [searchValue, setSearchValue] = useState("");
   const { data: conversations = [], isLoading } = useConversations();
 
-  const filteredConversations = useMemo(() => {
-    const q = searchValue.trim().toLowerCase();
-    return conversations.filter((item) => {
-      if (filter === "unread" && item.unreadCount === 0) return false;
-      if (filter === "archived" && !item.isArchived) return false;
-      if (filter === "all" && item.isArchived) return false;
-      if (!q) return true;
-      const name = item.otherParticipant?.fullName?.toLowerCase() ?? "";
-      const title = item.listing?.title?.toLowerCase() ?? "";
-      const preview = item.lastMessagePreview?.toLowerCase() ?? "";
-      return name.includes(q) || title.includes(q) || preview.includes(q);
-    });
-  }, [conversations, filter, searchValue]);
-
-  const totalUnread = useMemo(
-    () => conversations.filter((c) => !c.isArchived && c.unreadCount > 0).length,
-    [conversations]
+  const filteredConversations = useMemo(
+    () => filterConversations(conversations, filter, searchValue),
+    [conversations, filter, searchValue]
   );
 
   return (
     <View style={styles.root}>
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+      {/* WhatsApp style Header */}
+      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <View style={styles.headerTop}>
-          <View style={styles.headerTitleBlock}>
-            <Text style={styles.headerOverline}>MESAJLAR</Text>
-            <Text style={styles.headerTitle}>Konuşmalar</Text>
+          <Text style={styles.headerTitle}>Mesajlar</Text>
+          <View style={styles.headerIcons}>
+            <Pressable hitSlop={8} style={styles.iconBtn}>
+              <MaterialCommunityIcons name="camera-outline" size={24} color={colors.text} />
+            </Pressable>
+            <Pressable hitSlop={8} style={styles.iconBtn}>
+              <MaterialCommunityIcons name="magnify" size={24} color={colors.text} />
+            </Pressable>
+            <Pressable hitSlop={8} style={styles.iconBtn}>
+              <MaterialCommunityIcons name="dots-vertical" size={24} color={colors.text} />
+            </Pressable>
           </View>
-          {totalUnread > 0 && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadCount}>{totalUnread}</Text>
-              <Text style={styles.unreadLabel}>okunmamış</Text>
-            </View>
-          )}
         </View>
 
-        <SearchBar
-          onChangeText={setSearchValue}
-          placeholder="Konuşma veya kişi ara..."
-          value={searchValue}
-        />
-
-        <SegmentedTabs onChange={setFilter} options={filterOptions} value={filter} />
-
-        <View style={styles.divider} />
+        <View style={styles.filterRow}>
+          <SegmentedTabs 
+            onChange={setFilter} 
+            options={filterOptions} 
+            value={filter}
+          />
+        </View>
       </View>
 
       {isLoading ? (
         <View style={styles.emptyWrap}>
-          <ActivityIndicator color={colors.primary} />
+          <ActivityIndicator color={colors.primary} size="large" />
         </View>
       ) : filteredConversations.length > 0 ? (
         <ScrollView
@@ -109,23 +93,16 @@ export function MessagesScreen() {
         >
           {filteredConversations.map((conversation) => (
             <ConversationPreviewCard
-              key={conversation.id}
+              key={conversation.peerId}
               href={{
-                params: { conversationId: conversation.id },
+                params: { conversationId: conversation.peerId },
                 pathname: "/(app)/messages/[conversationId]"
               }}
-              lastMessage={conversation.lastMessagePreview ?? ""}
-              listingHref={getListingHref(conversation.listingId, conversation.listing?.type)}
-              listingTitle={conversation.listing?.title ?? "İlan"}
-              listingType={
-                conversation.listing?.type
-                  ? (listingTypeLabels[conversation.listing.type] ?? conversation.listing.type)
-                  : "İlan"
-              }
-              participantName={conversation.otherParticipant?.fullName ?? "Kullanıcı"}
-              participantRole={getParticipantRole(conversation.otherParticipant)}
+              lastMessage={conversation.lastMessage}
+              participantName={conversation.peerName}
+              participantRole={getPeerRole(conversation.peerRole)}
               unreadCount={conversation.unreadCount}
-              updatedAt={formatRelativeDate(conversation.lastMessageAt ?? conversation.updatedAt)}
+              updatedAt={formatRelativeDate(conversation.lastMessageAt)}
             />
           ))}
         </ScrollView>
@@ -135,28 +112,25 @@ export function MessagesScreen() {
             description={
               filter === "unread"
                 ? "Tüm mesajlarınızı okudunuz."
-                : filter === "archived"
-                  ? "Arşivlenmiş konuşmanız bulunmuyor."
-                  : searchValue
-                    ? "Aradığınız kriterlere uygun konuşma bulunamadı."
-                    : "Henüz mesajlaşma başlatılmamış."
+                : searchValue
+                  ? "Aradığınız kriterlere uygun konuşma bulunamadı."
+                  : "Henüz mesajlaşma başlatılmamış."
             }
             icon="message-text-outline"
             title={filter === "unread" ? "Tamamdır!" : "Konuşma Yok"}
           />
         </View>
       )}
+
+      {/* Floating Action Button */}
+      <Pressable style={[styles.fab, { bottom: 100 }]}>
+        <MaterialCommunityIcons name="message-plus" size={24} color={colors.textInverse} />
+      </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  divider: {
-    backgroundColor: colors.divider,
-    height: 1,
-    marginHorizontal: -spacing.comfortable,
-    marginTop: spacing.compact
-  },
   emptyWrap: {
     alignItems: "center",
     flex: 1,
@@ -164,46 +138,50 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.comfortable
   },
   header: {
-    ...shadows.card,
     backgroundColor: colors.surface,
-    gap: spacing.compact,
-    paddingBottom: spacing.standard,
+    paddingBottom: spacing.compact,
     paddingHorizontal: spacing.comfortable,
-    zIndex: 10
-  },
-  headerOverline: {
-    ...typography.overline,
-    color: colors.primary
-  },
-  headerTitle: {
-    ...typography.h2,
-    color: colors.text,
-    marginTop: 2
-  },
-  headerTitleBlock: {
-    flex: 1
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSubtle,
   },
   headerTop: {
-    alignItems: "flex-start",
     flexDirection: "row",
-    justifyContent: "space-between"
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: 56,
+  },
+  headerTitle: {
+    ...typography.h3,
+    fontSize: 22,
+    color: colors.text,
+  },
+  headerIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.standard,
+  },
+  iconBtn: {
+    padding: spacing.micro,
+  },
+  filterRow: {
+    marginTop: spacing.compact,
   },
   listContent: {
-    paddingBottom: 110
+    paddingBottom: 160
   },
   root: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
     flex: 1
   },
-  unreadBadge: {
-    alignItems: "flex-end"
-  },
-  unreadCount: {
-    ...typography.h2,
-    color: colors.primary
-  },
-  unreadLabel: {
-    ...typography.caption,
-    color: colors.textMuted
+  fab: {
+    position: "absolute",
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    ...shadows.card,
   }
 });
