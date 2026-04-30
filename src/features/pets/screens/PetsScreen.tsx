@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     gap: spacing.compact,
     padding: spacing.standard
   },
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     gap: spacing.standard
   },
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   list: {
     gap: spacing.compact
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   petIcon: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     height: 48,
     justifyContent: "center",
     width: 48

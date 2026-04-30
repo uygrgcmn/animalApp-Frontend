@@ -139,7 +139,7 @@ export function ConversationDetailScreen() {
                     </Text>
                     {isMe && (
                       <MaterialCommunityIcons
-                        color={message.readAt ? "#34B7F1" : colors.textTertiary}
+                        color={message.readAt ? "#34B7F1" : colors.textSubtle}
                         name={message.readAt ? "check-all" : "check"}
                         size={15}
                         style={{ marginLeft: 4 }}
@@ -158,26 +158,26 @@ export function ConversationDetailScreen() {
         <View style={styles.inputBar}>
           <View style={styles.inputContainer}>
             <Pressable style={styles.inputIcon}>
-              <MaterialCommunityIcons name="emoticon-outline" size={24} color={colors.textTertiary} />
+              <MaterialCommunityIcons name="emoticon-outline" size={24} color={colors.textSubtle} />
             </Pressable>
             
             <TextInput
               multiline
               onChangeText={setDraft}
               placeholder="Mesaj"
-              placeholderTextColor={colors.textTertiary}
+              placeholderTextColor={colors.textSubtle}
               selectionColor={colors.primary}
               style={styles.input}
               value={draft}
             />
 
             <Pressable style={styles.inputIcon}>
-              <MaterialCommunityIcons name="paperclip" size={24} color={colors.textTertiary} />
+              <MaterialCommunityIcons name="paperclip" size={24} color={colors.textSubtle} />
             </Pressable>
 
             {!draft.trim() && (
               <Pressable style={styles.inputIcon}>
-                <MaterialCommunityIcons name="camera" size={24} color={colors.textTertiary} />
+                <MaterialCommunityIcons name="camera" size={24} color={colors.textSubtle} />
               </Pressable>
             )}
           </View>
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 10,
-    color: colors.textTertiary,
+    color: colors.textSubtle,
   },
   myTime: {},
   otherTime: {},

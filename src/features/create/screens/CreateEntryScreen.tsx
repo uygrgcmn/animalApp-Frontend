@@ -1016,7 +1016,7 @@ const styles = StyleSheet.create({
   channelIcon: {
     alignItems: "center",
     backgroundColor: colors.accentSoft,
-    borderRadius: radius.small,
+    borderRadius: radius.sm,
     height: 36,
     justifyContent: "center",
     width: 36
@@ -1028,7 +1028,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     backgroundColor: colors.surfaceAlt,
     borderColor: colors.border,
-    borderRadius: radius.small,
+    borderRadius: radius.sm,
     borderWidth: 1,
     flex: 1,
     flexDirection: "row",
@@ -1090,7 +1090,7 @@ const styles = StyleSheet.create({
   composeShell: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     gap: spacing.standard,
     padding: spacing.standard
   },
@@ -1105,8 +1105,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0
   },
   content: {
-    gap: spacing.section,
-    paddingHorizontal: spacing.comfortable,
+    gap: spacing.xl,
+    paddingHorizontal: spacing.lg,
     paddingTop: spacing.standard
   },
   editorDescription: {
@@ -1117,7 +1117,7 @@ const styles = StyleSheet.create({
   editorIcon: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     height: 48,
     justifyContent: "center",
     width: 48
@@ -1130,8 +1130,8 @@ const styles = StyleSheet.create({
   editorPanel: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
-    gap: spacing.section,
+    borderRadius: radius.xl,
+    gap: spacing.xl,
     padding: spacing.standard
   },
   editorTitle: {
@@ -1151,7 +1151,7 @@ const styles = StyleSheet.create({
   embeddedActions: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     gap: spacing.compact,
     padding: spacing.standard
   },
@@ -1166,7 +1166,7 @@ const styles = StyleSheet.create({
   },
   feedback: {
     alignItems: "flex-start",
-    borderRadius: radius.small,
+    borderRadius: radius.sm,
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.tight,
@@ -1250,7 +1250,7 @@ const styles = StyleSheet.create({
   startIcon: {
     alignItems: "center",
     backgroundColor: colors.accentSoft,
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     height: 48,
     justifyContent: "center",
     width: 48
@@ -1259,9 +1259,9 @@ const styles = StyleSheet.create({
     ...shadows.card,
     alignItems: "flex-start",
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     gap: spacing.standard,
-    padding: spacing.comfortable
+    padding: spacing.lg
   },
   startTexts: {
     gap: spacing.micro
@@ -1275,7 +1275,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.surfaceAlt,
     borderColor: colors.border,
-    borderRadius: radius.small,
+    borderRadius: radius.sm,
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.tight,
@@ -1286,7 +1286,7 @@ const styles = StyleSheet.create({
   typePillIcon: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.small,
+    borderRadius: radius.sm,
     height: 36,
     justifyContent: "center",
     width: 36

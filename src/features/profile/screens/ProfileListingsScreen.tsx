@@ -248,7 +248,7 @@ export function ProfileListingsScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   list: {
     gap: spacing.compact

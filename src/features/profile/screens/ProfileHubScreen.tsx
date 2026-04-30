@@ -28,7 +28,7 @@ import { isCaregiverListing, isOwnerRequestListing } from "../../listings/utils/
 import { usePetshopCampaignManagement } from "../../petshop/hooks/usePetshopQueries";
 import { getCaregiverModePresentation, getPetshopModePresentation } from "../utils/modeStatus";
 
-const FALLBACK_CHIP = { bg: colors.surfaceMuted, text: colors.textSubtle, icon: "circle-outline" } as const;
+const FALLBACK_CHIP = { bg: colors.surfaceMuted, text: colors.textMuted, icon: "circle-outline" } as const;
 
 const MODE_CHIP: Record<string, { bg: string; text: string; icon: string }> = {
   active:     { bg: colors.successSoft,  text: colors.success,  icon: "check-circle"          },
@@ -133,14 +133,13 @@ export function ProfileHubScreen() {
       showsVerticalScrollIndicator={false}
     >
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      {/* Hero */}
       <LinearGradient
-        colors={["#0D9488", "#075C56"]}
+        colors={["#7C3AED", "#5B21B6"]}
         end={{ x: 1, y: 1 }}
         start={{ x: 0, y: 0 }}
         style={[styles.hero, { paddingTop: insets.top + 16 }]}
       >
-        {/* Üst satır — ayarlar butonu */}
         <View style={styles.heroTopRow}>
           <View style={styles.heroSpacer} />
           <Link asChild href={routes.app.profileSettings}>
@@ -173,7 +172,7 @@ export function ProfileHubScreen() {
           )}
         </Pressable>
 
-        {/* İsim + meta */}
+        {/* Name + meta */}
         <View style={styles.identity}>
           <Text style={styles.heroName}>{displayName}</Text>
           {(locationText || rating !== null || displayEmail) ? (
@@ -201,7 +200,7 @@ export function ProfileHubScreen() {
         </View>
       </LinearGradient>
 
-      {/* ── İstatistikler — hero'nun üstüne biner ────────────────────────── */}
+      {/* Stats card — overlaps hero */}
       <View style={styles.statsCard}>
         <View style={styles.statCol}>
           {myListingsQuery.isLoading || myCommunityQuery.isLoading ? (
@@ -240,7 +239,7 @@ export function ProfileHubScreen() {
         </View>
       </View>
 
-      {/* ── Profil tamamlanma ─────────────────────────────────────────────── */}
+      {/* Profile completion banner */}
       {completion > 0 && completion < 100 ? (
         <Link asChild href={routes.app.profileEdit}>
           <Pressable style={({ pressed }) => [styles.completionBanner, pressed && { opacity: 0.75 }]}>
@@ -258,7 +257,7 @@ export function ProfileHubScreen() {
         </Link>
       ) : null}
 
-      {/* ── Hızlı Erişim 2 × 2 ───────────────────────────────────────────── */}
+      {/* 2×2 Grid */}
       <View style={styles.gridSection}>
         <View style={styles.gridRow}>
           <Link asChild href={routes.app.profileListings}>
@@ -280,8 +279,8 @@ export function ProfileHubScreen() {
           <Link asChild href={routes.app.profileApplications}>
             <Pressable style={({ pressed }) => [styles.gridCard, pressed && { opacity: 0.7 }]}>
               <View style={styles.gridIconWrap}>
-                <View style={[styles.gridIconCircle, { backgroundColor: "#F59E0B15" }]}>
-                  <MaterialCommunityIcons color="#F59E0B" name="file-document-outline" size={26} />
+                <View style={[styles.gridIconCircle, { backgroundColor: colors.accentSoft }]}>
+                  <MaterialCommunityIcons color={colors.accent} name="file-document-outline" size={26} />
                 </View>
                 {applicationCount > 0 ? (
                   <View style={[styles.gridBadge, styles.gridBadgeHL]}>
@@ -300,8 +299,8 @@ export function ProfileHubScreen() {
           <Link asChild href={routes.app.profileSaved}>
             <Pressable style={({ pressed }) => [styles.gridCard, pressed && { opacity: 0.7 }]}>
               <View style={styles.gridIconWrap}>
-                <View style={[styles.gridIconCircle, { backgroundColor: "#10B98115" }]}>
-                  <MaterialCommunityIcons color="#10B981" name="bookmark-outline" size={26} />
+                <View style={[styles.gridIconCircle, { backgroundColor: colors.successSoft }]}>
+                  <MaterialCommunityIcons color={colors.success} name="bookmark-outline" size={26} />
                 </View>
                 {bookmarkCount > 0 ? (
                   <View style={styles.gridBadge}>
@@ -316,8 +315,8 @@ export function ProfileHubScreen() {
           <Link asChild href={routes.app.profilePets}>
             <Pressable style={({ pressed }) => [styles.gridCard, pressed && { opacity: 0.7 }]}>
               <View style={styles.gridIconWrap}>
-                <View style={[styles.gridIconCircle, { backgroundColor: "#8B5CF615" }]}>
-                  <MaterialCommunityIcons color="#8B5CF6" name="paw-outline" size={26} />
+                <View style={[styles.gridIconCircle, { backgroundColor: colors.primarySoft }]}>
+                  <MaterialCommunityIcons color={colors.primary} name="paw-outline" size={26} />
                 </View>
               </View>
               <Text style={styles.gridLabel}>Hayvanlarım</Text>
@@ -326,14 +325,14 @@ export function ProfileHubScreen() {
         </View>
       </View>
 
-      {/* ── Modlar ────────────────────────────────────────────────────────── */}
+      {/* Modes */}
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>MODLAR</Text>
         <View style={styles.listCard}>
           <Link asChild href={routes.app.profileModes}>
             <Pressable style={({ pressed }) => [styles.listRow, pressed && { opacity: 0.65 }]}>
-              <View style={[styles.listIcon, { backgroundColor: "#6366F118" }]}>
-                <MaterialCommunityIcons color="#6366F1" name="shield-account-outline" size={20} />
+              <View style={[styles.listIcon, { backgroundColor: colors.primarySoft }]}>
+                <MaterialCommunityIcons color={colors.primary} name="shield-account-outline" size={20} />
               </View>
               <Text style={styles.listLabel} numberOfLines={1}>Bakıcı Modu</Text>
               <View style={[styles.modeChip, { backgroundColor: caregiverChip.bg }]}>
@@ -346,7 +345,7 @@ export function ProfileHubScreen() {
                   {caregiverLabel}
                 </Text>
               </View>
-              <MaterialCommunityIcons color={colors.textTertiary} name="chevron-right" size={18} />
+              <MaterialCommunityIcons color={colors.textSubtle} name="chevron-right" size={18} />
             </Pressable>
           </Link>
 
@@ -354,8 +353,8 @@ export function ProfileHubScreen() {
 
           <Link asChild href={routes.app.profileModes}>
             <Pressable style={({ pressed }) => [styles.listRow, pressed && { opacity: 0.65 }]}>
-              <View style={[styles.listIcon, { backgroundColor: "#F9731618" }]}>
-                <MaterialCommunityIcons color="#F97316" name="storefront-outline" size={20} />
+              <View style={[styles.listIcon, { backgroundColor: colors.accentSoft }]}>
+                <MaterialCommunityIcons color={colors.accent} name="storefront-outline" size={20} />
               </View>
               <Text style={styles.listLabel} numberOfLines={1}>Petshop Modu</Text>
               <View style={[styles.modeChip, { backgroundColor: petshopChip.bg }]}>
@@ -368,26 +367,26 @@ export function ProfileHubScreen() {
                   {petshopLabel}
                 </Text>
               </View>
-              <MaterialCommunityIcons color={colors.textTertiary} name="chevron-right" size={18} />
+              <MaterialCommunityIcons color={colors.textSubtle} name="chevron-right" size={18} />
             </Pressable>
           </Link>
         </View>
       </View>
 
-      {/* ── Hesap ─────────────────────────────────────────────────────────── */}
+      {/* Account */}
       <View style={styles.section}>
         <Text style={styles.sectionLabel}>HESAP</Text>
         <View style={styles.listCard}>
           <Link asChild href={routes.app.profileEdit}>
             <Pressable style={({ pressed }) => [styles.listRow, pressed && { opacity: 0.65 }]}>
-              <View style={[styles.listIcon, { backgroundColor: `${colors.primary}18` }]}>
+              <View style={[styles.listIcon, { backgroundColor: colors.primarySoft }]}>
                 <MaterialCommunityIcons color={colors.primary} name="account-edit-outline" size={20} />
               </View>
               <View style={styles.listContent}>
                 <Text style={styles.listLabel}>Profili Düzenle</Text>
                 <Text style={styles.listSub}>Ad, fotoğraf, konum</Text>
               </View>
-              <MaterialCommunityIcons color={colors.textTertiary} name="chevron-right" size={18} />
+              <MaterialCommunityIcons color={colors.textSubtle} name="chevron-right" size={18} />
             </Pressable>
           </Link>
 
@@ -396,19 +395,19 @@ export function ProfileHubScreen() {
           <Link asChild href={routes.app.profileSettings}>
             <Pressable style={({ pressed }) => [styles.listRow, pressed && { opacity: 0.65 }]}>
               <View style={[styles.listIcon, { backgroundColor: colors.surfaceMuted }]}>
-                <MaterialCommunityIcons color={colors.textMuted} name="cog-outline" size={20} />
+                <MaterialCommunityIcons color={colors.textSecondary} name="cog-outline" size={20} />
               </View>
               <View style={styles.listContent}>
                 <Text style={styles.listLabel}>Ayarlar</Text>
                 <Text style={styles.listSub}>Bildirim ve gizlilik</Text>
               </View>
-              <MaterialCommunityIcons color={colors.textTertiary} name="chevron-right" size={18} />
+              <MaterialCommunityIcons color={colors.textSubtle} name="chevron-right" size={18} />
             </Pressable>
           </Link>
         </View>
       </View>
 
-      {/* ── Footer ────────────────────────────────────────────────────────── */}
+      {/* Footer */}
       <View style={styles.footer}>
         <Pressable
           onPress={handleSignOut}
@@ -424,21 +423,17 @@ export function ProfileHubScreen() {
   );
 }
 
-// ─── Stiller ─────────────────────────────────────────────────────────────────
-
-const GRID_GAP = spacing.compact;
+const GRID_GAP = spacing.sm;
 
 const styles = StyleSheet.create({
   root: {
     backgroundColor: colors.background
   },
-
-  // ── Hero ────────────────────────────────────────────────────────────────
   hero: {
     alignItems: "center",
-    gap: spacing.standard,
+    gap: spacing.md,
     paddingBottom: 52,
-    paddingHorizontal: spacing.comfortable
+    paddingHorizontal: spacing.lg
   },
   heroTopRow: {
     alignItems: "center",
@@ -509,18 +504,18 @@ const styles = StyleSheet.create({
   },
   identity: {
     alignItems: "center",
-    gap: spacing.compact
+    gap: spacing.sm
   },
   heroName: {
     color: "#fff",
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "800",
     letterSpacing: -0.4
   },
   metaRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.tight,
+    gap: spacing.sm,
     justifyContent: "center"
   },
   metaPill: {
@@ -537,22 +532,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500"
   },
-
-  // ── İstatistikler ────────────────────────────────────────────────────────
   statsCard: {
     ...shadows.card,
     alignItems: "center",
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     flexDirection: "row",
-    marginHorizontal: spacing.comfortable,
+    marginHorizontal: spacing.lg,
     marginTop: -32
   },
   statCol: {
     alignItems: "center",
     flex: 1,
     gap: 6,
-    paddingVertical: spacing.comfortable
+    paddingVertical: spacing.lg
   },
   statSep: {
     backgroundColor: colors.divider,
@@ -561,7 +554,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: colors.text,
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "800",
     letterSpacing: -0.5
   },
@@ -575,25 +568,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "500"
   },
-
-  // ── Profil tamamlanma ────────────────────────────────────────────────────
   completionBanner: {
     ...shadows.micro,
     alignItems: "center",
     backgroundColor: colors.primarySoft,
     borderColor: colors.primaryBorder,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1,
     flexDirection: "row",
-    gap: spacing.standard,
-    marginHorizontal: spacing.comfortable,
-    marginTop: spacing.section,
-    paddingHorizontal: spacing.standard,
-    paddingVertical: spacing.compact + 2
+    gap: spacing.md,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xl,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2
   },
   completionLeft: {
     flex: 1,
-    gap: spacing.tight
+    gap: spacing.sm
   },
   completionLabelRow: {
     alignItems: "center",
@@ -620,12 +611,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     height: "100%"
   },
-
-  // ── Grid ─────────────────────────────────────────────────────────────────
   gridSection: {
     gap: GRID_GAP,
-    marginHorizontal: spacing.comfortable,
-    marginTop: spacing.section
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xl
   },
   gridRow: {
     flexDirection: "row",
@@ -635,17 +624,17 @@ const styles = StyleSheet.create({
     ...shadows.micro,
     alignItems: "center",
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     flex: 1,
-    gap: spacing.compact,
-    paddingVertical: spacing.comfortable
+    gap: spacing.sm,
+    paddingVertical: spacing.lg
   },
   gridIconWrap: {
     position: "relative"
   },
   gridIconCircle: {
     alignItems: "center",
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     height: 56,
     justifyContent: "center",
     width: 56
@@ -680,36 +669,34 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700"
   },
-
-  // ── Liste bölümleri ──────────────────────────────────────────────────────
   section: {
-    gap: spacing.compact,
-    marginHorizontal: spacing.comfortable,
-    marginTop: spacing.section
+    gap: spacing.sm,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xl
   },
   sectionLabel: {
     color: colors.textSubtle,
     fontSize: 11,
     fontWeight: "700",
-    letterSpacing: 0.8,
-    paddingHorizontal: spacing.micro
+    letterSpacing: 1.0,
+    paddingHorizontal: spacing.xs
   },
   listCard: {
     ...shadows.micro,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     overflow: "hidden"
   },
   listRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.standard,
-    paddingHorizontal: spacing.standard,
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: 14
   },
   listIcon: {
     alignItems: "center",
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     height: 40,
     justifyContent: "center",
     width: 40
@@ -717,25 +704,22 @@ const styles = StyleSheet.create({
   listLabel: {
     color: colors.text,
     flex: 1,
-    fontSize: 15,
-    fontWeight: "600"
+    ...typography.bodyStrong
   },
   listContent: {
     flex: 1,
     gap: 2
   },
   listSub: {
-    color: colors.textSubtle,
+    color: colors.textMuted,
     fontSize: 12,
     fontWeight: "400"
   },
   rowDivider: {
     backgroundColor: colors.divider,
     height: 1,
-    marginLeft: spacing.standard + 40 + spacing.standard
+    marginLeft: spacing.md + 40 + spacing.md
   },
-
-  // ── Mod chip ─────────────────────────────────────────────────────────────
   modeChip: {
     alignItems: "center",
     borderRadius: radius.pill,
@@ -748,20 +732,18 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700"
   },
-
-  // ── Footer ───────────────────────────────────────────────────────────────
   footer: {
     alignItems: "center",
-    gap: spacing.compact,
-    marginHorizontal: spacing.comfortable,
-    marginTop: spacing.section
+    gap: spacing.sm,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.xl
   },
   signOutRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.tight,
-    paddingHorizontal: spacing.comfortable,
-    paddingVertical: spacing.compact
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm
   },
   signOutText: {
     color: colors.error,
@@ -769,7 +751,7 @@ const styles = StyleSheet.create({
     fontWeight: "700"
   },
   versionText: {
-    color: colors.textTertiary,
+    color: colors.textSubtle,
     ...typography.caption
   }
 });

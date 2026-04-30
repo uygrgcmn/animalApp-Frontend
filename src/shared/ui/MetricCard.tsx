@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     ...shadows.card,
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.compact,
     minHeight: 120,

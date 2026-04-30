@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: spacing.comfortable
+    paddingHorizontal: spacing.lg
   },
   description: {
     color: colors.textMuted,
@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
   },
   texts: {
     gap: spacing.tight,
-    marginBottom: spacing.section,
-    marginTop: spacing.section
+    marginBottom: spacing.xl,
+    marginTop: spacing.xl
   },
   title: {
     color: colors.text,

@@ -64,12 +64,12 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.standard,
     justifyContent: "center",
-    padding: spacing.comfortable
+    padding: spacing.lg
   },
   devError: {
     ...typography.caption,
     backgroundColor: "#FEF2F2",
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     color: colors.error,
     fontFamily: "monospace",
     padding: spacing.compact,

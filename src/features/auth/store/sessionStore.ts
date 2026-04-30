@@ -4,6 +4,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { ApiError } from "../../../core/api/errors";
 import { authApi } from "../../../core/api/services/authApi";
 import { uploadMediaAsset } from "../../../core/media/uploadMediaAsset";
+import { resolveMediaUrl } from "../../../core/media/resolveMediaUrl";
 import { usersApi } from "../../../core/api/services/usersApi";
 import { clearStoredAuthTokens, getStoredAuthTokens, setStoredAuthTokens } from "../../../core/api/tokenStorage";
 import type { MyProfile } from "../../../core/api/contracts";
@@ -91,11 +92,11 @@ function resolveProfileAvatar(
   currentState?: Pick<SessionState, "user">
 ) {
   if (profile.avatar?.trim()) {
-    return profile.avatar;
+    return resolveMediaUrl(profile.avatar);
   }
 
   if (currentState?.user?.avatar?.trim()) {
-    return currentState.user.avatar;
+    return resolveMediaUrl(currentState.user.avatar);
   }
 
   return null;
@@ -118,15 +119,13 @@ function toSessionUser(
 
 function hasFinishedProfileSetup(
   profile: MyProfile,
-  profileGoal: ProfileGoal | null,
   currentState?: Pick<SessionState, "user">
 ) {
   return Boolean(
     profile.fullName?.trim() &&
       profile.city?.trim() &&
       profile.district?.trim() &&
-      resolveProfileAvatar(profile, currentState)?.trim() &&
-      profileGoal
+      resolveProfileAvatar(profile, currentState)?.trim()
   );
 }
 
@@ -238,9 +237,9 @@ function toSessionState(
 
   return {
     isAuthenticated: true,
-    hasCompletedProfileSetup: hasFinishedProfileSetup(profile, profileGoal, currentState),
+    hasCompletedProfileSetup: hasFinishedProfileSetup(profile, currentState),
     user: toSessionUser(profile, currentState),
-    profileGoal,
+    profileGoal: profileGoal ?? "kesfetmek-istiyorum",
     caregiverStatus: profile.isSitter
       ? toCaregiverStatus(profile)
       : preservedCaregiverProfile
@@ -279,7 +278,10 @@ async function uploadProfileAvatar(uri: string) {
       (error instanceof Error &&
         (error.message.includes("S3") ||
           error.message.includes("presigned") ||
-          error.message.includes("Sunucuya ulasilamadi")))
+          error.message.includes("Sunucuya ulasilamadi") ||
+          error.message.toLowerCase().includes("network request failed") ||
+          error.message.includes("yüklenemedi") ||
+          error.message.includes("yuklenemedi")))
     ) {
       return { avatar: uri, persisted: false };
     }
@@ -422,7 +424,7 @@ export const useSessionStore = create<SessionState>()(
             ? profile
             : {
                 ...profile,
-                avatar: avatarUpload.avatar
+                avatar: resolveMediaUrl(avatarUpload.avatar)
               };
 
         set((state) => ({

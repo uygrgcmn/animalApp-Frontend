@@ -206,10 +206,10 @@ const styles = StyleSheet.create({
     width: 36
   },
   content: {
-    gap: spacing.section,
+    gap: spacing.xl,
     paddingBottom: 110,
-    paddingHorizontal: spacing.comfortable,
-    paddingTop: spacing.section
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl
   },
   divider: {
     backgroundColor: colors.divider,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   header: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    paddingHorizontal: spacing.comfortable,
+    paddingHorizontal: spacing.lg,
     paddingBottom: 0
   },
   headerCounts: {

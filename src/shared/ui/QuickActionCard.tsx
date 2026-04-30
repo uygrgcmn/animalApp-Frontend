@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     ...shadows.card,
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.standard,
     minHeight: 160,
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   iconBg: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     opacity: 0.5,
     transform: [{ rotate: "12deg" }]
   },

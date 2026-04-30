@@ -184,9 +184,9 @@ export function PetshopStoreProfileScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.section,
+    gap: spacing.xl,
     paddingBottom: spacing.large,
-    paddingHorizontal: spacing.comfortable,
+    paddingHorizontal: spacing.lg,
     paddingTop: spacing.standard
   },
   heroRow: {
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.primarySoft,
     borderColor: colors.primaryBorder,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1,
     height: 52,
     justifyContent: "center",

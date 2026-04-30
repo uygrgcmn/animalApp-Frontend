@@ -235,7 +235,7 @@ export function PetshopDashboardScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   metaRow: {
     flexDirection: "row",

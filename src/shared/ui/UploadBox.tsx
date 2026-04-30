@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderStyle: "dashed",
     borderWidth: 1,
     flexDirection: "row",
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryBorder
   },
   image: {
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     height: 56,
     width: 56
   },
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   placeholder: {
     alignItems: "center",
     backgroundColor: colors.surfaceMuted,
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     height: 56,
     justifyContent: "center",
     width: 56

@@ -6,7 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { resolveAuthenticatedRoute, routes } from "../../../core/navigation/routes";
 import { colors } from "../../../core/theme/colors";
-import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
+import { radius, spacing, typography } from "../../../core/theme/tokens";
 import { AppButton } from "../../../shared/ui/AppButton";
 import { ScreenContainer } from "../../../shared/ui/ScreenContainer";
 import { useSessionStore } from "../store/sessionStore";
@@ -38,7 +38,7 @@ const onboardingSlides = [
   },
   {
     icon: "hand-heart-outline" as const,
-    accent: "#F97316",
+    accent: colors.accent,
     title: "Güven veren akış",
     description:
       "Topluluk, mesajlar ve mod başvuruları seni durdurmadan yönlendiren bir deneyimle ilerler.",
@@ -150,33 +150,33 @@ export function OnboardingScreen() {
 const styles = StyleSheet.create({
   content: {
     flex: 1,
-    gap: spacing.section,
+    gap: spacing.xl,
     justifyContent: "space-between",
-    paddingBottom: spacing.comfortable
+    paddingBottom: spacing.lg
   },
   slideHero: {
     flex: 1,
-    gap: spacing.comfortable,
+    gap: spacing.lg,
     justifyContent: "center"
   },
   slideIconBg: {
     alignSelf: "flex-start",
-    borderRadius: radius.xlarge,
-    padding: spacing.comfortable
+    borderRadius: radius.xl,
+    padding: spacing.lg
   },
   slideIconShell: {
     alignItems: "center",
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     height: 72,
     justifyContent: "center",
     width: 72
   },
   slideTitle: {
     color: colors.text,
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: "800",
-    letterSpacing: -0.5,
-    lineHeight: 40
+    letterSpacing: -0.6,
+    lineHeight: 42
   },
   slideDescription: {
     color: colors.textMuted,
@@ -185,34 +185,34 @@ const styles = StyleSheet.create({
     maxWidth: "90%"
   },
   featureList: {
-    gap: spacing.compact
+    gap: spacing.sm
   },
   featureItem: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.compact
+    gap: spacing.sm
   },
   featureDot: {
     alignItems: "center",
-    borderRadius: radius.medium,
-    height: 36,
+    borderRadius: radius.md,
+    height: 38,
     justifyContent: "center",
-    width: 36
+    width: 38
   },
   featureLabel: {
     color: colors.text,
     ...typography.bodyStrong
   },
   footer: {
-    gap: spacing.standard
+    gap: spacing.md
   },
   progress: {
     flexDirection: "row",
-    gap: spacing.compact
+    gap: spacing.sm
   },
   progressBarWrap: {
     flex: 1,
-    paddingVertical: spacing.micro
+    paddingVertical: spacing.xs
   },
   progressBar: {
     backgroundColor: colors.surfaceMuted,
@@ -225,21 +225,21 @@ const styles = StyleSheet.create({
   actions: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.compact
+    gap: spacing.sm
   },
   backBtn: {
     alignItems: "center",
     backgroundColor: colors.surfaceMuted,
     borderRadius: radius.pill,
-    height: 52,
+    height: 54,
     justifyContent: "center",
-    width: 52
+    width: 54
   },
   nextBtnWrap: {
     flex: 1
   },
   skipLabel: {
-    color: colors.textTertiary,
+    color: colors.textSubtle,
     ...typography.label,
     textAlign: "center"
   }

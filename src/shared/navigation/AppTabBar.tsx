@@ -21,7 +21,7 @@ export function AppTabBar({ descriptors, navigation, state }: BottomTabBarProps)
       <View
         style={[
           styles.bar,
-          { paddingBottom: Math.max(insets.bottom + 4, spacing.compact) }
+          { paddingBottom: Math.max(insets.bottom + 6, spacing.sm + 4) }
         ]}
       >
         {state.routes.map((route, index) => {
@@ -79,9 +79,9 @@ function TabItemButton({
       return;
     }
     if (focused) {
-      iconScale.value = withSpring(1.18, { damping: 6, stiffness: 280 }, () => {
+      iconScale.value = withSpring(1.2, { damping: 5, stiffness: 300 }, () => {
         "worklet";
-        iconScale.value = withSpring(1, { damping: 12, stiffness: 300 });
+        iconScale.value = withSpring(1, { damping: 14, stiffness: 320 });
       });
     }
   }, [focused, iconScale]);
@@ -101,9 +101,9 @@ function TabItemButton({
       {focused && <View style={styles.activeBackground} />}
       <Animated.View style={iconAnimStyle}>
         <MaterialCommunityIcons
-          color={focused ? colors.primary : colors.textTertiary}
+          color={focused ? colors.primary : colors.textSubtle}
           name={focused ? config.iconActive : config.icon}
-          size={24}
+          size={22}
         />
       </Animated.View>
       <Text style={[styles.label, focused ? styles.labelActive : null]}>
@@ -117,25 +117,25 @@ const styles = StyleSheet.create({
   bar: {
     ...shadows.floating,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     flexDirection: "row",
-    marginBottom: spacing.compact,
-    marginHorizontal: spacing.standard,
-    paddingHorizontal: spacing.tight,
-    paddingTop: spacing.tight
+    marginBottom: spacing.sm,
+    marginHorizontal: spacing.md,
+    paddingHorizontal: spacing.xs,
+    paddingTop: spacing.sm
   },
   activeBackground: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.large,
-    marginHorizontal: spacing.micro,
-    marginVertical: spacing.micro
+    borderRadius: radius.lg,
+    marginHorizontal: spacing.xs,
+    marginVertical: spacing.xs
   },
   label: {
-    color: colors.textTertiary,
+    color: colors.textSubtle,
     fontSize: 10,
     fontWeight: "600",
-    letterSpacing: 0.1
+    letterSpacing: 0.2
   },
   labelActive: {
     color: colors.primary
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 3,
     justifyContent: "center",
-    minHeight: 58,
-    paddingVertical: spacing.tight
+    minHeight: 56,
+    paddingVertical: spacing.sm
   }
 });

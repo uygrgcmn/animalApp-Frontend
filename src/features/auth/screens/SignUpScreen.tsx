@@ -49,7 +49,7 @@ export function SignUpScreen() {
         {/* Brand */}
         <View style={styles.brand}>
           <LinearGradient
-            colors={[colors.primary, "#2DD4BF"]}
+            colors={[colors.primary, "#A78BFA"]}
             end={{ x: 1, y: 1 }}
             start={{ x: 0, y: 0 }}
             style={styles.brandIcon}
@@ -148,18 +148,18 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    gap: spacing.section,
+    gap: spacing.xl,
     justifyContent: "center",
-    paddingHorizontal: spacing.comfortable,
-    paddingVertical: spacing.comfortable
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.lg
   },
   brand: {
     alignItems: "center",
-    gap: spacing.standard
+    gap: spacing.md
   },
   brandIcon: {
     alignItems: "center",
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     height: 80,
     justifyContent: "center",
     width: 80,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
   brandTexts: {
     alignItems: "center",
-    gap: spacing.tight
+    gap: spacing.sm
   },
   brandTitle: {
     color: colors.text,
@@ -180,15 +180,15 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   form: {
-    gap: spacing.standard
+    gap: spacing.md
   },
   errorBox: {
     alignItems: "center",
     backgroundColor: colors.errorSoft,
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     flexDirection: "row",
-    gap: spacing.tight,
-    padding: spacing.standard
+    gap: spacing.sm,
+    padding: spacing.md
   },
   errorText: {
     color: colors.error,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   dividerRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.standard
+    gap: spacing.md
   },
   divider: {
     backgroundColor: colors.divider,
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     height: 1
   },
   dividerLabel: {
-    color: colors.textTertiary,
+    color: colors.textSubtle,
     ...typography.caption
   }
 });

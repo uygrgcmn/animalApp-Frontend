@@ -5,8 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import type { ConversationSummary } from "../../../core/api/contracts";
 import { colors } from "../../../core/theme/colors";
-import { shadows, spacing, typography } from "../../../core/theme/tokens";
-import { routeBuilders } from "../../../core/navigation/routes";
+import { radius, shadows, spacing, typography } from "../../../core/theme/tokens";
 import { EmptyState } from "../../../shared/ui/EmptyState";
 import { SearchBar } from "../../../shared/ui/SearchBar";
 import { SegmentedTabs } from "../../../shared/ui/SegmentedTabs";
@@ -56,30 +55,36 @@ export function MessagesScreen() {
 
   return (
     <View style={styles.root}>
-      {/* WhatsApp style Header */}
+      {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <View style={styles.headerTop}>
-          <Text style={styles.headerTitle}>Mesajlar</Text>
+          <View>
+            <Text style={styles.headerOverline}>MESAJLAR</Text>
+            <Text style={styles.headerTitle}>Konuşmalar</Text>
+          </View>
           <View style={styles.headerIcons}>
             <Pressable hitSlop={8} style={styles.iconBtn}>
-              <MaterialCommunityIcons name="camera-outline" size={24} color={colors.text} />
+              <MaterialCommunityIcons name="magnify" size={22} color={colors.textSecondary} />
             </Pressable>
             <Pressable hitSlop={8} style={styles.iconBtn}>
-              <MaterialCommunityIcons name="magnify" size={24} color={colors.text} />
-            </Pressable>
-            <Pressable hitSlop={8} style={styles.iconBtn}>
-              <MaterialCommunityIcons name="dots-vertical" size={24} color={colors.text} />
+              <MaterialCommunityIcons name="dots-vertical" size={22} color={colors.textSecondary} />
             </Pressable>
           </View>
         </View>
 
-        <View style={styles.filterRow}>
-          <SegmentedTabs 
-            onChange={setFilter} 
-            options={filterOptions} 
-            value={filter}
-          />
-        </View>
+        <SearchBar
+          onChangeText={setSearchValue}
+          placeholder="Konuşma veya kişi ara..."
+          value={searchValue}
+        />
+
+        <SegmentedTabs
+          onChange={setFilter}
+          options={filterOptions}
+          value={filter}
+        />
+
+        <View style={styles.divider} />
       </View>
 
       {isLoading ? (
@@ -135,53 +140,66 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: spacing.comfortable
+    paddingHorizontal: spacing.lg
   },
   header: {
+    ...shadows.card,
     backgroundColor: colors.surface,
-    paddingBottom: spacing.compact,
-    paddingHorizontal: spacing.comfortable,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSubtle,
+    gap: spacing.sm,
+    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+    zIndex: 10
   },
   headerTop: {
+    alignItems: "flex-start",
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    height: 56,
+    justifyContent: "space-between"
+  },
+  headerOverline: {
+    ...typography.overline,
+    color: colors.primary
   },
   headerTitle: {
-    ...typography.h3,
-    fontSize: 22,
+    ...typography.h2,
     color: colors.text,
+    marginTop: 2
   },
   headerIcons: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: spacing.standard,
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.xs
   },
   iconBtn: {
-    padding: spacing.micro,
+    alignItems: "center",
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radius.md,
+    height: 38,
+    justifyContent: "center",
+    width: 38
   },
-  filterRow: {
-    marginTop: spacing.compact,
+  divider: {
+    backgroundColor: colors.divider,
+    height: 1,
+    marginHorizontal: -spacing.lg,
+    marginTop: spacing.xs
   },
   listContent: {
     paddingBottom: 160
   },
   root: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
     flex: 1
   },
   fab: {
-    position: "absolute",
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
-    justifyContent: "center",
     alignItems: "center",
-    ...shadows.card,
+    backgroundColor: colors.primary,
+    borderRadius: radius.xl,
+    height: 56,
+    justifyContent: "center",
+    position: "absolute",
+    right: spacing.lg,
+    width: 56,
+    ...shadows.floating
   }
 });

@@ -150,7 +150,7 @@ export function CaregiverMarketplaceScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   list: {
     gap: spacing.compact

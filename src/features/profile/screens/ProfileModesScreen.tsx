@@ -203,7 +203,7 @@ export function ProfileModesScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   inlineActions: {
     gap: spacing.compact

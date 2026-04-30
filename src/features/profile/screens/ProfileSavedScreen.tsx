@@ -85,13 +85,13 @@ const styles = StyleSheet.create({
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     gap: spacing.compact,
     padding: spacing.standard
   },
   cardDate: {
     ...typography.caption,
-    color: colors.textTertiary,
+    color: colors.textSubtle,
     flexShrink: 0
   },
   cardHeader: {
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   cardIcon: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     height: 36,
     justifyContent: "center",
     width: 36
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     color: colors.text
   },
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   list: {
     gap: spacing.compact

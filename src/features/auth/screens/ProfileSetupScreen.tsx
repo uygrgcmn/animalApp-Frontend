@@ -281,7 +281,7 @@ function PressableGoalCard({
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   error: {
     color: colors.error,

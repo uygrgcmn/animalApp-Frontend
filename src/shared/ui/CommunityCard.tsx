@@ -49,7 +49,7 @@ export function CommunityCard({
           </View>
         )}
         <LinearGradient
-          colors={["transparent", "rgba(15,23,42,0.6)"]}
+          colors={["transparent", "rgba(9,9,11,0.6)"]}
           style={styles.visualOverlay}
         >
           <StatusPill label={category} tone="success" />
@@ -59,9 +59,7 @@ export function CommunityCard({
 
       <View style={styles.content}>
         <Text numberOfLines={1} style={styles.title}>{title}</Text>
-        <Text numberOfLines={2} style={styles.description}>
-          {description}
-        </Text>
+        <Text numberOfLines={2} style={styles.description}>{description}</Text>
 
         <View style={styles.metaContainer}>
           <View style={styles.metaRow}>
@@ -86,23 +84,23 @@ export function CommunityCard({
 
 const styles = StyleSheet.create({
   actionArea: {
-    marginTop: spacing.tight
+    marginTop: spacing.sm
   },
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     overflow: "hidden",
-    padding: spacing.standard,
+    padding: spacing.md,
     width: "100%"
   },
   content: {
-    gap: spacing.tight,
-    marginTop: spacing.standard
+    gap: spacing.sm,
+    marginTop: spacing.md
   },
   description: {
     color: colors.textMuted,
-    minHeight: 40,
+    minHeight: 44,
     ...typography.body
   },
   image: {
@@ -110,17 +108,17 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   metaContainer: {
-    gap: spacing.micro,
-    marginTop: spacing.micro
+    gap: spacing.xs,
+    marginTop: spacing.xs
   },
   metaRow: {
     alignItems: "center",
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.tight
+    gap: spacing.sm
   },
   pressed: {
-    opacity: 0.92
+    opacity: 0.9
   },
   title: {
     color: colors.text,
@@ -128,8 +126,8 @@ const styles = StyleSheet.create({
   },
   visualArea: {
     backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.medium,
-    height: 160,
+    borderRadius: radius.lg,
+    height: 168,
     overflow: "hidden",
     position: "relative"
   },
@@ -150,7 +148,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     left: 0,
-    padding: spacing.compact,
+    padding: spacing.sm,
     position: "absolute",
     right: 0
   }

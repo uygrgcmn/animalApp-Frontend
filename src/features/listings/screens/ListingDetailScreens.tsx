@@ -940,9 +940,9 @@ function MissingDetailState({ description, title }: { description: string; title
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.section,
+    gap: spacing.xl,
     paddingBottom: spacing.large,
-    paddingHorizontal: spacing.comfortable,
+    paddingHorizontal: spacing.lg,
     paddingTop: spacing.standard
   },
   ctaGhostItem: {
@@ -961,7 +961,7 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   heroImageArea: {
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     height: 260,
     overflow: "hidden"
   },
@@ -987,7 +987,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.primarySoft,
     borderColor: colors.primaryBorder,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1,
     height: 52,
     justifyContent: "center",
@@ -1018,7 +1018,7 @@ const styles = StyleSheet.create({
     ...shadows.card,
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.standard,
     padding: spacing.standard
@@ -1028,7 +1028,7 @@ const styles = StyleSheet.create({
     ...typography.body
   },
   relatedVisualArea: {
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     height: 140,
     overflow: "hidden"
   },

@@ -25,9 +25,7 @@ export function AppHeader({
         {showBackButton ? (
           <Pressable
             accessibilityLabel="Geri git"
-            onPress={() => {
-              router.back();
-            }}
+            onPress={() => router.back()}
             style={styles.backButton}
           >
             <MaterialCommunityIcons color={colors.text} name="arrow-left" size={20} />
@@ -62,22 +60,22 @@ const styles = StyleSheet.create({
     ...typography.body
   },
   rightSlot: {
-    marginLeft: spacing.compact
+    marginLeft: spacing.sm
   },
   row: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.compact
+    gap: spacing.sm
   },
   texts: {
     flex: 1,
-    gap: spacing.micro
+    gap: spacing.xs
   },
   title: {
     color: colors.text,
     ...typography.h1
   },
   wrapper: {
-    gap: spacing.tight
+    gap: spacing.sm
   }
 });

@@ -30,12 +30,12 @@ export function EmptyState({ actionSlot, description, icon, title }: EmptyStateP
 const styles = StyleSheet.create({
   card: {
     alignItems: "center",
-    gap: spacing.comfortable,
-    paddingHorizontal: spacing.comfortable,
-    paddingVertical: spacing.large
+    gap: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing["2xl"]
   },
   description: {
-    color: colors.textSubtle,
+    color: colors.textMuted,
     ...typography.body,
     textAlign: "center"
   },
@@ -43,16 +43,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.surfaceMuted,
     borderRadius: radius.full,
-    height: 72,
+    height: 76,
     justifyContent: "center",
-    width: 72
+    width: 76
   },
   texts: {
     alignItems: "center",
-    gap: spacing.tight
+    gap: spacing.sm
   },
   title: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
     ...typography.subheading,
     textAlign: "center"
   }

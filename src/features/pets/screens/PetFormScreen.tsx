@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   fields: {
     gap: spacing.standard

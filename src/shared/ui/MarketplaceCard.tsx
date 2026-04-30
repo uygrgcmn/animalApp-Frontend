@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     ...shadows.card,
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.standard,
     padding: spacing.standard
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     ...typography.subheading
   },
   visualArea: {
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     height: 180,
     overflow: "hidden"
   },

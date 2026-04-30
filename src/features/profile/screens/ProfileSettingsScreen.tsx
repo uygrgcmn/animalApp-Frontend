@@ -114,7 +114,7 @@ export function ProfileSettingsScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   actions: {
     flexDirection: "row",

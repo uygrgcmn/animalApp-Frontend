@@ -169,7 +169,7 @@ export function DesignSystemShowcaseScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.section,
+    gap: spacing.xl,
     paddingBottom: 120
   },
   page: {

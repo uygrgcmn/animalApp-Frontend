@@ -138,15 +138,15 @@ export function useToast(): ToastContextValue {
 const styles = StyleSheet.create({
   banner: {
     alignItems: "center",
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     elevation: 8,
     flexDirection: "row",
     gap: spacing.compact,
-    left: spacing.comfortable,
+    left: spacing.lg,
     paddingHorizontal: spacing.standard,
     paddingVertical: spacing.compact,
     position: "absolute",
-    right: spacing.comfortable,
+    right: spacing.lg,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,

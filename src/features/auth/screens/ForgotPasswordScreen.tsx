@@ -120,7 +120,7 @@ export function ForgotPasswordScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   formFields: {
     gap: spacing.standard

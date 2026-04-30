@@ -18,7 +18,7 @@ export function TextField({ label, error, hint, ...props }: TextFieldProps) {
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
-        placeholderTextColor={colors.textTertiary}
+        placeholderTextColor={colors.textSubtle}
         selectionColor={colors.primary}
         style={[
           styles.input,
@@ -47,42 +47,44 @@ export function TextField({ label, error, hint, ...props }: TextFieldProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    gap: spacing.tight
+    gap: spacing.sm
   },
   label: {
-    color: colors.text,
+    color: colors.textSecondary,
     ...typography.label
   },
   input: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.large,
+    borderRadius: radius.md,
     borderWidth: 1.5,
     color: colors.text,
     fontSize: typography.body.fontSize,
     minHeight: 56,
-    paddingHorizontal: spacing.standard,
-    paddingVertical: 14
+    paddingHorizontal: spacing.md,
+    paddingVertical: 15
   },
   multiline: {
-    minHeight: 120,
+    minHeight: 128,
     paddingTop: 16,
     textAlignVertical: "top"
   },
   inputFocused: {
     borderColor: colors.primary,
-    borderWidth: 2
+    borderWidth: 2,
+    backgroundColor: colors.surfaceAlt
   },
   inputError: {
     borderColor: colors.error,
-    borderWidth: 2
+    borderWidth: 2,
+    backgroundColor: colors.errorSoft
   },
   error: {
     color: colors.error,
     ...typography.caption
   },
   hint: {
-    color: colors.textSubtle,
+    color: colors.textMuted,
     ...typography.caption
   }
 });

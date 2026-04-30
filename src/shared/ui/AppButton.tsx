@@ -16,7 +16,7 @@ type AppButtonProps = {
   loading?: boolean;
   onPress?: () => void;
   size?: "sm" | "md" | "lg";
-  variant?: "primary" | "secondary" | "ghost" | "danger";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "accent";
   leftSlot?: ReactNode;
 };
 
@@ -33,12 +33,12 @@ export function AppButton({
 
   const handlePressIn = useCallback(() => {
     if (!disabled && !loading) {
-      scale.value = withSpring(0.97, { damping: 15, stiffness: 400 });
+      scale.value = withSpring(0.96, { damping: 18, stiffness: 450 });
     }
   }, [disabled, loading, scale]);
 
   const handlePressOut = useCallback(() => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    scale.value = withSpring(1, { damping: 18, stiffness: 450 });
   }, [scale]);
 
   const animStyle = useAnimatedStyle(() => ({
@@ -46,6 +46,11 @@ export function AppButton({
   }));
 
   const isDisabled = disabled || loading;
+
+  const spinnerColor =
+    variant === "primary" || variant === "danger" || variant === "accent"
+      ? colors.textInverse
+      : colors.primary;
 
   return (
     <Animated.View style={animStyle}>
@@ -62,15 +67,13 @@ export function AppButton({
           variant === "secondary" && styles.secondary,
           variant === "ghost" && styles.ghost,
           variant === "danger" && styles.danger,
+          variant === "accent" && styles.accentVariant,
           isDisabled && styles.disabled
         ]}
       >
         <View style={styles.content}>
           {loading ? (
-            <ActivityIndicator
-              size="small"
-              color={variant === "primary" || variant === "danger" ? colors.textInverse : colors.primary}
-            />
+            <ActivityIndicator size="small" color={spinnerColor} />
           ) : (
             <>
               {leftSlot}
@@ -81,6 +84,7 @@ export function AppButton({
                   size === "lg" && styles.labelLg,
                   variant === "primary" && styles.primaryLabel,
                   variant === "danger" && styles.dangerLabel,
+                  variant === "accent" && styles.accentLabel,
                   (variant === "secondary" || variant === "ghost") && styles.secondaryLabel
                 ]}
               >
@@ -100,23 +104,23 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1.5,
     justifyContent: "center",
-    minHeight: 52,
-    paddingHorizontal: spacing.comfortable,
-    paddingVertical: 14
+    minHeight: 54,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 15
   },
   sm: {
     minHeight: 38,
-    paddingHorizontal: spacing.standard,
-    paddingVertical: spacing.tight
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm
   },
   lg: {
-    minHeight: 58,
-    paddingHorizontal: spacing.section
+    minHeight: 60,
+    paddingHorizontal: spacing.xl
   },
   content: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.tight,
+    gap: spacing.sm,
     justifyContent: "center"
   },
   primary: {
@@ -135,19 +139,23 @@ const styles = StyleSheet.create({
     backgroundColor: colors.error,
     borderColor: colors.error
   },
+  accentVariant: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent
+  },
   disabled: {
-    opacity: 0.45
+    opacity: 0.4
   },
   label: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
     letterSpacing: 0.1
   },
   labelSm: {
-    fontSize: 13
+    fontSize: 14
   },
   labelLg: {
-    fontSize: 17
+    fontSize: 18
   },
   primaryLabel: {
     color: colors.textInverse
@@ -156,6 +164,9 @@ const styles = StyleSheet.create({
     color: colors.text
   },
   dangerLabel: {
+    color: colors.textInverse
+  },
+  accentLabel: {
     color: colors.textInverse
   }
 });

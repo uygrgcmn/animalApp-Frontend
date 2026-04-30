@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     flexDirection: "row",
     gap: spacing.standard,
-    paddingHorizontal: spacing.comfortable,
+    paddingHorizontal: spacing.lg,
     height: 76,
   },
   content: {

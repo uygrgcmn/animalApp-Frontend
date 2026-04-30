@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     gap: spacing.compact
   },
   content: {
-    gap: spacing.section
+    gap: spacing.xl
   },
   filterRow: {
     flexDirection: "row",

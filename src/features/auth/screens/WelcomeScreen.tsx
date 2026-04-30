@@ -16,7 +16,7 @@ export function WelcomeScreen() {
         {/* Hero */}
         <View style={styles.hero}>
           <LinearGradient
-            colors={[colors.primary, "#0ABFAB", "#2DD4BF"]}
+            colors={[colors.primary, "#A78BFA", "#8B5CF6"]}
             end={{ x: 1, y: 1 }}
             start={{ x: 0, y: 0 }}
             style={styles.iconShell}
@@ -95,34 +95,34 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    gap: spacing.section,
+    gap: spacing.xl,
     justifyContent: "flex-end",
-    paddingBottom: spacing.comfortable,
-    paddingHorizontal: spacing.comfortable
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.lg
   },
   hero: {
     alignItems: "flex-start",
     flex: 1,
-    gap: spacing.comfortable,
+    gap: spacing.lg,
     justifyContent: "center"
   },
   iconShell: {
     alignItems: "center",
-    borderRadius: radius.xlarge,
-    height: 100,
+    borderRadius: radius.xl,
+    height: 104,
     justifyContent: "center",
-    width: 100,
+    width: 104,
     ...shadows.card
   },
   heroTexts: {
-    gap: spacing.compact
+    gap: spacing.sm
   },
   heroTitle: {
     color: colors.text,
-    fontSize: 38,
-    fontWeight: "800",
-    letterSpacing: -0.8,
-    lineHeight: 46
+    fontSize: 40,
+    fontWeight: "900",
+    letterSpacing: -1.0,
+    lineHeight: 48
   },
   heroSubtitle: {
     color: colors.textMuted,
@@ -133,15 +133,15 @@ const styles = StyleSheet.create({
   chips: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.tight
+    gap: spacing.sm
   },
   chip: {
     alignItems: "center",
     borderRadius: radius.pill,
     borderWidth: 1,
     flexDirection: "row",
-    gap: spacing.micro,
-    paddingHorizontal: spacing.compact,
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 6
   },
   chipLabel: {
@@ -149,10 +149,10 @@ const styles = StyleSheet.create({
     fontWeight: "700"
   },
   actions: {
-    gap: spacing.compact
+    gap: spacing.sm
   },
   legal: {
-    color: colors.textTertiary,
+    color: colors.textSubtle,
     fontSize: 11,
     lineHeight: 17,
     textAlign: "center"

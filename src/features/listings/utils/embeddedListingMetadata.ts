@@ -1,3 +1,5 @@
+import { resolveMediaUrl } from "../../../core/media/resolveMediaUrl";
+
 const METADATA_START = "[[ANIMAL_APP_META]]";
 const METADATA_END = "[[/ANIMAL_APP_META]]";
 const METADATA_PATTERN = /\[\[ANIMAL_APP_META\]\]([\s\S]*?)\[\[\/ANIMAL_APP_META\]\]/;
@@ -83,12 +85,14 @@ export function parseEmbeddedListingMetadata(rawDescription: string | null | und
 
   try {
     const parsed = JSON.parse(metadataPayload) as Partial<EmbeddedListingMetadata>;
+    const normalizedMetadata: EmbeddedListingMetadata = {
+      ...parsed,
+      mediaUrls: parsed.mediaUrls?.map((item) => resolveMediaUrl(item) ?? item),
+      version: 1
+    };
     return {
       description,
-      metadata: {
-        ...parsed,
-        version: 1
-      } satisfies EmbeddedListingMetadata
+      metadata: normalizedMetadata
     };
   } catch {
     return {
@@ -99,5 +103,5 @@ export function parseEmbeddedListingMetadata(rawDescription: string | null | und
 }
 
 export function getPrimaryMediaUrl(metadata: EmbeddedListingMetadata) {
-  return metadata.mediaUrls?.[0];
+  return resolveMediaUrl(metadata.mediaUrls?.[0]) ?? undefined;
 }

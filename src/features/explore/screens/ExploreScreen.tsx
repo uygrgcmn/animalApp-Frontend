@@ -101,7 +101,6 @@ export function ExploreScreen() {
     [ownerQuery.data]
   );
 
-
   const caregiverResults = useMemo(() => {
     const q = searchValue.trim().toLowerCase();
     let results = allCaregivers.filter((item) => {
@@ -251,7 +250,7 @@ export function ExploreScreen() {
 
   return (
     <View style={styles.root}>
-      {/* ── Sticky header ── */}
+      {/* Sticky header */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <View style={styles.headerTop}>
           <View style={styles.headerTitleBlock}>
@@ -292,7 +291,7 @@ export function ExploreScreen() {
         <View style={styles.divider} />
       </View>
 
-      {/* ── Content ── */}
+      {/* Content */}
       {isInitialLoading ? (
         <ScrollView contentContainerStyle={styles.listContent}>
           <SkeletonCards count={4} />
@@ -346,8 +345,6 @@ export function ExploreScreen() {
   );
 }
 
-// ─── Skeleton ────────────────────────────────────────────────────────────────
-
 function SkeletonCards({ count }: { count: number }) {
   return (
     <>
@@ -365,12 +362,10 @@ function SkeletonCards({ count }: { count: number }) {
   );
 }
 
-// ─── Styles ──────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   actionRow: {
     flexDirection: "row",
-    gap: spacing.tight
+    gap: spacing.sm
   },
   countBadge: {
     alignItems: "flex-end"
@@ -386,31 +381,31 @@ const styles = StyleSheet.create({
   divider: {
     backgroundColor: colors.divider,
     height: 1,
-    marginHorizontal: -spacing.comfortable,
-    marginTop: spacing.compact
+    marginHorizontal: -spacing.lg,
+    marginTop: spacing.sm
   },
   emptyWrap: {
     alignItems: "center",
     flex: 1,
     justifyContent: "center",
-    paddingTop: spacing.large
+    paddingTop: spacing["2xl"]
   },
   filterContent: {
-    gap: spacing.tight,
-    paddingHorizontal: spacing.comfortable
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg
   },
   filterScroll: {
-    marginHorizontal: -spacing.comfortable
+    marginHorizontal: -spacing.lg
   },
   footerLoader: {
-    paddingVertical: spacing.section
+    paddingVertical: spacing.xl
   },
   header: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    gap: spacing.compact,
-    paddingBottom: spacing.standard,
-    paddingHorizontal: spacing.comfortable,
+    gap: spacing.sm,
+    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
     zIndex: 10
   },
   headerOverline: {
@@ -432,42 +427,42 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 110,
-    paddingHorizontal: spacing.comfortable,
-    paddingTop: spacing.standard
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md
   },
   listContentEmpty: {
     flexGrow: 1,
     paddingBottom: 110,
-    paddingHorizontal: spacing.comfortable,
-    paddingTop: spacing.standard
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md
   },
   root: {
     backgroundColor: colors.background,
     flex: 1
   },
   separator: {
-    height: spacing.standard
+    height: spacing.md
   }
 });
 
 const skeletonStyles = StyleSheet.create({
   body: {
-    gap: spacing.compact,
-    padding: spacing.standard
+    gap: spacing.sm,
+    padding: spacing.md
   },
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     overflow: "hidden"
   },
   image: {
     backgroundColor: colors.surfaceMuted,
-    height: 160
+    height: 168
   },
   line: {
     backgroundColor: colors.surfaceMuted,
-    borderRadius: radius.small,
+    borderRadius: radius.sm,
     height: 14
   }
 });

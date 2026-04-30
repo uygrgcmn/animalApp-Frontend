@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: spacing.comfortable
+    paddingHorizontal: spacing.lg
   },
   countBadge: {
     alignItems: "flex-end"
@@ -215,18 +215,18 @@ const styles = StyleSheet.create({
   divider: {
     backgroundColor: colors.divider,
     height: 1,
-    marginHorizontal: -spacing.comfortable,
+    marginHorizontal: -spacing.lg,
     marginTop: spacing.compact
   },
   footerLoader: {
-    paddingVertical: spacing.section
+    paddingVertical: spacing.xl
   },
   header: {
     ...shadows.card,
     backgroundColor: colors.surface,
     gap: spacing.compact,
     paddingBottom: spacing.standard,
-    paddingHorizontal: spacing.comfortable,
+    paddingHorizontal: spacing.lg,
     zIndex: 10
   },
   headerOverline: {
@@ -248,13 +248,13 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 110,
-    paddingHorizontal: spacing.comfortable,
+    paddingHorizontal: spacing.lg,
     paddingTop: spacing.standard
   },
   listContentEmpty: {
     flexGrow: 1,
     paddingBottom: 110,
-    paddingHorizontal: spacing.comfortable,
+    paddingHorizontal: spacing.lg,
     paddingTop: spacing.standard
   },
   pillRow: {
@@ -279,7 +279,7 @@ const skeletonStyles = StyleSheet.create({
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     overflow: "hidden"
   },
   image: {
@@ -288,7 +288,7 @@ const skeletonStyles = StyleSheet.create({
   },
   line: {
     backgroundColor: colors.surfaceMuted,
-    borderRadius: radius.small,
+    borderRadius: radius.sm,
     height: 14
   }
 });

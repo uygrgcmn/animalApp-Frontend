@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { colors } from "../../core/theme/colors";
-import { radius, spacing } from "../../core/theme/tokens";
+import { radius, spacing, typography } from "../../core/theme/tokens";
 import type { AppIconName } from "./AppIcon";
 
 type NavigationCardProps = {
@@ -35,14 +35,12 @@ export function NavigationCard({
       <View style={styles.content}>
         <View style={styles.texts}>
           <Text style={styles.title}>{title}</Text>
-          <Text numberOfLines={1} style={styles.description}>
-            {description}
-          </Text>
+          <Text numberOfLines={1} style={styles.description}>{description}</Text>
         </View>
 
         <View style={styles.trailing}>
           {rightMeta}
-          <MaterialCommunityIcons color={colors.textTertiary} name="chevron-right" size={18} />
+          <MaterialCommunityIcons color={colors.textSubtle} name="chevron-right" size={18} />
         </View>
       </View>
     </Pressable>
@@ -54,9 +52,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.surface,
     flexDirection: "row",
-    gap: spacing.standard,
-    paddingHorizontal: spacing.standard,
-    paddingVertical: spacing.compact + 2
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2
   },
   content: {
     alignItems: "center",
@@ -65,35 +63,33 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingBottom: spacing.compact + 2
+    paddingBottom: spacing.sm + 2
   },
   description: {
-    color: colors.textSubtle,
-    fontSize: 13,
-    lineHeight: 18
+    color: colors.textMuted,
+    ...typography.caption
   },
   iconContainer: {
     alignItems: "center",
-    borderRadius: radius.medium,
-    height: 38,
+    borderRadius: radius.md,
+    height: 40,
     justifyContent: "center",
-    width: 38
+    width: 40
   },
   pressed: {
     opacity: 0.65
   },
   texts: {
     flex: 1,
-    gap: 2
+    gap: 3
   },
   title: {
     color: colors.text,
-    fontSize: 15,
-    fontWeight: "700"
+    ...typography.bodyStrong
   },
   trailing: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.tight
+    gap: spacing.sm
   }
 });

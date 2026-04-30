@@ -21,7 +21,9 @@ module.exports = () => ({
     typedRoutes: true
   },
   extra: {
-    apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api"
+    ...(process.env.EXPO_PUBLIC_API_BASE_URL
+      ? { apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL }
+      : {})
   }
 });
 

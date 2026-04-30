@@ -47,7 +47,7 @@ export function ActionGateSheet({
           style={[
             styles.sheet,
             {
-              paddingBottom: Math.max(insets.bottom, spacing.comfortable)
+              paddingBottom: Math.max(insets.bottom, spacing.lg)
             }
           ]}
         >
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.primarySoft,
     borderColor: colors.primaryBorder,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1,
     height: 52,
     justifyContent: "center",
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   list: {
     backgroundColor: colors.warningSoft,
     borderColor: colors.accentBorder,
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     borderWidth: 1,
     gap: spacing.compact,
     padding: spacing.standard
@@ -165,11 +165,11 @@ const styles = StyleSheet.create({
   sheet: {
     ...shadows.floating,
     backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.xlarge,
-    borderTopRightRadius: radius.xlarge,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
     gap: spacing.standard,
-    paddingHorizontal: spacing.comfortable,
-    paddingTop: spacing.comfortable
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg
   },
   texts: {
     gap: spacing.tight

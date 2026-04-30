@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     ...shadows.card,
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1,
     gap: spacing.standard,
     padding: spacing.standard
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.surfaceAlt,
     borderColor: colors.border,
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.tight,

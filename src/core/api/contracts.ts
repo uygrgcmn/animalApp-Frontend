@@ -393,6 +393,11 @@ export type PresignedUploadUrlResponse = {
   publicUrl: string;
 };
 
+export type UploadedMediaResponse = {
+  key: string;
+  publicUrl: string;
+};
+
 export type PetshopVerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export type PetshopCampaignParticipantRecord = {

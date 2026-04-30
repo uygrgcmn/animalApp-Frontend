@@ -43,11 +43,11 @@ export function OwnerRequestCard({
           <Image source={{ uri: coverImageUri }} style={styles.visualImage} />
         ) : (
           <View style={styles.visualFallback}>
-            <AppIcon backgrounded={false} color={colors.warning} name="paw" size={44} />
+            <AppIcon backgrounded={false} color={colors.accent} name="paw" size={44} />
           </View>
         )}
         <LinearGradient
-          colors={["transparent", "rgba(15,23,42,0.55)"]}
+          colors={["transparent", "rgba(9,9,11,0.55)"]}
           style={styles.visualOverlay}
         >
           <StatusPill label={petType} tone="warning" />
@@ -56,12 +56,8 @@ export function OwnerRequestCard({
       </View>
 
       <View style={styles.body}>
-        <Text numberOfLines={1} style={styles.title}>
-          {title}
-        </Text>
-        <Text numberOfLines={2} style={styles.description}>
-          {description}
-        </Text>
+        <Text numberOfLines={1} style={styles.title}>{title}</Text>
+        <Text numberOfLines={2} style={styles.description}>{description}</Text>
 
         <View style={styles.metaRow}>
           {location ? (
@@ -82,18 +78,18 @@ export function OwnerRequestCard({
 const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
-    gap: spacing.tight
+    gap: spacing.sm
   },
   body: {
-    gap: spacing.tight
+    gap: spacing.sm
   },
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
-    gap: spacing.standard,
+    borderRadius: radius.xl,
+    gap: spacing.md,
     overflow: "hidden",
-    padding: spacing.standard
+    padding: spacing.md
   },
   description: {
     color: colors.textMuted,
@@ -102,7 +98,7 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.tight
+    gap: spacing.sm
   },
   overlayDate: {
     ...typography.caption,
@@ -110,7 +106,7 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   pressed: {
-    opacity: 0.92
+    opacity: 0.9
   },
   title: {
     color: colors.text,
@@ -118,8 +114,8 @@ const styles = StyleSheet.create({
   },
   visualArea: {
     backgroundColor: colors.warningSoft,
-    borderRadius: radius.medium,
-    height: 160,
+    borderRadius: radius.lg,
+    height: 168,
     overflow: "hidden",
     position: "relative"
   },
@@ -138,7 +134,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     left: 0,
-    padding: spacing.compact,
+    padding: spacing.sm,
     position: "absolute",
     right: 0
   }

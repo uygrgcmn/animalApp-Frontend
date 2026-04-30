@@ -54,11 +54,11 @@ function SegmentTab({
   const scale = useSharedValue(1);
 
   const handlePressIn = useCallback(() => {
-    scale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
+    scale.value = withSpring(0.96, { damping: 18, stiffness: 450 });
   }, [scale]);
 
   const handlePressOut = useCallback(() => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    scale.value = withSpring(1, { damping: 18, stiffness: 450 });
   }, [scale]);
 
   const animStyle = useAnimatedStyle(() => ({
@@ -84,28 +84,28 @@ function SegmentTab({
 const styles = StyleSheet.create({
   wrapper: {
     backgroundColor: colors.surfaceMuted,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     flexDirection: "row",
-    gap: spacing.micro,
-    padding: spacing.micro
+    gap: spacing.xs,
+    padding: spacing.xs
   },
   tabWrap: {
     flex: 1
   },
   tab: {
     alignItems: "center",
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     justifyContent: "center",
-    minHeight: 36,
-    paddingHorizontal: spacing.tight
+    minHeight: 38,
+    paddingHorizontal: spacing.sm
   },
   activeTab: {
     ...shadows.micro,
     backgroundColor: colors.surface
   },
   label: {
-    color: colors.textSubtle,
-    fontSize: 13,
+    color: colors.textMuted,
+    fontSize: 14,
     fontWeight: "600"
   },
   activeLabel: {

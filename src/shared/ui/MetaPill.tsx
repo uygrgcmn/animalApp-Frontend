@@ -44,8 +44,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: radius.pill,
     flexDirection: "row",
-    gap: spacing.micro,
-    paddingHorizontal: spacing.compact,
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 5
   },
   label: {
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceMuted
   },
   neutralLabel: {
-    color: colors.textMuted
+    color: colors.textSecondary
   },
   primary: {
     backgroundColor: colors.primarySoft

@@ -43,7 +43,7 @@ export function ListingCard({
         <View style={styles.visualArea}>
           <Image source={{ uri: coverImageUri }} style={styles.visualImage} />
           <LinearGradient
-            colors={["transparent", "rgba(10,25,41,0.75)"]}
+            colors={["transparent", "rgba(9,9,11,0.72)"]}
             style={styles.visualOverlay}
           >
             <View style={styles.priceTag}>
@@ -98,24 +98,24 @@ export function ListingCard({
 const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
-    gap: spacing.tight,
-    marginTop: spacing.micro
+    gap: spacing.sm,
+    marginTop: spacing.xs
   },
   avatar: {
     alignItems: "center",
     backgroundColor: colors.primarySoft,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     height: 44,
     justifyContent: "center",
     width: 44
   },
   avatarChip: {
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.18)",
-    borderRadius: radius.medium,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: radius.md,
     justifyContent: "center",
-    paddingHorizontal: spacing.compact,
-    paddingVertical: spacing.micro + 2
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4
   },
   avatarChipLabel: {
     color: colors.textInverse,
@@ -126,23 +126,23 @@ const styles = StyleSheet.create({
     ...typography.bodyStrong
   },
   body: {
-    gap: spacing.compact,
-    padding: spacing.standard
+    gap: spacing.sm,
+    padding: spacing.md
   },
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     overflow: "hidden"
   },
   description: {
-    color: colors.textSubtle,
+    color: colors.textMuted,
     ...typography.body
   },
   footer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.tight
+    gap: spacing.sm
   },
   noImageHeader: {
     alignItems: "center",
@@ -150,18 +150,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   pressed: {
-    opacity: 0.90
+    opacity: 0.88
   },
   priceTag: {
     backgroundColor: colors.success,
     borderRadius: radius.pill,
-    paddingHorizontal: spacing.compact,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 5
   },
   priceTagInline: {
     backgroundColor: colors.successSoft,
     borderRadius: radius.pill,
-    paddingHorizontal: spacing.compact,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 5
   },
   priceTagInlineText: {
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     fontWeight: "700"
   },
   subtitle: {
-    color: colors.textSubtle,
+    color: colors.textMuted,
     ...typography.caption
   },
   title: {
@@ -184,16 +184,16 @@ const styles = StyleSheet.create({
   },
   titleBlock: {
     flex: 1,
-    gap: spacing.nano
+    gap: spacing.xs
   },
   titleRow: {
     alignItems: "flex-start",
     flexDirection: "row",
-    gap: spacing.compact,
+    gap: spacing.sm,
     justifyContent: "space-between"
   },
   visualArea: {
-    height: 200,
+    height: 216,
     overflow: "hidden",
     position: "relative"
   },
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     left: 0,
-    padding: spacing.standard,
+    padding: spacing.md,
     position: "absolute",
     right: 0
   }

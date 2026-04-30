@@ -36,9 +36,9 @@ const styles = StyleSheet.create({
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
-    gap: spacing.standard,
-    padding: spacing.comfortable
+    borderRadius: radius.xl,
+    gap: spacing.md,
+    padding: spacing.lg
   },
   accentCard: {
     backgroundColor: colors.primarySoft,
@@ -48,12 +48,12 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "flex-start",
     flexDirection: "row",
-    gap: spacing.compact,
+    gap: spacing.sm,
     justifyContent: "space-between"
   },
   texts: {
     flex: 1,
-    gap: spacing.tight
+    gap: spacing.sm
   },
   title: {
     color: colors.text,
@@ -64,6 +64,6 @@ const styles = StyleSheet.create({
     ...typography.body
   },
   body: {
-    gap: spacing.compact
+    gap: spacing.sm
   }
 });

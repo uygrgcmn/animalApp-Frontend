@@ -38,8 +38,6 @@ type SessionUser = {
   profileCompletion: number;
 };
 
-// ─── Ana Bileşen ──────────────────────────────────────────────────────────────
-
 export function HomeDashboardScreen() {
   const user = useSessionStore((s) => s.user) as SessionUser | null;
   const insets = useSafeAreaInsets();
@@ -83,12 +81,12 @@ export function HomeDashboardScreen() {
         />
       }
     >
-      {/* ─── Hero ─── */}
+      {/* Hero */}
       <LinearGradient
-        colors={["#0D9488", "#0F7A6E", "#0A5C52"]}
+        colors={["#7C3AED", "#6D28D9", "#4C1D95"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.hero, { paddingTop: insets.top + spacing.standard }]}
+        style={[styles.hero, { paddingTop: insets.top + spacing.md }]}
       >
         {/* Top row */}
         <View style={styles.heroTopRow}>
@@ -147,13 +145,13 @@ export function HomeDashboardScreen() {
           <QuickAction
             icon="paw"
             label="Bakıcılar"
-            color="#2DD4BF"
+            color="#C4B5FD"
             onPress={() => router.push(routes.app.explore)}
           />
           <QuickAction
             icon="account-search"
             label="Talepler"
-            color="#F97316"
+            color="#FCD34D"
             onPress={() =>
               router.push({ pathname: "/(app)/(tabs)/explore", params: { tab: "owner-requests" } })
             }
@@ -161,27 +159,22 @@ export function HomeDashboardScreen() {
           <QuickAction
             icon="hand-heart"
             label="Topluluk"
-            color="#A78BFA"
+            color="#6EE7B7"
             onPress={() => router.push(routes.app.community)}
           />
           <QuickAction
             icon="storefront"
             label="Petshop"
-            color="#34D399"
+            color="#FCA5A5"
             onPress={() => router.push(routes.app.petshop)}
           />
         </View>
       </LinearGradient>
 
-      {/* ─── İçerik ─── */}
+      {/* Content */}
       <View style={styles.body}>
 
-        {/* Bakıcı İlanları */}
-        <Section
-          title="Bakıcı İlanları"
-          label="SİZİN İÇİN"
-          href={routes.app.explore}
-        >
+        <Section title="Bakıcı İlanları" label="SİZİN İÇİN" href={routes.app.explore}>
           {caregiverQuery.isLoading ? (
             <CardSkeleton />
           ) : caregiverListings.length > 0 ? (
@@ -204,12 +197,7 @@ export function HomeDashboardScreen() {
           )}
         </Section>
 
-        {/* Yakındaki Talepler */}
-        <Section
-          title="Yakındaki Talepler"
-          label="KOMŞU"
-          href={routes.app.explore}
-        >
+        <Section title="Yakındaki Talepler" label="KOMŞU" href={routes.app.explore}>
           {ownerQuery.isLoading ? (
             <CardSkeleton />
           ) : ownerRequests.length > 0 ? (
@@ -232,12 +220,7 @@ export function HomeDashboardScreen() {
           )}
         </Section>
 
-        {/* Topluluk */}
-        <Section
-          title="Topluluk"
-          label="NABIZ"
-          href={routes.app.community}
-        >
+        <Section title="Topluluk" label="NABIZ" href={routes.app.community}>
           {communityQuery.isLoading ? (
             <CardSkeleton />
           ) : communityPosts.length > 0 ? (
@@ -259,12 +242,7 @@ export function HomeDashboardScreen() {
           )}
         </Section>
 
-        {/* Petshop Kampanyaları */}
-        <Section
-          title="Kampanyalar"
-          label="PETSHOP"
-          href={routes.app.petshop}
-        >
+        <Section title="Kampanyalar" label="PETSHOP" href={routes.app.petshop}>
           {petshopQuery.isLoading ? (
             <CardSkeleton />
           ) : petshopCampaigns.length > 0 ? (
@@ -292,16 +270,12 @@ export function HomeDashboardScreen() {
   );
 }
 
-// ─── Yardımcı Fonksiyon ───────────────────────────────────────────────────────
-
 function timeGreeting() {
   const h = new Date().getHours();
   if (h < 12) return "Günaydın ☀️";
   if (h < 17) return "İyi günler 👋";
   return "İyi akşamlar 🌙";
 }
-
-// ─── Alt Bileşenler ───────────────────────────────────────────────────────────
 
 function QuickAction({
   color,
@@ -386,10 +360,9 @@ function CaregiverCard({
 }) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && { opacity: 0.93 }]}
+      style={({ pressed }) => [styles.card, pressed && { opacity: 0.92 }]}
       onPress={onPress}
     >
-      {/* Image */}
       <View style={styles.cardImageArea}>
         {imageUri ? (
           <Image source={{ uri: imageUri }} style={styles.cardImageBg} resizeMode="cover" />
@@ -412,12 +385,10 @@ function CaregiverCard({
           </View>
         ) : null}
       </View>
-
-      {/* Body */}
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle} numberOfLines={1}>{name}</Text>
         <View style={styles.cardMeta}>
-          <MaterialCommunityIcons name="map-marker-outline" size={12} color={colors.textTertiary} />
+          <MaterialCommunityIcons name="map-marker-outline" size={12} color={colors.textSubtle} />
           <Text style={styles.cardMetaText} numberOfLines={1}>{location}</Text>
         </View>
         {schedule ? (
@@ -449,7 +420,7 @@ function RequestCard({
 }) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && { opacity: 0.93 }]}
+      style={({ pressed }) => [styles.card, pressed && { opacity: 0.92 }]}
       onPress={onPress}
     >
       <View style={styles.cardImageArea}>
@@ -457,7 +428,7 @@ function RequestCard({
           <Image source={{ uri: imageUri }} style={styles.cardImageBg} resizeMode="cover" />
         ) : (
           <LinearGradient
-            colors={["#FFF7ED", "#FFFBEB"]}
+            colors={[colors.warningSoft, "#FFFBEB"]}
             style={styles.cardImageBg}
           >
             <MaterialCommunityIcons name="paw" size={40} color={colors.warning} />
@@ -470,13 +441,13 @@ function RequestCard({
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text>
         <View style={styles.cardMeta}>
-          <MaterialCommunityIcons name="map-marker-outline" size={12} color={colors.textTertiary} />
+          <MaterialCommunityIcons name="map-marker-outline" size={12} color={colors.textSubtle} />
           <Text style={styles.cardMetaText}>{location}</Text>
         </View>
         <View style={styles.cardTagRow}>
           {date ? (
             <View style={[styles.cardTag, { backgroundColor: colors.surfaceMuted }]}>
-              <Text style={[styles.cardTagText, { color: colors.textSubtle }]}>{date}</Text>
+              <Text style={[styles.cardTagText, { color: colors.textMuted }]}>{date}</Text>
             </View>
           ) : null}
           {budget ? (
@@ -507,7 +478,7 @@ function CommunityCard({
 }) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && { opacity: 0.93 }]}
+      style={({ pressed }) => [styles.card, pressed && { opacity: 0.92 }]}
       onPress={onPress}
     >
       <View style={styles.cardImageArea}>
@@ -528,11 +499,11 @@ function CommunityCard({
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle} numberOfLines={2}>{title}</Text>
         <View style={styles.cardMeta}>
-          <MaterialCommunityIcons name="account-outline" size={12} color={colors.textTertiary} />
+          <MaterialCommunityIcons name="account-outline" size={12} color={colors.textSubtle} />
           <Text style={styles.cardMetaText}>{author}</Text>
         </View>
         <View style={[styles.cardTag, { backgroundColor: colors.surfaceMuted }]}>
-          <Text style={[styles.cardTagText, { color: colors.textSubtle }]}>{date}</Text>
+          <Text style={[styles.cardTagText, { color: colors.textMuted }]}>{date}</Text>
         </View>
       </View>
     </Pressable>
@@ -558,7 +529,7 @@ function CampaignCard({
 }) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, pressed && { opacity: 0.93 }]}
+      style={({ pressed }) => [styles.card, pressed && { opacity: 0.92 }]}
       onPress={onPress}
     >
       <View style={styles.cardImageArea}>
@@ -566,13 +537,13 @@ function CampaignCard({
           <Image source={{ uri: imageUri }} style={styles.cardImageBg} resizeMode="cover" />
         ) : (
           <LinearGradient
-            colors={["#FFF7ED", "#FFFBEB"]}
+            colors={[colors.accentSoft, "#FEF3C7"]}
             style={styles.cardImageBg}
           >
             <MaterialCommunityIcons name="tag" size={40} color={colors.accent} />
           </LinearGradient>
         )}
-        <View style={[styles.discountBadge]}>
+        <View style={styles.discountBadge}>
           <Text style={styles.discountText}>{discount}</Text>
         </View>
       </View>
@@ -584,7 +555,7 @@ function CampaignCard({
             <Text style={[styles.cardTagText, { color: colors.accent }]}>{campaignLabel}</Text>
           </View>
           <View style={[styles.cardTag, { backgroundColor: colors.surfaceMuted }]}>
-            <Text style={[styles.cardTagText, { color: colors.textSubtle }]}>{deadline}</Text>
+            <Text style={[styles.cardTagText, { color: colors.textMuted }]}>{deadline}</Text>
           </View>
         </View>
       </View>
@@ -617,15 +588,13 @@ function CardSkeleton() {
 function EmptyCard({ icon, message }: { icon: string; message: string }) {
   return (
     <View style={styles.emptyCard}>
-      <MaterialCommunityIcons name={icon as any} size={28} color={colors.textTertiary} />
+      <MaterialCommunityIcons name={icon as any} size={28} color={colors.textSubtle} />
       <Text style={styles.emptyText}>{message}</Text>
     </View>
   );
 }
 
-// ─── Stiller ─────────────────────────────────────────────────────────────────
-
-const CARD_WIDTH = 188;
+const CARD_WIDTH = 192;
 
 const styles = StyleSheet.create({
   root: {
@@ -635,22 +604,20 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 110
   },
-
-  // Hero
   hero: {
-    paddingHorizontal: spacing.comfortable,
-    paddingBottom: spacing.section
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl
   },
   heroTopRow: {
     alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: spacing.section
+    marginBottom: spacing.xl
   },
   heroAvatarRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: spacing.compact
+    gap: spacing.sm
   },
   avatarRing: {
     borderColor: "rgba(255,255,255,0.3)",
@@ -677,7 +644,7 @@ const styles = StyleSheet.create({
   },
   heroName: {
     color: colors.textInverse,
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "800",
     letterSpacing: -0.5,
     marginTop: 1
@@ -695,33 +662,31 @@ const styles = StyleSheet.create({
   },
   heroButtons: {
     flexDirection: "row",
-    gap: spacing.tight,
-    marginTop: spacing.micro
+    gap: spacing.sm,
+    marginTop: spacing.xs
   },
   heroIconBtn: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.15)",
     borderColor: "rgba(255,255,255,0.2)",
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     borderWidth: 1,
     height: 40,
     justifyContent: "center",
     width: 40
   },
-
-  // Quick actions
   quickActions: {
     flexDirection: "row",
-    gap: spacing.tight
+    gap: spacing.sm
   },
   quickAction: {
     alignItems: "center",
     flex: 1,
-    gap: spacing.micro
+    gap: spacing.xs
   },
   quickActionIcon: {
     alignItems: "center",
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     height: 52,
     justifyContent: "center",
     width: 52
@@ -731,17 +696,13 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "600"
   },
-
-  // Body
   body: {
-    gap: spacing.section,
-    paddingHorizontal: spacing.comfortable,
-    paddingTop: spacing.section
+    gap: spacing.xl,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl
   },
-
-  // Section
   section: {
-    gap: spacing.standard
+    gap: spacing.md
   },
   sectionHeader: {
     alignItems: "center",
@@ -752,14 +713,14 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 10,
     fontWeight: "700",
-    letterSpacing: 1.2
+    letterSpacing: 1.4
   },
   sectionTitle: {
     color: colors.text,
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "800",
-    letterSpacing: -0.3,
-    marginTop: 1
+    letterSpacing: -0.4,
+    marginTop: 2
   },
   seeAll: {
     alignItems: "center",
@@ -768,30 +729,26 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     color: colors.primary,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "600"
   },
-
-  // Horizontal scroll
   hScroll: {
-    marginHorizontal: -spacing.comfortable
+    marginHorizontal: -spacing.lg
   },
   hScrollContent: {
-    gap: spacing.compact,
-    paddingHorizontal: spacing.comfortable
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg
   },
-
-  // Card
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     overflow: "hidden",
     width: CARD_WIDTH
   },
   cardImageArea: {
     alignItems: "center",
-    height: 140,
+    height: 144,
     justifyContent: "center",
     overflow: "hidden",
     position: "relative"
@@ -808,19 +765,19 @@ const styles = StyleSheet.create({
   verifiedBadge: {
     backgroundColor: colors.surface,
     borderRadius: radius.full,
-    bottom: spacing.compact,
-    left: spacing.compact,
+    bottom: spacing.sm,
+    left: spacing.sm,
     padding: 3,
     position: "absolute"
   },
   priceBadge: {
     backgroundColor: colors.surface,
     borderRadius: radius.pill,
-    bottom: spacing.compact,
-    paddingHorizontal: spacing.compact,
+    bottom: spacing.sm,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     position: "absolute",
-    right: spacing.compact
+    right: spacing.sm
   },
   priceBadgeText: {
     color: colors.text,
@@ -830,11 +787,11 @@ const styles = StyleSheet.create({
   discountBadge: {
     backgroundColor: colors.accent,
     borderRadius: radius.pill,
-    bottom: spacing.compact,
-    paddingHorizontal: spacing.compact,
+    bottom: spacing.sm,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     position: "absolute",
-    right: spacing.compact
+    right: spacing.sm
   },
   discountText: {
     color: colors.textInverse,
@@ -842,8 +799,8 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   cardBody: {
-    gap: spacing.tight,
-    padding: spacing.compact
+    gap: spacing.sm,
+    padding: spacing.sm
   },
   cardStore: {
     color: colors.primary,
@@ -857,7 +814,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     letterSpacing: -0.2,
-    lineHeight: 19
+    lineHeight: 20
   },
   cardMeta: {
     alignItems: "center",
@@ -865,56 +822,52 @@ const styles = StyleSheet.create({
     gap: 3
   },
   cardMetaText: {
-    color: colors.textTertiary,
+    color: colors.textSubtle,
     fontSize: 11,
     fontWeight: "500"
   },
   cardTagRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 4
+    gap: spacing.xs
   },
   cardTag: {
     alignSelf: "flex-start",
     borderRadius: radius.pill,
-    paddingHorizontal: spacing.compact,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 3
   },
   cardTagText: {
     fontSize: 10,
     fontWeight: "600"
   },
-
-  // Skeleton
   skeletonCard: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     overflow: "hidden",
     width: CARD_WIDTH
   },
   skeletonImg: {
     backgroundColor: colors.surfaceMuted,
-    height: 140
+    height: 144
   },
   skeletonBody: {
-    gap: spacing.tight,
-    padding: spacing.compact
+    gap: spacing.sm,
+    padding: spacing.sm
   },
-
-  // Empty
   emptyCard: {
     alignItems: "center",
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
+    borderRadius: radius.xl,
     flexDirection: "row",
-    gap: spacing.compact,
-    paddingHorizontal: spacing.standard,
-    paddingVertical: spacing.comfortable,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.lg,
     ...shadows.micro
   },
   emptyText: {
-    color: colors.textSubtle,
+    color: colors.textMuted,
     fontSize: 14,
     fontWeight: "500"
   }

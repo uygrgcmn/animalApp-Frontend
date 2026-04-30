@@ -45,9 +45,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background
   },
   content: {
-    gap: spacing.section,
+    gap: spacing.xl,
     paddingBottom: 110,
-    paddingHorizontal: spacing.comfortable,
-    paddingTop: spacing.standard
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md
   }
 });

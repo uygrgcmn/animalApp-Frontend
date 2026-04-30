@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     borderTopWidth: 1,
     gap: spacing.compact,
-    paddingHorizontal: spacing.comfortable,
+    paddingHorizontal: spacing.lg,
     paddingTop: spacing.standard
   }
 });

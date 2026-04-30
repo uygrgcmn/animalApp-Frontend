@@ -59,7 +59,7 @@ export function ApplyModal({ listingId, onClose, onSuccess, visible }: ApplyModa
         style={styles.overlay}
       >
         <Pressable onPress={handleClose} style={StyleSheet.absoluteFillObject} />
-        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.comfortable) }]}>
+        <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, spacing.lg) }]}>
           <ScrollView
             bounces={false}
             contentContainerStyle={styles.scrollContent}
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.compact
   },
   charCount: {
-    color: colors.textTertiary,
+    color: colors.textSubtle,
     ...typography.caption
   },
   charCountWarning: {
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.warningSoft,
     borderColor: colors.accentBorder,
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     borderWidth: 1,
     flexDirection: "row",
     gap: spacing.compact,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.primarySoft,
     borderColor: colors.primaryBorder,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1,
     height: 52,
     justifyContent: "center",
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: colors.surfaceAlt,
     borderColor: colors.border,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1.5,
     color: colors.text,
     minHeight: 120,
@@ -241,10 +241,10 @@ const styles = StyleSheet.create({
   sheet: {
     ...shadows.floating,
     backgroundColor: colors.background,
-    borderTopLeftRadius: radius.xlarge,
-    borderTopRightRadius: radius.xlarge,
-    paddingHorizontal: spacing.comfortable,
-    paddingTop: spacing.comfortable
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg
   },
   subtitle: {
     color: colors.textSubtle,

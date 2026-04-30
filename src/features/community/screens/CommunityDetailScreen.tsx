@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   authorBadge: {
     alignItems: "center",
     backgroundColor: colors.successSoft,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     height: 48,
     justifyContent: "center",
     width: 48
@@ -287,9 +287,9 @@ const styles = StyleSheet.create({
     gap: spacing.tight
   },
   content: {
-    gap: spacing.section,
+    gap: spacing.xl,
     paddingBottom: spacing.large,
-    paddingHorizontal: spacing.comfortable,
+    paddingHorizontal: spacing.lg,
     paddingTop: spacing.standard
   },
   heroImage: {
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   heroImageArea: {
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     height: 220,
     overflow: "hidden"
   },

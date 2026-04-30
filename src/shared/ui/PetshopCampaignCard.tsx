@@ -45,7 +45,7 @@ export function PetshopCampaignCard({
         <View style={styles.visualArea}>
           <Image source={{ uri: coverImageUri }} style={styles.visualImage} />
           <LinearGradient
-            colors={["transparent", "rgba(15,23,42,0.60)"]}
+            colors={["transparent", "rgba(9,9,11,0.60)"]}
             style={styles.visualOverlay}
           >
             <StatusPill label={campaignLabel} tone="warning" />
@@ -54,13 +54,13 @@ export function PetshopCampaignCard({
         </View>
       ) : (
         <LinearGradient
-          colors={["#FFF7ED", "#F0FDFA"]}
+          colors={[colors.accentSoft, colors.primarySoft]}
           end={{ x: 1, y: 1 }}
           start={{ x: 0, y: 0 }}
           style={styles.visual}
         >
           <View style={styles.visualTextBlock}>
-            <AppIcon name="storefront-outline" size={28} />
+            <AppIcon name="storefront-outline" size={28} tone="primary" />
             {visualLabel ? <Text style={styles.visualLabelMuted}>{visualLabel}</Text> : null}
           </View>
           <StatusPill label={campaignLabel} tone="warning" />
@@ -76,9 +76,7 @@ export function PetshopCampaignCard({
           <VerificationBadge state={verificationState} />
         </View>
 
-        <Text numberOfLines={2} style={styles.description}>
-          {description}
-        </Text>
+        <Text numberOfLines={2} style={styles.description}>{description}</Text>
 
         <View style={styles.metaRow}>
           <MetaPill icon="tag-outline" label={priceLabel} tone="warning" />
@@ -93,15 +91,15 @@ export function PetshopCampaignCard({
 
 const styles = StyleSheet.create({
   body: {
-    gap: spacing.tight
+    gap: spacing.sm
   },
   card: {
     ...shadows.card,
     backgroundColor: colors.surface,
-    borderRadius: radius.xlarge,
-    gap: spacing.standard,
+    borderRadius: radius.xl,
+    gap: spacing.md,
     overflow: "hidden",
-    padding: spacing.standard
+    padding: spacing.md
   },
   description: {
     color: colors.textMuted,
@@ -110,25 +108,25 @@ const styles = StyleSheet.create({
   heading: {
     alignItems: "flex-start",
     flexDirection: "row",
-    gap: spacing.compact,
+    gap: spacing.sm,
     justifyContent: "space-between"
   },
   metaRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.tight
+    gap: spacing.sm
   },
   pressed: {
-    opacity: 0.92
+    opacity: 0.9
   },
   store: {
     color: colors.primary,
     ...typography.caption,
-    fontWeight: "600"
+    fontWeight: "700"
   },
   texts: {
     flex: 1,
-    gap: spacing.micro
+    gap: spacing.xs
   },
   title: {
     color: colors.text,
@@ -136,15 +134,15 @@ const styles = StyleSheet.create({
   },
   visual: {
     alignItems: "center",
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     flexDirection: "row",
     justifyContent: "space-between",
     minHeight: 120,
-    paddingHorizontal: spacing.standard
+    paddingHorizontal: spacing.md
   },
   visualArea: {
-    borderRadius: radius.medium,
-    height: 160,
+    borderRadius: radius.lg,
+    height: 168,
     overflow: "hidden",
     position: "relative"
   },
@@ -167,11 +165,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     left: 0,
-    padding: spacing.compact,
+    padding: spacing.sm,
     position: "absolute",
     right: 0
   },
   visualTextBlock: {
-    gap: spacing.tight
+    gap: spacing.sm
   }
 });

@@ -54,7 +54,7 @@ export function AppIcon({
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    borderRadius: radius.medium,
+    borderRadius: radius.md,
     height: 44,
     justifyContent: "center",
     width: 44

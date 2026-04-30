@@ -19,17 +19,17 @@ export function SearchBar({
   return (
     <View style={styles.wrapper}>
       <View style={styles.inputWrap}>
-        <MaterialCommunityIcons color={colors.textTertiary} name="magnify" size={20} />
+        <MaterialCommunityIcons color={colors.textSubtle} name="magnify" size={20} />
         <TextInput
           placeholder={placeholder}
-          placeholderTextColor={colors.textTertiary}
+          placeholderTextColor={colors.textSubtle}
           selectionColor={colors.primary}
           style={styles.input}
           {...props}
         />
         {props.value ? (
           <Pressable onPress={() => props.onChangeText?.("")} style={styles.clearButton}>
-            <MaterialCommunityIcons color={colors.textTertiary} name="close-circle" size={18} />
+            <MaterialCommunityIcons color={colors.textSubtle} name="close-circle" size={18} />
           </Pressable>
         ) : null}
       </View>
@@ -45,13 +45,13 @@ export function SearchBar({
 
 const styles = StyleSheet.create({
   clearButton: {
-    padding: spacing.micro
+    padding: spacing.xs
   },
   filterButton: {
     alignItems: "center",
     backgroundColor: colors.surface,
     borderColor: colors.border,
-    borderRadius: radius.large,
+    borderRadius: radius.lg,
     borderWidth: 1.5,
     height: 48,
     justifyContent: "center",
@@ -70,12 +70,12 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     flex: 1,
     flexDirection: "row",
-    gap: spacing.tight,
+    gap: spacing.sm,
     minHeight: 48,
-    paddingHorizontal: spacing.standard
+    paddingHorizontal: spacing.md
   },
   wrapper: {
     flexDirection: "row",
-    gap: spacing.compact
+    gap: spacing.sm
   }
 });

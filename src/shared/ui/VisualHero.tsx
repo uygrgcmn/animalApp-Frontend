@@ -29,7 +29,7 @@ export function VisualHero({ description, icon, metrics = [], title }: VisualHer
     >
       <View style={styles.iconArea}>
         <LinearGradient
-          colors={[colors.primary, "#2DD4BF"]}
+          colors={[colors.primary, "#A78BFA"]}
           end={{ x: 1, y: 1 }}
           start={{ x: 0, y: 0 }}
           style={styles.iconShell}
@@ -61,26 +61,26 @@ export function VisualHero({ description, icon, metrics = [], title }: VisualHer
 const styles = StyleSheet.create({
   card: {
     ...shadows.card,
-    borderRadius: radius.xlarge,
-    gap: spacing.compact,
+    borderRadius: radius.xl,
+    gap: spacing.sm,
     overflow: "hidden",
-    padding: spacing.comfortable,
-    paddingTop: spacing.large
+    padding: spacing.lg,
+    paddingTop: spacing["2xl"]
   },
   iconArea: {
     alignSelf: "flex-start",
-    marginBottom: spacing.compact
+    marginBottom: spacing.sm
   },
   iconShell: {
     alignItems: "center",
-    borderRadius: radius.large + 2,
+    borderRadius: radius.lg + 2,
     height: 72,
     justifyContent: "center",
     width: 72
   },
   iconRing: {
     borderColor: colors.primaryBorder,
-    borderRadius: radius.large + 6,
+    borderRadius: radius.lg + 6,
     borderWidth: 1,
     bottom: -4,
     left: -4,
@@ -90,21 +90,21 @@ const styles = StyleSheet.create({
   },
   description: {
     color: colors.textMuted,
-    fontSize: 15,
-    lineHeight: 24,
+    fontSize: 16,
+    lineHeight: 26,
     maxWidth: "94%"
   },
   metrics: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.tight,
-    marginTop: spacing.micro
+    gap: spacing.sm,
+    marginTop: spacing.xs
   },
   title: {
     color: colors.text,
     fontSize: 30,
     fontWeight: "800",
-    letterSpacing: -0.5,
+    letterSpacing: -0.6,
     lineHeight: 38
   }
 });
